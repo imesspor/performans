@@ -1,362 +1,1279 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Proforce Panel | Rapor Özeti</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root { --accent: #3b82f6; --bg: #0f172a; --surface: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
-        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); margin: 0; }
-        .sidebar { height: 100vh; background: #020617; position: fixed; width: 240px; padding: 30px 20px; border-right: 1px solid #334155; }
-        .nav-link { color: #94a3b8; cursor: pointer; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; transition: 0.3s; }
-        .nav-link.active { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-        .main-content { margin-left: 240px; padding: 40px; }
-        /* Grid Yapısı Güncellendi */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
-        .accordion-item { background: var(--surface) !important; border: 1px solid #334155 !important; border-radius: 12px !important; margin-bottom: 0px; overflow: hidden; height: 100%; }
-        .accordion-button { background: var(--surface) !important; color: #fff !important; font-weight: 700; font-size: 13px; padding: 15px; box-shadow: none !important; }
-        .accordion-button:not(.collapsed) { color: var(--accent) !important; border-bottom: 1px solid #334155; }
-        .table-data { width: 100%; margin: 0; font-family: 'Fira Code', monospace; font-size: 12px; }
-        .table-data td { padding: 10px 15px; border-bottom: 1px solid #334155; color: #cbd5e1; }
-        .val-primary { color: #fff; font-weight: 600; text-align: right; }
-        .perf-card { background: #020617; border-radius: 12px; padding: 18px; border-left: 4px solid var(--accent); cursor: pointer; transition: 0.3s; position: relative; height: 100%; }
-        
-        /* EKLEME: Aylık verimlilik yazısının rengini açan kısım */
-        .perf-card .text-muted { color: #cbd5e1 !important; }
-        
-        .perf-card:hover { transform: translateY(-5px); background: #0c1222; border-color: #fff; }
-        .progress { height: 6px; background: #334155; border-radius: 10px; margin: 12px 0; }
-        .status-tag { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; }
-        .tag-high { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .tag-mid { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
-        .tag-low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .target-table-container { background: #020617; border-radius: 12px; padding: 20px; border: 1px solid #334155; margin-bottom: 30px; }
-        .target-table { width: 100%; color: #cbd5e1; font-size: 12px; }
-        .target-table th { color: var(--accent); padding: 10px; border-bottom: 2px solid #334155; text-align: left; }
-        .target-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .highlight-row { background: rgba(59, 130, 246, 0.1); color: #fff; font-weight: bold; }
-        .modal-content { background: var(--surface); color: var(--text); border: 1px solid #334155; border-radius: 15px; }
-        .target-detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .target-info { font-size: 11px; color: var(--warning); margin-top: 8px; font-weight: 600; }
-        .sale-total-info { font-size: 13px; color: #fff; margin-top: 4px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; }
-        .barem-summary { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #334155; }
-        .barem-item { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .barem-target-val { color: #94a3b8; font-size: 9px; display: block; }
-        .monthly-stats { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #334155; }
-        .month-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #94a3b8; }
-        
-        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: var(--surface); border: 1px solid #334155; width: 350px; border-radius: 15px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proforce | İmes Spor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #07090f;
+  --bg2:       #0c0f1a;
+  --surface:   #111520;
+  --surface2:  #161b2c;
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(99,179,237,0.25);
+
+  --cyan:   #63b3ed;
+  --green:  #48bb78;
+  --amber:  #ecc94b;
+  --red:    #fc8181;
+  --purple: #b794f4;
+
+  --text:   #e2e8f0;
+  --muted:  #4a5568;
+  --dim:    #718096;
+
+  --r:      10px;
+  --r-lg:   14px;
+  --mono:   'DM Mono', monospace;
+  --sans:   'Outfit', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: var(--sans);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* subtle dot-grid */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle, rgba(99,179,237,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ═══════════════════════════════════════════
+   LOADER
+═══════════════════════════════════════════ */
+#loader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 18px;
+}
+.ld-track {
+  width: 48px; height: 48px;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.ld-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--cyan); letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: breathe 1.4s ease-in-out infinite;
+}
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes breathe { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+/* ═══════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════ */
+#login-screen {
+  position: fixed; inset: 0; z-index: 10000;
+  background: var(--bg);
+  display: none;
+  align-items: center; justify-content: center;
+}
+.login-wrap {
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 36px 32px;
+  box-shadow: 0 32px 64px rgba(0,0,0,.6);
+  animation: slideUp .4s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+.login-logo {
+  text-align: center; margin-bottom: 28px;
+}
+.login-logo-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border-hi);
+  border-radius: 40px;
+}
+.login-logo-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: var(--bg);
+  font-family: var(--mono);
+}
+.login-logo-text { font-weight: 800; font-size: 14px; letter-spacing: .5px; }
+.login-logo-sub  { font-family: var(--mono); font-size: 9px; color: var(--cyan); letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-top: 14px; }
+
+.field-label {
+  font-size: 11px; font-weight: 600; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 1px;
+  display: block; margin-bottom: 6px;
+}
+.field-input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: var(--mono); font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 16px;
+}
+.field-input:focus { border-color: var(--cyan); }
+.field-input::placeholder { color: var(--muted); }
+
+.btn-login {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  border: none; border-radius: var(--r);
+  color: var(--bg); font-weight: 700; font-size: 14px;
+  font-family: var(--sans); cursor: pointer;
+  transition: opacity .2s, transform .15s;
+}
+.btn-login:hover  { opacity: .9; }
+.btn-login:active { transform: scale(.98); }
+
+.login-err {
+  display: none; margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(252,129,129,.1);
+  border: 1px solid rgba(252,129,129,.3);
+  border-radius: var(--r);
+  font-size: 12px; color: var(--red); text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: 248px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 24px 16px;
+  z-index: 100;
+  transition: transform .3s ease;
+}
+
+.sb-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 8px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.sb-logo-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: var(--bg);
+  font-family: var(--mono); flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(99,179,237,.25);
+}
+.sb-logo-name { font-size: 13px; font-weight: 800; color: #fff; }
+.sb-logo-sub  { font-family: var(--mono); font-size: 8px; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; }
+
+.sb-section {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; padding: 0 10px;
+  margin: 4px 0 8px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border-radius: var(--r);
+  font-size: 13px; font-weight: 500; color: var(--dim);
+  cursor: pointer; transition: all .2s;
+  border: 1px solid transparent; margin-bottom: 2px;
+}
+.nav-item-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted); flex-shrink: 0;
+  transition: all .2s;
+}
+.nav-item:hover { color: var(--text); background: var(--surface); border-color: var(--border); }
+.nav-item.active {
+  background: rgba(99,179,237,.1);
+  border-color: rgba(99,179,237,.2);
+  color: var(--cyan);
+}
+.nav-item.active .nav-item-dot {
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+}
+
+.sb-footer {
+  margin-top: auto;
+}
+.sb-user-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.sb-user-status {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--green); margin-bottom: 4px;
+}
+.sb-user-status::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+  animation: breathe 2s ease-in-out infinite;
+}
+.sb-user-email {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--dim); word-break: break-all;
+}
+
+.btn-logout {
+  width: 100%; padding: 9px 14px;
+  background: transparent;
+  border: 1px solid rgba(252,129,129,.25);
+  border-radius: var(--r);
+  color: var(--red); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); cursor: pointer;
+  transition: all .2s; letter-spacing: .5px;
+}
+.btn-logout:hover { background: rgba(252,129,129,.08); border-color: var(--red); }
+
+.main {
+  margin-left: 248px;
+  padding: 32px 36px;
+  position: relative; z-index: 1;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════ */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 28px;
+}
+.topbar-title { font-size: 20px; font-weight: 800; color: #fff; }
+.topbar-title em { color: var(--cyan); font-style: normal; }
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.clock {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); letter-spacing: 1px;
+}
+.btn-refresh {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r); color: var(--cyan);
+  font-size: 12px; font-weight: 600; font-family: var(--sans);
+  cursor: pointer; transition: all .2s;
+}
+.btn-refresh:hover { background: rgba(99,179,237,.08); border-color: var(--border-hi); }
+.btn-refresh svg { transition: transform .5s; }
+.btn-refresh:hover svg { transform: rotate(180deg); }
+
+/* ═══════════════════════════════════════════
+   BAREM TABLE (Rapor Özeti)
+═══════════════════════════════════════════ */
+.barem-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden; margin-bottom: 24px;
+}
+.section-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-head-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 6px var(--cyan);
+}
+.section-head-title {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 2.5px; color: var(--cyan);
+  text-transform: uppercase;
+}
+.bt { width: 100%; border-collapse: collapse; }
+.bt th {
+  padding: 9px 18px; text-align: left;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+}
+.bt td {
+  padding: 11px 18px; font-size: 12px; color: var(--dim);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.bt tr:last-child td { border-bottom: none; }
+.bt tr.hl-row td { background: rgba(99,179,237,.06); color: #fff; font-weight: 600; }
+.bt tr.hl-row td:first-child { color: var(--cyan); }
+.bt-num { text-align: right; font-family: var(--mono); font-size: 11px; }
+
+/* ═══════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════ */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ═══════════════════════════════════════════
+   PERF CARD
+═══════════════════════════════════════════ */
+.pc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 18px 20px;
+  cursor: pointer; transition: all .22s;
+  position: relative; overflow: hidden;
+  animation: fadeUp .4s ease forwards; opacity: 0;
+}
+.pc::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+}
+.pc:hover { border-color: var(--border-hi); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.pc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.pc-name { font-size: 14px; font-weight: 700; color: #fff; }
+.pc-barem { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 3px; }
+
+.badge {
+  font-size: 8px; padding: 3px 9px;
+  border-radius: 20px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
+}
+.b-green  { background: rgba(72,187,120,.15); color: var(--green); }
+.b-cyan   { background: rgba(99,179,237,.12); color: var(--cyan); }
+.b-amber  { background: rgba(236,201,75,.13); color: var(--amber); }
+.b-red    { background: rgba(252,129,129,.12); color: var(--red); }
+
+.bar-track {
+  height: 3px; background: var(--bg2);
+  border-radius: 4px; overflow: hidden; margin: 10px 0 12px;
+}
+.bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.bar-green  { background: linear-gradient(90deg, var(--green), #276749); }
+.bar-amber  { background: linear-gradient(90deg, var(--amber), #b7791f); }
+.bar-cyan   { background: linear-gradient(90deg, var(--cyan),  #2b6cb0); }
+.bar-red    { background: linear-gradient(90deg, var(--red),   #9b2c2c); }
+
+.pc-meta { display: flex; justify-content: space-between; align-items: center; }
+.pc-pct  { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.pc-val  { font-family: var(--mono); font-size: 12px; font-weight: 500; color: #fff; }
+
+.pc-divider { border: none; border-top: 1px dashed rgba(255,255,255,.07); margin: 12px 0; }
+
+.pc-next { font-size: 10px; color: var(--amber); margin-bottom: 10px; }
+
+/* Monthly rows inside perf card */
+.mo-row {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted);
+  padding: 3px 0;
+}
+.mo-row span:last-child { font-family: var(--mono); color: var(--dim); }
+
+/* ═══════════════════════════════════════════
+   DATA PANELS (user detail)
+═══════════════════════════════════════════ */
+.dp {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden;
+  animation: fadeUp .35s ease forwards; opacity: 0;
+}
+.dp-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.dp-dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
+.dp-title {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 2px; color: var(--cyan); text-transform: uppercase;
+}
+.dp-badge {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--muted); background: var(--bg2);
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.dt { width: 100%; border-collapse: collapse; }
+.dt td {
+  padding: 9px 18px; font-size: 12px; color: var(--dim);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.dt tr:last-child td { border-bottom: none; }
+.dt td:last-child { text-align: right; font-family: var(--mono); font-size: 11px; color: #fff; font-weight: 500; }
+.dt tr:hover td { background: rgba(99,179,237,.03); color: var(--text); }
+
+/* ═══════════════════════════════════════════
+   KPI ROW (user detail top)
+═══════════════════════════════════════════ */
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 18px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--line, linear-gradient(90deg, var(--cyan), transparent));
+}
+.kpi-card:hover { border-color: var(--border-hi); }
+.kpi-label { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+.kpi-value { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+.kpi-sub   { font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.modal-content {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-lg) !important;
+}
+.modal-header {
+  border-bottom: 1px solid var(--border) !important;
+  padding: 16px 22px !important;
+}
+.modal-title { font-size: 14px !important; font-weight: 700 !important; color: #fff !important; }
+.btn-close-white { filter: invert(1) !important; opacity: .5 !important; }
+.btn-close-white:hover { opacity: 1 !important; }
+.modal-body { padding: 20px 22px !important; }
+
+.m-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+  font-size: 13px;
+}
+.m-row:last-child { border-bottom: none; }
+.m-row-label { color: var(--dim); }
+.m-row-value { font-family: var(--mono); font-weight: 500; }
+.cv-green  { color: var(--green); }
+.cv-cyan   { color: var(--cyan); }
+.cv-amber  { color: var(--amber); }
+.cv-red    { color: var(--red); }
+.cv-purple { color: var(--purple); }
+
+.barem-detail-head {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; margin: 16px 0 10px;
+}
+.bd-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-radius: 8px;
+  margin-bottom: 4px; background: var(--bg2);
+  border: 1px solid var(--border); transition: border-color .2s;
+}
+.bd-row:hover { border-color: var(--border-hi); }
+.bd-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.bd-target { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+.bd-diff { font-family: var(--mono); font-size: 11px; font-weight: 500; }
+
+/* ═══════════════════════════════════════════
+   KİŞİSEL RAPOR HERO KARTI
+═══════════════════════════════════════════ */
+.personal-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 22px 14px;
+  margin-bottom: 16px;
+  position: relative; overflow: hidden;
+  animation: fadeUp .4s ease forwards;
+}
+.personal-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--green), transparent);
+}
+.ph-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 4px;
+}
+.ph-name  { font-size: 20px; font-weight: 800; color: #fff; }
+.ph-barem { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.ph-bar-wrap { margin: 12px 0 10px; }
+.ph-bar-track {
+  height: 4px; background: var(--bg2);
+  border-radius: 4px; overflow: hidden;
+}
+.ph-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1.4s cubic-bezier(.4,0,.2,1);
+}
+
+.ph-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 2px;
+}
+.ph-pct   { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.ph-total {
+  font-family: var(--mono); font-size: 18px; font-weight: 500;
+  color: #fff; letter-spacing: .5px;
+}
+
+.ph-divider { border: none; border-top: 1px dashed rgba(255,255,255,.07); margin: 10px 0; }
+
+.ph-next { font-size: 12px; color: var(--amber); margin-bottom: 10px; }
+.ph-next strong { color: #fff; }
+
+/* KPI kartları hero içinde daha kompakt */
+.personal-hero .kpi-row { gap: 10px; margin-bottom: 0; }
+.personal-hero .kpi-card { padding: 11px 14px; }
+.personal-hero .kpi-label { margin-bottom: 5px; }
+.personal-hero .kpi-value { font-size: 16px; }
+.personal-hero .kpi-sub   { margin-top: 3px; font-size: 9px; }
+
+/* Aylık satış tablosu */
+.monthly-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 2px;
+}
+.mo-cell {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 11px;
+  transition: border-color .2s;
+}
+.mo-cell:hover { border-color: var(--border-hi); }
+.mo-cell-month {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 1px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.mo-cell-val {
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500; color: var(--text);
+}
+.mo-cell-val.has-val { color: #fff; }
+.mo-cell-val.zero    { color: var(--muted); }
+
+@media (max-width: 700px) { .monthly-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .monthly-grid { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════
+   ERROR STATE
+═══════════════════════════════════════════ */
+.err-state {
+  grid-column: 1 / -1;
+  padding: 56px 40px; text-align: center;
+  border: 1px dashed rgba(252,129,129,.25);
+  border-radius: var(--r-lg);
+  background: rgba(252,129,129,.04);
+}
+.err-state h3 { font-size: 15px; color: var(--red); margin-bottom: 6px; }
+.err-state p  { font-size: 12px; color: var(--muted); }
+
+/* ═══════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════ */
+.mob-btn {
+  display: none; position: fixed;
+  top: 14px; left: 14px; z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 9px;
+  color: var(--cyan); cursor: pointer;
+}
+.sb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.65); z-index: 99;
+}
+
+@media (max-width: 1080px) { .grid-3    { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 900px)  {
+  .sidebar   { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sb-overlay.open { display: block; }
+  .mob-btn   { display: flex; }
+  .main      { margin-left: 0; padding: 24px 18px; padding-top: 60px; }
+  .grid-3    { grid-template-columns: 1fr; }
+  .kpi-row   { grid-template-columns: repeat(2,1fr); }
+  .barem-wrap .bt th:nth-child(3),
+  .barem-wrap .bt td:nth-child(3) { display: none; }
+}
+@media (max-width: 500px) {
+  .kpi-row   { grid-template-columns: 1fr; }
+  .topbar    { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .barem-wrap .bt th:nth-child(4),
+  .barem-wrap .bt td:nth-child(4) { display: none; }
+}
+</style>
 </head>
 <body>
 
-<div id="login-screen" style="display: none;">
-    <div class="login-card">
-        <h3 class="text-center fw-bold mb-4 text-primary">PROFORCE</h3>
-        <div class="mb-3">
-            <label class="small mb-1 text-muted">E-posta</label>
-            <input type="email" id="login-email" class="form-control bg-dark text-white border-secondary" placeholder="Örn: emrah@imesspor.com">
-        </div>
-        <div class="mb-4">
-            <label class="small mb-1 text-muted">Şifre</label>
-            <input type="password" id="login-pass" class="form-control bg-dark text-white border-secondary" placeholder="******">
-        </div>
-        <button onclick="login()" class="btn btn-primary w-100 fw-bold">Giriş Yap</button>
-        <p id="login-error" class="text-danger small mt-3 text-center" style="display:none;">Hatalı giriş! (Şifreniz en az 6 hane olmalıdır)</p>
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-track"></div>
+  <div class="ld-label">Yükleniyor</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-badge">
+        <div class="login-logo-icon">P</div>
+        <div class="login-logo-text">PROFORCE</div>
+      </div>
+      <div class="login-logo-sub">İmes Spor Performans Paneli</div>
     </div>
+
+    <label class="field-label" for="li-email">E-posta</label>
+    <input class="field-input" id="li-email" type="email" placeholder="ad@imesspor.com" autocomplete="email">
+
+    <label class="field-label" for="li-pass">Şifre</label>
+    <input class="field-input" id="li-pass" type="password" placeholder="••••••" autocomplete="current-password">
+
+    <button class="btn-login" onclick="doLogin()">Giriş Yap</button>
+    <div class="login-err" id="li-err">Hatalı giriş. E-posta veya şifre yanlış.</div>
+  </div>
 </div>
 
-<div id="loader" style="position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999;"><div class="spinner-border text-primary"></div></div>
+<!-- MOBILE TOGGLE -->
+<button class="mob-btn" onclick="toggleSb()" aria-label="Menü">
+  <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+    <rect width="16" height="1.8" rx="1" fill="currentColor"/>
+    <rect y="5.1" width="11" height="1.8" rx="1" fill="currentColor"/>
+    <rect y="10.2" width="16" height="1.8" rx="1" fill="currentColor"/>
+  </svg>
+</button>
+<div class="sb-overlay" id="sb-ov" onclick="toggleSb()"></div>
 
-<div class="sidebar">
-    <h3 class="fw-bold mb-5 text-primary">IMES SPOR</h3>
-    <div id="user-menu"></div>
-    <button onclick="logout()" class="btn btn-outline-danger btn-sm mt-5 w-100">Güvenli Çıkış</button>
-</div>
-
-<div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 fw-bold m-0" id="current-page">Rapor Özeti</h1>
-        <button onclick="location.reload()" class="btn btn-outline-primary btn-sm rounded-pill px-4">Veriyi Tazele</button>
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">P</div>
+    <div>
+      <div class="sb-logo-name">İmes Spor</div>
+      <div class="sb-logo-sub">Proforce Panel</div>
     </div>
-    
-    <div id="target-area"></div> 
+  </div>
 
-    <div class="dashboard-grid" id="dataParent"></div>
-</div>
+  <div class="sb-section">Navigasyon</div>
+  <div id="user-menu"></div>
 
+  <div class="sb-footer">
+    <div class="sb-user-box">
+      <div class="sb-user-status">Aktif Oturum</div>
+      <div class="sb-user-email" id="sb-email">—</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">⏻ &nbsp;Güvenli Çıkış</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Rapor <em>Özeti</em></div>
+    <div class="topbar-right">
+      <span class="clock" id="clk">--:--:--</span>
+      <button class="btn-refresh" onclick="location.reload()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+        Tazele
+      </button>
+    </div>
+  </div>
+  <div id="target-area"></div>
+  <div class="grid-3" id="data-grid"></div>
+</main>
+
+<!-- MODAL -->
 <div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0"><h5 class="modal-title" id="modalUserName">Hedef Analizi</h5><button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"></button></div>
-            <div class="modal-body" id="modalBody"></div>
-        </div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title">Hedef Analizi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
     </div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA3VNIvFEkC91ROb1gJ0GQ9bcYLCrD4yfA",
-        authDomain: "performans-6ca5a.firebaseapp.com",
-        projectId: "performans-6ca5a",
-        storageBucket: "performans-6ca5a.firebasestorage.app",
-        messagingSenderId: "972686388947",
-        appId: "1:972686388947:web:a70bb6cd672e379b2eae26"
-    };
+/* ═══════════════════════════════════════════
+   FIREBASE INIT
+═══════════════════════════════════════════ */
+firebase.initializeApp({
+  apiKey:            "AIzaSyA3VNIvFEkC91ROb1gJ0GQ9bcYLCrD4yfA",
+  authDomain:        "performans-6ca5a.firebaseapp.com",
+  projectId:         "performans-6ca5a",
+  storageBucket:     "performans-6ca5a.firebasestorage.app",
+  messagingSenderId: "972686388947",
+  appId:             "1:972686388947:web:a70bb6cd672e379b2eae26"
+});
+const auth = firebase.auth();
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+/* ═══════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbweCM9Kfn7oU4vwmIgTCpbDH9k164vcwmkI4fi5Jrkf4BAF4XddekX_xjsf9nY_5PeVIg/exec';
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbweCM9Kfn7oU4vwmIgTCpbDH9k164vcwmkI4fi5Jrkf4BAF4XddekX_xjsf9nY_5PeVIg/exec';
-    let database = {};
+const TARGETS = { ANNUAL: 102900000, QUARTERLY: 25725000, MONTHLY: 8575000 };
 
-    const TARGETS = { ANNUAL: 102900000, QUARTERLY: 25725000, MONTHLY: 8575000 };
-    const BAREMS = [
-        { name: "Hedef 1 (%0,35)", oran: 0.35, monthly: 2083333 },
-        { name: "Hedef 2 (%0,60)", oran: 0.60, monthly: 4375000 },
-        { name: "Hedef 3 (%0,80)", oran: 0.80, monthly: 6125000 },
-        { name: "Hedef 4 (%1,00)", oran: 1.00, monthly: 8575000 },
-        { name: "Hedef 5 (%1,20)", oran: 1.20, monthly: 12005000 },
-        { name: "Hedef 6 (%1,40)", oran: 1.40, monthly: 16807000 }
-    ];
+const BAREMS = [
+  { name: "Hedef 1 – %0,35", oran: 0.35, monthly: 2083333 },
+  { name: "Hedef 2 – %0,60", oran: 0.60, monthly: 4375000 },
+  { name: "Hedef 3 – %0,80", oran: 0.80, monthly: 6125000 },
+  { name: "Hedef 4 – %1,00", oran: 1.00, monthly: 8575000 },
+  { name: "Hedef 5 – %1,20", oran: 1.20, monthly: 12005000 },
+  { name: "Hedef 6 – %1,40", oran: 1.40, monthly: 16807000 }
+];
 
-    const HEADERS = ["Hedef ve Prim Panosu", "Şubat Ayı Aktivite Tipi", "Şubat Ayı Müşteri Kaynağı", "Şehir Teklif Dağılım Panosu", "ARANMASI GEREKEN MÜŞTERİLER"];
+const HEADERS = [
+  "Hedef ve Prim Panosu",
+  "Şubat Ayı Aktivite Tipi",
+  "Şubat Ayı Müşteri Kaynağı",
+  "Şehir Teklif Dağılım Panosu",
+  "ARANMASI GEREKEN MÜŞTERİLER"
+];
 
-    const RESTRICTED_USERS = {
-        "ermanmete@imesspor.com": "Erman Mete",
-        "mehmetcan@imesspor.com": "Mehmetcan Kapu",
-        "burak@imesspor.com": "Mert Burak",
-        "timucin@imesspor.com": "Timuçin Şahin",
-        "aykutonus@imesspor.com": "Aykut Onuş",
-        "eren@imesspor.com": "Eren Soytürk"
-    };
+// Email → isim eşlemesi: sadece bu kullanıcılar kendi sayfasını görür
+const RESTRICTED = {
+  "ermanmete@imesspor.com":   "Erman Mete",
+  "mehmetcan@imesspor.com":   "Mehmetcan Kapu",
+  "burak@imesspor.com":       "Mert Burak",
+  "timucin@imesspor.com":     "Timuçin Şahin",
+  "aykutonus@imesspor.com":   "Aykut Onuş",
+  "eren@imesspor.com":        "Eren Soytürk"
+};
 
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-screen').style.display = 'none';
-            fetchData();
-        } else {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('loader').style.display = 'none';
-        }
+let DB = {};
+
+/* ═══════════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════════ */
+(function clock() {
+  document.getElementById('clk').textContent = new Date().toLocaleTimeString('tr-TR');
+  setTimeout(clock, 1000);
+})();
+
+/* ═══════════════════════════════════════════
+   MOBILE SIDEBAR
+═══════════════════════════════════════════ */
+function toggleSb() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-ov').classList.toggle('open');
+}
+function closeSb() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-ov').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════ */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('sb-email').textContent = user.email;
+    fetchData();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    loader(false);
+  }
+});
+
+async function doLogin() {
+  const email = document.getElementById('li-email').value.trim();
+  const pass  = document.getElementById('li-pass').value;
+  document.getElementById('li-err').style.display = 'none';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch (e) {
+    document.getElementById('li-err').style.display = 'block';
+  }
+}
+
+// Enter key → login
+document.getElementById('li-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() { auth.signOut(); }
+function logout()   { auth.signOut(); } // uyumluluk
+
+/* ═══════════════════════════════════════════
+   FETCH
+═══════════════════════════════════════════ */
+async function fetchData() {
+  loader(true);
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    DB = await res.json();
+    initApp();
+  } catch (e) {
+    console.error('Veri çekme hatası:', e);
+    document.getElementById('data-grid').innerHTML = `
+      <div class="err-state">
+        <h3>Veri Yüklenemedi</h3>
+        <p>Sunucu bağlantısı kurulamadı. Sayfayı yenileyin.</p>
+      </div>`;
+  } finally {
+    loader(false);
+  }
+}
+
+function loader(show) {
+  document.getElementById('loader').style.display = show ? 'flex' : 'none';
+}
+
+/* ═══════════════════════════════════════════
+   INIT APP
+═══════════════════════════════════════════ */
+function initApp() {
+  const email = auth.currentUser.email;
+  const menu  = document.getElementById('user-menu');
+  menu.innerHTML = '';
+
+  if (RESTRICTED[email]) {
+    const userName = RESTRICTED[email];
+    menu.appendChild(makeNavItem("Kişisel Raporum", true, () => switchPage("Kişisel Raporum", userName)));
+    switchPage("Kişisel Raporum", userName);
+  } else {
+    Object.keys(DB).forEach(user => {
+      const isFirst = user === 'Rapor Özeti';
+      menu.appendChild(makeNavItem(user, isFirst, () => {
+        setActiveNav(user);
+        switchPage(user, user);
+      }));
     });
+    switchPage("Rapor Özeti", "Rapor Özeti");
+  }
+}
 
-    async function login() {
-        const email = document.getElementById('login-email').value;
-        const pass = document.getElementById('login-pass').value;
-        try {
-            await auth.signInWithEmailAndPassword(email, pass);
-        } catch (err) {
-            console.error(err);
-            document.getElementById('login-error').style.display = 'block';
-        }
+function makeNavItem(label, active, onClick) {
+  const el = document.createElement('div');
+  el.className = `nav-item${active ? ' active' : ''}`;
+  el.dataset.key = label;
+  el.innerHTML = `<span class="nav-item-dot"></span>${label}`;
+  el.addEventListener('click', () => { onClick(); closeSb(); });
+  return el;
+}
+
+function setActiveNav(key) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.key === key);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   SWITCH PAGE
+═══════════════════════════════════════════ */
+function switchPage(displayName, dataKey) {
+  const titleEl = document.getElementById('page-title');
+  const parts   = displayName.split(' ');
+  const last    = parts.pop();
+  titleEl.innerHTML = `${parts.join(' ')} <em>${last}</em>`;
+
+  document.getElementById('target-area').innerHTML = '';
+  document.getElementById('data-grid').innerHTML   = '';
+
+  if (dataKey === "Rapor Özeti") {
+    renderSummary();
+  } else {
+    renderUserDetail(dataKey);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RAPOR ÖZETİ
+═══════════════════════════════════════════ */
+function renderSummary() {
+  // Barem tablosu
+  document.getElementById('target-area').innerHTML = `
+    <div class="barem-wrap">
+      <div class="section-head">
+        <span class="section-head-dot"></span>
+        <span class="section-head-title">2026 Kurumsal Hedef Parametreleri</span>
+      </div>
+      <table class="bt">
+        <thead><tr>
+          <th>Barem</th><th>Oran</th>
+          <th>Yıllık Hedef</th><th>3 Aylık</th><th>Aylık Hedef</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Hedef 1</td><td class="bt-num">0,35</td><td class="bt-num">25.000.000 ₺</td><td class="bt-num">6.250.000 ₺</td><td class="bt-num">2.083.333 ₺</td></tr>
+          <tr><td>Hedef 2</td><td class="bt-num">0,60</td><td class="bt-num">52.500.000 ₺</td><td class="bt-num">13.125.000 ₺</td><td class="bt-num">4.375.000 ₺</td></tr>
+          <tr><td>Hedef 3</td><td class="bt-num">0,80</td><td class="bt-num">73.500.000 ₺</td><td class="bt-num">18.375.000 ₺</td><td class="bt-num">6.125.000 ₺</td></tr>
+          <tr class="hl-row"><td>Hedef 4 ★</td><td class="bt-num">1,00</td><td class="bt-num">102.900.000 ₺</td><td class="bt-num">25.725.000 ₺</td><td class="bt-num">8.575.000 ₺</td></tr>
+          <tr><td>Hedef 5</td><td class="bt-num">1,20</td><td class="bt-num">144.060.000 ₺</td><td class="bt-num">36.015.000 ₺</td><td class="bt-num">12.005.000 ₺</td></tr>
+          <tr><td>Hedef 6</td><td class="bt-num">1,40</td><td class="bt-num">201.684.000 ₺</td><td class="bt-num">50.421.000 ₺</td><td class="bt-num">16.807.000 ₺</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+
+  // Perf kartları
+  const grid = document.getElementById('data-grid');
+  Object.keys(DB).forEach((user, i) => {
+    if (user === "Rapor Özeti") return;
+    const el = document.createElement('div');
+    el.innerHTML = buildPerfCard(user, i);
+    grid.appendChild(el.firstElementChild);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   USER DETAIL
+═══════════════════════════════════════════ */
+function renderUserDetail(user) {
+  const matrix = DB[user];
+  if (!matrix) return;
+
+  const targetData = findAndExtract(matrix, "Hedef ve Prim Panosu");
+  const currentVal = parseFloat(targetData[0]?.v1) || 0;
+  const oran       = Math.round((currentVal / TARGETS.MONTHLY) * 100);
+  const status     = calcStatus(currentVal);
+  const remaining  = Math.max(0, TARGETS.MONTHLY - currentVal);
+
+  // ── Aylık satış verisini çek (matrix[4]=aylar, matrix[5]=değerler)
+  const months = [];
+  try {
+    const mr = matrix[4]; const vr = matrix[5];
+    for (let c = 11; c < 23; c++) {
+      if (mr && mr[c]) {
+        months.push({ name: mr[c], val: (vr && vr[c] !== undefined && vr[c] !== '') ? vr[c] : 0 });
+      }
     }
+  } catch(e) {}
 
-    function logout() { auth.signOut(); }
+  // ── Renk & bar belirle
+  const barColor = oran >= 100 ? 'bar-green' : oran >= 70 ? 'bar-amber' : 'bar-cyan';
+  const badgeColor = oran >= 100 ? 'b-green' : oran >= 70 ? 'b-amber' : oran >= 40 ? 'b-cyan' : 'b-red';
+  const badgeTxt   = oran >= 100 ? 'HEDEF TUTTU' : oran >= 70 ? 'YAKLAŞTI' : oran >= 40 ? 'DEVAM' : 'GERİDE';
 
-    async function fetchData() {
-        document.getElementById('loader').style.display = 'flex';
-        try {
-            const res = await fetch(API_URL);
-            database = await res.json();
-            initApp();
-        } catch (e) {
-            console.error("Veri çekme hatası:", e);
-        }
-        document.getElementById('loader').style.display = 'none';
-    }
+  const nextTxt = status.next
+    ? `${status.next.name} için <strong>${fmt(status.next.monthly - currentVal)} ₺</strong> kaldı`
+    : '🎉 Tüm baremler aşıldı!';
 
-    function calculateTargetStatus(current) {
-        let reached = "Barem Altı";
-        let next = BAREMS[0];
-        for (let i = 0; i < BAREMS.length; i++) {
-            if (current >= BAREMS[i].monthly) {
-                reached = BAREMS[i].name; 
-                next = BAREMS[i+1] || null;
-            }
-        }
-        return { reached, next };
-    }
+  // ── Aylık grid HTML
+  const monthlyGridHTML = months.length ? `
+    <div class="ph-divider"></div>
+    <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">
+      Aylık Satış Geçmişi
+    </div>
+    <div class="monthly-grid">
+      ${months
+        .filter(m => !String(m.name).toLowerCase().includes('temsilci') && !String(m.name).toLowerCase().includes('satış t'))
+        .map(m => {
+          const v = parseFloat(String(m.val).replace(/\./g,'').replace(',','.')) || 0;
+          return `
+            <div class="mo-cell">
+              <div class="mo-cell-month">${m.name}</div>
+              <div class="mo-cell-val ${v > 0 ? 'has-val' : 'zero'}">${v > 0 ? fmt(m.val) + ' ₺' : '—'}</div>
+            </div>`;
+        }).join('')}
+    </div>` : '';
 
-    function initApp() {
-        const email = auth.currentUser.email;
-        const menu = document.getElementById('user-menu');
-        menu.innerHTML = "";
-        
-        if (RESTRICTED_USERS[email]) {
-            const userName = RESTRICTED_USERS[email];
-            const btn = document.createElement('div');
-            btn.className = `nav-link active`;
-            btn.innerText = "Kişisel Raporum";
-            btn.onclick = () => buildDashboard(userName);
-            menu.appendChild(btn);
-            buildDashboard(userName);
-        } else {
-            Object.keys(database).forEach(user => {
-                const btn = document.createElement('div');
-                btn.className = `nav-link ${user === 'Rapor Özeti' ? 'active' : ''}`;
-                btn.innerText = user;
-                btn.onclick = () => {
-                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                    btn.classList.add('active');
-                    buildDashboard(user);
-                };
-                menu.appendChild(btn);
-            });
-            buildDashboard("Rapor Özeti");
-        }
-    }
+  // ── Her kullanıcı için aynı hero kart (kişisel veya admin fark etmez)
+  document.getElementById('target-area').innerHTML = `
+    <div class="personal-hero">
+      <div class="ph-top">
+        <div>
+          <div class="ph-name">${user}</div>
+          <div class="ph-barem">${status.reached}</div>
+        </div>
+        <span class="badge ${badgeColor}">${badgeTxt}</span>
+      </div>
+      <div class="ph-bar-wrap">
+        <div class="ph-bar-track">
+          <div class="ph-bar-fill ${barColor}" style="width:${Math.min(oran,100)}%"></div>
+        </div>
+      </div>
+      <div class="ph-row">
+        <span class="ph-pct">%${oran} tamamlandı</span>
+        <span class="ph-total">${fmt(currentVal)} ₺</span>
+      </div>
+      <hr class="ph-divider">
+      <div class="ph-next">${nextTxt}</div>
+      <div class="kpi-row" style="margin-bottom:0">
+        <div class="kpi-card">
+          <div class="kpi-label">Toplam Satış</div>
+          <div class="kpi-value">${fmt(currentVal)}</div>
+          <div class="kpi-sub">Türk Lirası</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Hedef Gerçekleşme</div>
+          <div class="kpi-value" style="color:var(--cyan)">%${oran}</div>
+          <div class="kpi-sub">${fmt(TARGETS.MONTHLY)} ₺ hedef</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Kalan Tutar</div>
+          <div class="kpi-value" style="color:${oran>=100?'var(--green)':'var(--amber)'}">
+            ${oran >= 100 ? '—' : fmt(remaining)}
+          </div>
+          <div class="kpi-sub">${oran >= 100 ? '🎯 Hedef aşıldı!' : 'tamamlanacak'}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Sıradaki Hedef</div>
+          <div class="kpi-value" style="font-size:12px;color:var(--amber)">
+            ${status.next ? fmt(status.next.monthly) + ' ₺' : 'MAX'}
+          </div>
+          <div class="kpi-sub">${status.next ? status.next.name : 'En üst seviye'}</div>
+        </div>
+      </div>
+      ${monthlyGridHTML}
+    </div>`;
 
-    function buildDashboard(userName) {
-        const email = auth.currentUser.email;
-        document.getElementById('current-page').innerText = userName;
-        const parent = document.getElementById('dataParent');
-        const targetArea = document.getElementById('target-area');
-        parent.innerHTML = ""; targetArea.innerHTML = "";
+  // Data panelleri
+  const grid = document.getElementById('data-grid');
+  HEADERS.forEach((h, i) => {
+    const data = findAndExtract(matrix, h);
+    if (!data.length) return;
 
-        if (userName === "Rapor Özeti") {
-            targetArea.innerHTML = `<div class="target-table-container"><h6 class="text-white mb-3 fw-bold">2026 Kurumsal Hedef Parametreleri</h6><table class="target-table"><thead><tr><th>BAREM</th><th>ORAN</th><th>YILLIK HEDEF</th><th>3 AYLIK HEDEF</th><th>AYLIK HEDEF</th></tr></thead><tbody><tr><td>Hedef 1</td><td>0,35</td><td>25.000.000₺</td><td>6.250.000₺</td><td>2.083.333₺</td></tr><tr><td>Hedef 2</td><td>0,60</td><td>52.500.000₺</td><td>13.125.000₺</td><td>4.375.000₺</td></tr><tr><td>Hedef 3</td><td>0,80</td><td>73.500.000₺</td><td>18.375.000₺</td><td>6.125.000₺</td></tr><tr class="highlight-row"><td>Hedef 4</td><td>1,00</td><td>102.900.000₺</td><td>25.725.000₺</td><td>8.575.000₺</td></tr><tr><td>Hedef 5</td><td>1,20</td><td>144.060.000₺</td><td>36.015.000₺</td><td>12.005.000₺</td></tr><tr><td>Hedef 6</td><td>1,40</td><td>201.684.000₺</td><td>50.421.000₺</td><td>16.807.000₺</td></tr></tbody></table></div>`;
-            
-            Object.keys(database).forEach(user => {
-                if (user === "Rapor Özeti") return;
-                parent.innerHTML += createPerfCardHTML(user);
-            });
-        } 
-        else {
-            parent.innerHTML += createPerfCardHTML(userName);
-
-            const currentMatrix = database[userName];
-            if (!currentMatrix) return;
-
-            HEADERS.forEach((h, i) => {
-                const data = findAndExtract(currentMatrix, h);
-                if (data.length === 0) return;
-
-                let badgeValue = "";
-                const isCallList = h === "ARANMASI GEREKEN MÜŞTERİLER";
-
-                // DÜZELTME: Başlıklardaki ₺ simgesi kaldırıldı
-                if (isCallList) {
-                    const count = data.filter(r => !String(r.key).toLowerCase().includes("toplam")).length;
-                    badgeValue = count + " ";
-                } else {
-                    const totalRow = data.find(r => String(r.key).toLowerCase().includes("genel toplam") || String(r.key).toLowerCase().includes("toplam"));
-                    if (totalRow) badgeValue = format(totalRow.v1); 
-                }
-
-                let displayTitle = h.toUpperCase();
-                if (badgeValue !== "") displayTitle += ` (${badgeValue})`;
-
-                const id = `sec_${i}`;
-                // buildDashboard fonksiyonu içindeki satır oluşturma kısmını bu şekilde güncelle:
-let rows = data.map(r => {
-    // Tablo başlığına göre birim kontrolü yapıyoruz
     const isCurrency = h.includes("Hedef") || h.includes("Prim") || h.includes("Ciro");
-    const unit = isCurrency ? '₺' : ''; 
-    
-    return `<tr><td>${r.key}</td><td class="val-primary">${format(r.v1)}${unit}</td></tr>`;
-}).join('');
-                parent.innerHTML += `<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${id}">${displayTitle}</button></h2><div id="${id}" class="accordion-collapse collapse show"><div class="accordion-body p-0"><table class="table-data">${rows}</table></div></div></div>`;
-            });
-        }
+    const isCallList = h === "ARANMASI GEREKEN MÜŞTERİLER";
+
+    // Badge
+    let badgeHTML = '';
+    if (isCallList) {
+      const count = data.filter(r => !String(r.key).toLowerCase().includes("toplam")).length;
+      badgeHTML = `<span class="dp-badge">${count} müşteri</span>`;
+    } else {
+      const totalRow = data.find(r =>
+        String(r.key).toLowerCase().includes("genel toplam") ||
+        String(r.key).toLowerCase().includes("toplam")
+      );
+      if (totalRow) badgeHTML = `<span class="dp-badge">${fmt(totalRow.v1)}${isCurrency?' ₺':''}</span>`;
     }
 
-    function createPerfCardHTML(user) {
-        const userMatrix = database[user];
-        const targetData = findAndExtract(userMatrix, "Hedef ve Prim Panosu");
-        const currentVal = parseFloat(targetData[0]?.v1) || 0;
-        const status = calculateTargetStatus(currentVal);
-        const nextTargetText = status.next 
-            ? `${status.next.name} için kalan: ${format(status.next.monthly - currentVal)}₺`
-            : "Tüm baremler aşıldı!";
-        
-        let monthlyHTML = '<div class="monthly-stats">';
-        try {
-            const monthsRow = userMatrix[4]; 
-            const valuesRow = userMatrix[5]; 
-            for (let col = 11; col < 23; col++) {
-                if (monthsRow[col] && valuesRow[col] !== undefined && valuesRow[col] !== "") {
-                    monthlyHTML += `<div class="month-item"><span>${monthsRow[col]}</span><span class="text-white">${format(valuesRow[col])}₺</span></div>`;
-                }
+    const rows = data.map(r => {
+      const val = isCurrency ? fmt(r.v1) + ' ₺' : fmt(r.v1);
+      return `<tr><td>${String(r.key).replace('₺','').trim()}</td><td>${val}</td></tr>`;
+    }).join('');
+
+    const panel = document.createElement('div');
+    panel.className = 'dp';
+    panel.style.animationDelay = `${i * 70}ms`;
+    panel.innerHTML = `
+      <div class="dp-head">
+        <span class="dp-dot"></span>
+        <span class="dp-title">${h}</span>
+        ${badgeHTML}
+      </div>
+      <table class="dt">${rows}</table>`;
+    grid.appendChild(panel);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   PERF CARD HTML
+═══════════════════════════════════════════ */
+function buildPerfCard(user, idx) {
+  const matrix = DB[user];
+  const d      = findAndExtract(matrix, "Hedef ve Prim Panosu");
+  const val    = parseFloat(d[0]?.v1) || 0;
+  const oran   = Math.round((val / TARGETS.MONTHLY) * 100);
+  const prog   = Math.min(oran, 100);
+  const status = calcStatus(val);
+
+  let badgeCls, barCls, badgeTxt;
+  if (oran >= 100) { badgeCls='b-green';  barCls='bar-green'; badgeTxt='HEDEF TUTTU'; }
+  else if (oran >= 70) { badgeCls='b-amber'; barCls='bar-amber'; badgeTxt='YAKLAŞTI'; }
+  else if (oran >= 40) { badgeCls='b-cyan';  barCls='bar-cyan';  badgeTxt='DEVAM'; }
+  else                 { badgeCls='b-red';   barCls='bar-red';   badgeTxt='GERİDE'; }
+
+  // Aylık satış geçmişi (orijinal mantık korundu)
+  let monthsHTML = '';
+  try {
+    const mr = matrix[4]; const vr = matrix[5];
+    for (let c = 11; c < 23; c++) {
+      if (mr[c] && vr[c] !== undefined && vr[c] !== '') {
+        monthsHTML += `<div class="mo-row"><span>${mr[c]}</span><span>${fmt(vr[c])} ₺</span></div>`;
+      }
+    }
+  } catch(e) {}
+
+  const nextTxt = status.next
+    ? `${status.next.name} için <strong>${fmt(status.next.monthly - val)} ₺</strong> kaldı`
+    : 'Tüm baremler aşıldı 🎉';
+
+  return `
+    <div class="pc" style="animation-delay:${idx*55}ms"
+         onclick="openDetail('${user}', ${val})">
+      <div class="pc-head">
+        <div>
+          <div class="pc-name">${user}</div>
+          <div class="pc-barem">${status.reached}</div>
+        </div>
+        <span class="badge ${badgeCls}">${badgeTxt}</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill ${barCls}" style="width:${prog}%"></div>
+      </div>
+      <div class="pc-meta">
+        <span class="pc-pct">%${oran} tamamlandı</span>
+        <span class="pc-val">${fmt(val)} ₺</span>
+      </div>
+      <hr class="pc-divider">
+      <div class="pc-next">${nextTxt}</div>
+      ${monthsHTML ? `<div>${monthsHTML}</div>` : ''}
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function openDetail(user, current) {
+  // Perf kart tıklanınca modal açar (orijinal showDetails mantığı)
+  showDetails(user, current);
+}
+
+function showDetails(user, current) {
+  document.getElementById('modal-title').textContent = `${user} — Hedef Analizi`;
+  const status = calcStatus(current);
+
+  const summary = `
+    <div class="m-row">
+      <span class="m-row-label">Güncel Ciro</span>
+      <span class="m-row-value cv-green">${fmt(current)} ₺</span>
+    </div>
+    <div class="m-row">
+      <span class="m-row-label">Mevcut Barem</span>
+      <span class="m-row-value cv-cyan">${status.reached}</span>
+    </div>
+    <div class="m-row">
+      <span class="m-row-label">Sıradaki Hedef</span>
+      <span class="m-row-value cv-amber">${status.next
+        ? status.next.name + ' (' + fmt(status.next.monthly) + ' ₺)'
+        : 'MAKSİMUM SEVİYE'}</span>
+    </div>
+    <div class="m-row">
+      <span class="m-row-label">Hedefe Kalan</span>
+      <span class="m-row-value cv-amber">${status.next
+        ? fmt(status.next.monthly - current) + ' ₺'
+        : '—'}</span>
+    </div>`;
+
+  const rows = BAREMS.map(b => {
+    const diff  = current - b.monthly;
+    const color = diff >= 0 ? 'var(--green)' : 'var(--red)';
+    const txt   = diff >= 0 ? `+${fmt(diff)} ₺ geçti` : `${fmt(Math.abs(diff))} ₺ kaldı`;
+    return `
+      <div class="bd-row">
+        <div>
+          <div class="bd-name">${b.name}</div>
+          <div class="bd-target">Eşik: ${fmt(b.monthly)} ₺</div>
+        </div>
+        <div class="bd-diff" style="color:${color}">${txt}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML = summary +
+    `<div class="barem-detail-head">Barem Detayları</div>${rows}`;
+
+  new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+function calcStatus(current) {
+  let reached = "Barem Altı";
+  let next = BAREMS[0];
+  for (let i = 0; i < BAREMS.length; i++) {
+    if (current >= BAREMS[i].monthly) {
+      reached = BAREMS[i].name;
+      next    = BAREMS[i + 1] || null;
+    }
+  }
+  return { reached, next };
+}
+
+// Orijinal findAndExtract — mantık bire bir korundu
+function findAndExtract(matrix, header) {
+  const list = [];
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      if (String(matrix[r][c]).toLowerCase().includes(header.toLowerCase())) {
+        let i = r + 1;
+        if (header.includes("Hedef")) {
+          while (i < matrix.length) {
+            const val = matrix[i][c + 1];
+            if (val !== "" && !isNaN(parseFloat(String(val).replace(/\./g,'').replace(',','.')))) {
+              list.push({ key: matrix[i][c] || "Güncel Ciro", v1: val });
+              i++;
+              while (i < matrix.length && matrix[i][c + 1] !== "") {
+                list.push({ key: matrix[i][c], v1: matrix[i][c + 1] });
+                i++;
+              }
+              return list;
             }
-        } catch(e) {}
-        monthlyHTML += '</div>';
-
-        const oran = Math.round((currentVal / TARGETS.MONTHLY) * 100);
-        const progressOran = Math.min(oran, 100);
-        let tag = "BEKLENEN"; let tagClass = "tag-low"; let barClass = "bg-danger";
-        if (oran >= 100) { tag = "HEDEF TUTTU"; tagClass = "tag-high"; barClass = "bg-success"; }
-        else if (oran > 50) { tag = "YAKLAŞTI"; tagClass = "tag-mid"; barClass = "bg-primary"; }
-
-        return `<div class="perf-card" onclick="showDetails('${user}', ${currentVal})"><div class="d-flex justify-content-between mb-1"><span class="fw-bold small">${user}</span><span class="status-tag ${tagClass}">${tag}</span></div><div class="progress"><div class="progress-bar ${barClass}" style="width: ${progressOran}%"></div></div><div class="d-flex justify-content-between mt-2" style="font-size: 11px;"><span class="text-muted">Aylık Verimlilik: %${oran}</span><span class="text-white fw-bold">${status.reached}</span></div><div class="sale-total-info">Yapılan Satış: ${format(currentVal)}₺</div><div class="target-info">${nextTargetText}</div>${monthlyHTML}</div>`;
-    }
-
-    function showDetails(user, current) {
-        document.getElementById('modalUserName').innerText = `${user} - Hedef Analizi`;
-        const body = document.getElementById('modalBody');
-        const status = calculateTargetStatus(current);
-        let targetListHTML = '<div class="barem-summary"><h6>Hedef Durum Detayları</h6>';
-        BAREMS.forEach(b => {
-            let diff = current - b.monthly;
-            let text = diff >= 0 ? `${format(diff)}₺ geçti` : `${format(Math.abs(diff))}₺ var`;
-            let color = diff >= 0 ? "var(--success)" : "var(--danger)";
-            targetListHTML += `<div class="barem-item"><div><span class="fw-bold">${b.name}</span><span class="barem-target-val">Orijinal Hedef: ${format(b.monthly)}₺</span></div><div class="text-end"><span style="color: ${color}; font-weight: 600; font-size: 11px;">${text}</span><div style="font-size: 9px; color: #94a3b8;">Yapılan Satış: ${format(current)}₺</div></div></div>`;
-        });
-        targetListHTML += '</div>';
-        body.innerHTML = `<div class="target-detail-row"><span>Güncel Ciro</span><span class="text-success fw-bold">${format(current)}₺</span></div><div class="target-detail-row"><span>Mevcut Barem</span><span class="text-primary fw-bold">${status.reached}</span></div><div class="target-detail-row"><span>Sıradaki Hedef</span><span class="text-warning">${status.next ? status.next.name + ' (' + format(status.next.monthly) + '₺)' : 'MAKSİMUM'}</span></div><div class="target-detail-row"><span>Hedeften Kalan</span><span class="text-warning">${status.next ? format(status.next.monthly - current) + '₺' : 'YOK'}</span></div>${targetListHTML}`;
-        new bootstrap.Modal(document.getElementById('detailModal')).show();
-    }
-
-    function findAndExtract(matrix, header) {
-        let list = [];
-        for (let r = 0; r < matrix.length; r++) {
-            for (let c = 0; c < matrix[r].length; c++) {
-                if (String(matrix[r][c]).toLowerCase().includes(header.toLowerCase())) {
-                    let i = r + 1;
-                    if (header.includes("Hedef")) {
-                        while (i < matrix.length) {
-                            const val = matrix[i][c+1];
-                            if (val !== "" && !isNaN(parseFloat(String(val).replace(/\./g, '').replace(',', '.')))) {
-                                list.push({ key: matrix[i][c] || "Güncel Ciro", v1: val });
-                                i++;
-                                while (i < matrix.length && matrix[i][c+1] !== "") {
-                                    list.push({ key: matrix[i][c], v1: matrix[i][c+1] });
-                                    i++;
-                                }
-                                return list;
-                            }
-                            i++; if (i > r + 5) break;
-                        }
-                    } else {
-                        if (i < matrix.length && !matrix[i][c] && !matrix[i][c+1]) i++;
-                        while (i < matrix.length) {
-                            const key = matrix[i][c];
-                            const val = matrix[i][c+1];
-                            if (!key || HEADERS.some(h => String(key).includes(h))) break;
-                            list.push({ key, v1: val });
-                            i++;
-                        }
-                    }
-                    return list;
-                }
-            }
+            i++;
+            if (i > r + 5) break;
+          }
+        } else {
+          if (i < matrix.length && !matrix[i][c] && !matrix[i][c + 1]) i++;
+          while (i < matrix.length) {
+            const key = matrix[i][c];
+            const val = matrix[i][c + 1];
+            if (!key || HEADERS.some(h => String(key).includes(h))) break;
+            list.push({ key, v1: val });
+            i++;
+          }
         }
         return list;
+      }
     }
+  }
+  return list;
+}
 
-    function format(v) {
-        if (!v && v !== 0) return "";
-        let num = typeof v === 'string' ? parseFloat(v.replace(/\./g, '').replace(',', '.')) : v;
-        return isNaN(num) ? v : num.toLocaleString('tr-TR');
-    }
+function fmt(v) {
+  if (!v && v !== 0) return "";
+  const n = typeof v === 'string'
+    ? parseFloat(v.replace(/\./g,'').replace(',','.'))
+    : v;
+  return isNaN(n) ? String(v) : n.toLocaleString('tr-TR');
+}
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
