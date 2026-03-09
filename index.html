@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Proforce Panel | Rapor Özeti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --accent: #3b82f6; --bg: #0f172a; --surface: #1e293b; --text: #f8fafc; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); margin: 0; }
+        .sidebar { height: 100vh; background: #020617; position: fixed; width: 240px; padding: 30px 20px; border-right: 1px solid #334155; }
+        .nav-link { color: #94a3b8; cursor: pointer; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; transition: 0.3s; }
+        .nav-link.active { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+        .main-content { margin-left: 240px; padding: 40px; }
+        /* Grid Yapısı Güncellendi */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+        .accordion-item { background: var(--surface) !important; border: 1px solid #334155 !important; border-radius: 12px !important; margin-bottom: 0px; overflow: hidden; height: 100%; }
+        .accordion-button { background: var(--surface) !important; color: #fff !important; font-weight: 700; font-size: 13px; padding: 15px; box-shadow: none !important; }
+        .accordion-button:not(.collapsed) { color: var(--accent) !important; border-bottom: 1px solid #334155; }
+        .table-data { width: 100%; margin: 0; font-family: 'Fira Code', monospace; font-size: 12px; }
+        .table-data td { padding: 10px 15px; border-bottom: 1px solid #334155; color: #cbd5e1; }
+        .val-primary { color: #fff; font-weight: 600; text-align: right; }
+        .perf-card { background: #020617; border-radius: 12px; padding: 18px; border-left: 4px solid var(--accent); cursor: pointer; transition: 0.3s; position: relative; height: 100%; }
+        
+        /* EKLEME: Aylık verimlilik yazısının rengini açan kısım */
+        .perf-card .text-muted { color: #cbd5e1 !important; }
+        
+        .perf-card:hover { transform: translateY(-5px); background: #0c1222; border-color: #fff; }
+        .progress { height: 6px; background: #334155; border-radius: 10px; margin: 12px 0; }
+        .status-tag { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; }
+        .tag-high { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .tag-mid { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
+        .tag-low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .target-table-container { background: #020617; border-radius: 12px; padding: 20px; border: 1px solid #334155; margin-bottom: 30px; }
+        .target-table { width: 100%; color: #cbd5e1; font-size: 12px; }
+        .target-table th { color: var(--accent); padding: 10px; border-bottom: 2px solid #334155; text-align: left; }
+        .target-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .highlight-row { background: rgba(59, 130, 246, 0.1); color: #fff; font-weight: bold; }
+        .modal-content { background: var(--surface); color: var(--text); border: 1px solid #334155; border-radius: 15px; }
+        .target-detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .target-info { font-size: 11px; color: var(--warning); margin-top: 8px; font-weight: 600; }
+        .sale-total-info { font-size: 13px; color: #fff; margin-top: 4px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; }
+        .barem-summary { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #334155; }
+        .barem-item { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .barem-target-val { color: #94a3b8; font-size: 9px; display: block; }
+        .monthly-stats { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #334155; }
+        .month-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #94a3b8; }
+        
+        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: var(--surface); border: 1px solid #334155; width: 350px; border-radius: 15px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" style="display: none;">
+    <div class="login-card">
+        <h3 class="text-center fw-bold mb-4 text-primary">PROFORCE</h3>
+        <div class="mb-3">
+            <label class="small mb-1 text-muted">E-posta</label>
+            <input type="email" id="login-email" class="form-control bg-dark text-white border-secondary" placeholder="Örn: emrah@imesspor.com">
+        </div>
+        <div class="mb-4">
+            <label class="small mb-1 text-muted">Şifre</label>
+            <input type="password" id="login-pass" class="form-control bg-dark text-white border-secondary" placeholder="******">
+        </div>
+        <button onclick="login()" class="btn btn-primary w-100 fw-bold">Giriş Yap</button>
+        <p id="login-error" class="text-danger small mt-3 text-center" style="display:none;">Hatalı giriş! (Şifreniz en az 6 hane olmalıdır)</p>
+    </div>
+</div>
+
+<div id="loader" style="position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999;"><div class="spinner-border text-primary"></div></div>
+
+<div class="sidebar">
+    <h3 class="fw-bold mb-5 text-primary">IMES SPOR</h3>
+    <div id="user-menu"></div>
+    <button onclick="logout()" class="btn btn-outline-danger btn-sm mt-5 w-100">Güvenli Çıkış</button>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 fw-bold m-0" id="current-page">Rapor Özeti</h1>
+        <button onclick="location.reload()" class="btn btn-outline-primary btn-sm rounded-pill px-4">Veriyi Tazele</button>
+    </div>
+    
+    <div id="target-area"></div> 
+
+    <div class="dashboard-grid" id="dataParent"></div>
+</div>
+
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0"><h5 class="modal-title" id="modalUserName">Hedef Analizi</h5><button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"></button></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3VNIvFEkC91ROb1gJ0GQ9bcYLCrD4yfA",
+        authDomain: "performans-6ca5a.firebaseapp.com",
+        projectId: "performans-6ca5a",
+        storageBucket: "performans-6ca5a.firebasestorage.app",
+        messagingSenderId: "972686388947",
+        appId: "1:972686388947:web:a70bb6cd672e379b2eae26"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const API_URL = 'https://script.google.com/macros/s/AKfycbweCM9Kfn7oU4vwmIgTCpbDH9k164vcwmkI4fi5Jrkf4BAF4XddekX_xjsf9nY_5PeVIg/exec';
+    let database = {};
+
+    const TARGETS = { ANNUAL: 102900000, QUARTERLY: 25725000, MONTHLY: 8575000 };
+    const BAREMS = [
+        { name: "Hedef 1 (%0,35)", oran: 0.35, monthly: 2083333 },
+        { name: "Hedef 2 (%0,60)", oran: 0.60, monthly: 4375000 },
+        { name: "Hedef 3 (%0,80)", oran: 0.80, monthly: 6125000 },
+        { name: "Hedef 4 (%1,00)", oran: 1.00, monthly: 8575000 },
+        { name: "Hedef 5 (%1,20)", oran: 1.20, monthly: 12005000 },
+        { name: "Hedef 6 (%1,40)", oran: 1.40, monthly: 16807000 }
+    ];
+
+    const HEADERS = ["Hedef ve Prim Panosu", "Şubat Ayı Aktivite Tipi", "Şubat Ayı Müşteri Kaynağı", "Şehir Teklif Dağılım Panosu", "ARANMASI GEREKEN MÜŞTERİLER"];
+
+    const RESTRICTED_USERS = {
+        "ermanmete@imesspor.com": "Erman Mete",
+        "mehmetcan@imesspor.com": "Mehmetcan Kapu",
+        "burak@imesspor.com": "Mert Burak",
+        "timucin@imesspor.com": "Timuçin Şahin",
+        "aykutonus@imesspor.com": "Aykut Onuş",
+        "eren@imesspor.com": "Eren Soytürk"
+    };
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-screen').style.display = 'none';
+            fetchData();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('loader').style.display = 'none';
+        }
+    });
+
+    async function login() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('login-error').style.display = 'block';
+        }
+    }
+
+    function logout() { auth.signOut(); }
+
+    async function fetchData() {
+        document.getElementById('loader').style.display = 'flex';
+        try {
+            const res = await fetch(API_URL);
+            database = await res.json();
+            initApp();
+        } catch (e) {
+            console.error("Veri çekme hatası:", e);
+        }
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function calculateTargetStatus(current) {
+        let reached = "Barem Altı";
+        let next = BAREMS[0];
+        for (let i = 0; i < BAREMS.length; i++) {
+            if (current >= BAREMS[i].monthly) {
+                reached = BAREMS[i].name; 
+                next = BAREMS[i+1] || null;
+            }
+        }
+        return { reached, next };
+    }
+
+    function initApp() {
+        const email = auth.currentUser.email;
+        const menu = document.getElementById('user-menu');
+        menu.innerHTML = "";
+        
+        if (RESTRICTED_USERS[email]) {
+            const userName = RESTRICTED_USERS[email];
+            const btn = document.createElement('div');
+            btn.className = `nav-link active`;
+            btn.innerText = "Kişisel Raporum";
+            btn.onclick = () => buildDashboard(userName);
+            menu.appendChild(btn);
+            buildDashboard(userName);
+        } else {
+            Object.keys(database).forEach(user => {
+                const btn = document.createElement('div');
+                btn.className = `nav-link ${user === 'Rapor Özeti' ? 'active' : ''}`;
+                btn.innerText = user;
+                btn.onclick = () => {
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    btn.classList.add('active');
+                    buildDashboard(user);
+                };
+                menu.appendChild(btn);
+            });
+            buildDashboard("Rapor Özeti");
+        }
+    }
+
+    function buildDashboard(userName) {
+        const email = auth.currentUser.email;
+        document.getElementById('current-page').innerText = userName;
+        const parent = document.getElementById('dataParent');
+        const targetArea = document.getElementById('target-area');
+        parent.innerHTML = ""; targetArea.innerHTML = "";
+
+        if (userName === "Rapor Özeti") {
+            targetArea.innerHTML = `<div class="target-table-container"><h6 class="text-white mb-3 fw-bold">2026 Kurumsal Hedef Parametreleri</h6><table class="target-table"><thead><tr><th>BAREM</th><th>ORAN</th><th>YILLIK HEDEF</th><th>3 AYLIK HEDEF</th><th>AYLIK HEDEF</th></tr></thead><tbody><tr><td>Hedef 1</td><td>0,35</td><td>25.000.000₺</td><td>6.250.000₺</td><td>2.083.333₺</td></tr><tr><td>Hedef 2</td><td>0,60</td><td>52.500.000₺</td><td>13.125.000₺</td><td>4.375.000₺</td></tr><tr><td>Hedef 3</td><td>0,80</td><td>73.500.000₺</td><td>18.375.000₺</td><td>6.125.000₺</td></tr><tr class="highlight-row"><td>Hedef 4</td><td>1,00</td><td>102.900.000₺</td><td>25.725.000₺</td><td>8.575.000₺</td></tr><tr><td>Hedef 5</td><td>1,20</td><td>144.060.000₺</td><td>36.015.000₺</td><td>12.005.000₺</td></tr><tr><td>Hedef 6</td><td>1,40</td><td>201.684.000₺</td><td>50.421.000₺</td><td>16.807.000₺</td></tr></tbody></table></div>`;
+            
+            Object.keys(database).forEach(user => {
+                if (user === "Rapor Özeti") return;
+                parent.innerHTML += createPerfCardHTML(user);
+            });
+        } 
+        else {
+            parent.innerHTML += createPerfCardHTML(userName);
+
+            const currentMatrix = database[userName];
+            if (!currentMatrix) return;
+
+            HEADERS.forEach((h, i) => {
+                const data = findAndExtract(currentMatrix, h);
+                if (data.length === 0) return;
+
+                let badgeValue = "";
+                const isCallList = h === "ARANMASI GEREKEN MÜŞTERİLER";
+
+                // DÜZELTME: Başlıklardaki ₺ simgesi kaldırıldı
+                if (isCallList) {
+                    const count = data.filter(r => !String(r.key).toLowerCase().includes("toplam")).length;
+                    badgeValue = count + " ";
+                } else {
+                    const totalRow = data.find(r => String(r.key).toLowerCase().includes("genel toplam") || String(r.key).toLowerCase().includes("toplam"));
+                    if (totalRow) badgeValue = format(totalRow.v1); 
+                }
+
+                let displayTitle = h.toUpperCase();
+                if (badgeValue !== "") displayTitle += ` (${badgeValue})`;
+
+                const id = `sec_${i}`;
+                // buildDashboard fonksiyonu içindeki satır oluşturma kısmını bu şekilde güncelle:
+let rows = data.map(r => {
+    // Tablo başlığına göre birim kontrolü yapıyoruz
+    const isCurrency = h.includes("Hedef") || h.includes("Prim") || h.includes("Ciro");
+    const unit = isCurrency ? '₺' : ''; 
+    
+    return `<tr><td>${r.key}</td><td class="val-primary">${format(r.v1)}${unit}</td></tr>`;
+}).join('');
+                parent.innerHTML += `<div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#${id}">${displayTitle}</button></h2><div id="${id}" class="accordion-collapse collapse show"><div class="accordion-body p-0"><table class="table-data">${rows}</table></div></div></div>`;
+            });
+        }
+    }
+
+    function createPerfCardHTML(user) {
+        const userMatrix = database[user];
+        const targetData = findAndExtract(userMatrix, "Hedef ve Prim Panosu");
+        const currentVal = parseFloat(targetData[0]?.v1) || 0;
+        const status = calculateTargetStatus(currentVal);
+        const nextTargetText = status.next 
+            ? `${status.next.name} için kalan: ${format(status.next.monthly - currentVal)}₺`
+            : "Tüm baremler aşıldı!";
+        
+        let monthlyHTML = '<div class="monthly-stats">';
+        try {
+            const monthsRow = userMatrix[4]; 
+            const valuesRow = userMatrix[5]; 
+            for (let col = 11; col < 23; col++) {
+                if (monthsRow[col] && valuesRow[col] !== undefined && valuesRow[col] !== "") {
+                    monthlyHTML += `<div class="month-item"><span>${monthsRow[col]}</span><span class="text-white">${format(valuesRow[col])}₺</span></div>`;
+                }
+            }
+        } catch(e) {}
+        monthlyHTML += '</div>';
+
+        const oran = Math.round((currentVal / TARGETS.MONTHLY) * 100);
+        const progressOran = Math.min(oran, 100);
+        let tag = "BEKLENEN"; let tagClass = "tag-low"; let barClass = "bg-danger";
+        if (oran >= 100) { tag = "HEDEF TUTTU"; tagClass = "tag-high"; barClass = "bg-success"; }
+        else if (oran > 50) { tag = "YAKLAŞTI"; tagClass = "tag-mid"; barClass = "bg-primary"; }
+
+        return `<div class="perf-card" onclick="showDetails('${user}', ${currentVal})"><div class="d-flex justify-content-between mb-1"><span class="fw-bold small">${user}</span><span class="status-tag ${tagClass}">${tag}</span></div><div class="progress"><div class="progress-bar ${barClass}" style="width: ${progressOran}%"></div></div><div class="d-flex justify-content-between mt-2" style="font-size: 11px;"><span class="text-muted">Aylık Verimlilik: %${oran}</span><span class="text-white fw-bold">${status.reached}</span></div><div class="sale-total-info">Yapılan Satış: ${format(currentVal)}₺</div><div class="target-info">${nextTargetText}</div>${monthlyHTML}</div>`;
+    }
+
+    function showDetails(user, current) {
+        document.getElementById('modalUserName').innerText = `${user} - Hedef Analizi`;
+        const body = document.getElementById('modalBody');
+        const status = calculateTargetStatus(current);
+        let targetListHTML = '<div class="barem-summary"><h6>Hedef Durum Detayları</h6>';
+        BAREMS.forEach(b => {
+            let diff = current - b.monthly;
+            let text = diff >= 0 ? `${format(diff)}₺ geçti` : `${format(Math.abs(diff))}₺ var`;
+            let color = diff >= 0 ? "var(--success)" : "var(--danger)";
+            targetListHTML += `<div class="barem-item"><div><span class="fw-bold">${b.name}</span><span class="barem-target-val">Orijinal Hedef: ${format(b.monthly)}₺</span></div><div class="text-end"><span style="color: ${color}; font-weight: 600; font-size: 11px;">${text}</span><div style="font-size: 9px; color: #94a3b8;">Yapılan Satış: ${format(current)}₺</div></div></div>`;
+        });
+        targetListHTML += '</div>';
+        body.innerHTML = `<div class="target-detail-row"><span>Güncel Ciro</span><span class="text-success fw-bold">${format(current)}₺</span></div><div class="target-detail-row"><span>Mevcut Barem</span><span class="text-primary fw-bold">${status.reached}</span></div><div class="target-detail-row"><span>Sıradaki Hedef</span><span class="text-warning">${status.next ? status.next.name + ' (' + format(status.next.monthly) + '₺)' : 'MAKSİMUM'}</span></div><div class="target-detail-row"><span>Hedeften Kalan</span><span class="text-warning">${status.next ? format(status.next.monthly - current) + '₺' : 'YOK'}</span></div>${targetListHTML}`;
+        new bootstrap.Modal(document.getElementById('detailModal')).show();
+    }
+
+    function findAndExtract(matrix, header) {
+        let list = [];
+        for (let r = 0; r < matrix.length; r++) {
+            for (let c = 0; c < matrix[r].length; c++) {
+                if (String(matrix[r][c]).toLowerCase().includes(header.toLowerCase())) {
+                    let i = r + 1;
+                    if (header.includes("Hedef")) {
+                        while (i < matrix.length) {
+                            const val = matrix[i][c+1];
+                            if (val !== "" && !isNaN(parseFloat(String(val).replace(/\./g, '').replace(',', '.')))) {
+                                list.push({ key: matrix[i][c] || "Güncel Ciro", v1: val });
+                                i++;
+                                while (i < matrix.length && matrix[i][c+1] !== "") {
+                                    list.push({ key: matrix[i][c], v1: matrix[i][c+1] });
+                                    i++;
+                                }
+                                return list;
+                            }
+                            i++; if (i > r + 5) break;
+                        }
+                    } else {
+                        if (i < matrix.length && !matrix[i][c] && !matrix[i][c+1]) i++;
+                        while (i < matrix.length) {
+                            const key = matrix[i][c];
+                            const val = matrix[i][c+1];
+                            if (!key || HEADERS.some(h => String(key).includes(h))) break;
+                            list.push({ key, v1: val });
+                            i++;
+                        }
+                    }
+                    return list;
+                }
+            }
+        }
+        return list;
+    }
+
+    function format(v) {
+        if (!v && v !== 0) return "";
+        let num = typeof v === 'string' ? parseFloat(v.replace(/\./g, '').replace(',', '.')) : v;
+        return isNaN(num) ? v : num.toLocaleString('tr-TR');
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
