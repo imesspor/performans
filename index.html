@@ -11,14 +11,14 @@
    TOKENS
 ═══════════════════════════════════════════ */
 :root {
-  --bg:        #07090f;
-  --bg2:       #0c0f1a;
-  --surface:   #111520;
-  --surface2:  #161b2c;
-  --border:    rgba(255,255,255,0.07);
-  --border-hi: rgba(99,179,237,0.25);
+  --bg:        #0f1520;
+  --bg2:       #151c2e;
+  --surface:   #1a2236;
+  --surface2:  #1f2840;
+  --border:    rgba(255,255,255,0.09);
+  --border-hi: rgba(147,197,253,0.30);
 
-  --cyan:   #63b3ed;
+  --cyan:   #93c5fd;
   --green:  #48bb78;
   --amber:  #ecc94b;
   --red:    #fc8181;
@@ -48,7 +48,7 @@ body {
 body::after {
   content: '';
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background-image: radial-gradient(circle, rgba(99,179,237,0.07) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(147,197,253,0.07) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -109,7 +109,7 @@ body::after {
 }
 .login-logo-icon {
   width: 28px; height: 28px; border-radius: 6px;
-  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  background: linear-gradient(135deg, var(--cyan), #3b82f6);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 13px; color: var(--bg);
   font-family: var(--mono);
@@ -139,7 +139,7 @@ body::after {
 
 .btn-login {
   width: 100%; padding: 12px;
-  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  background: linear-gradient(135deg, var(--cyan), #3b82f6);
   border: none; border-radius: var(--r);
   color: var(--bg); font-weight: 700; font-size: 14px;
   font-family: var(--sans); cursor: pointer;
@@ -179,11 +179,11 @@ body::after {
 }
 .sb-logo-icon {
   width: 34px; height: 34px; border-radius: 8px;
-  background: linear-gradient(135deg, var(--cyan), #2b6cb0);
+  background: linear-gradient(135deg, var(--cyan), #3b82f6);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 15px; color: var(--bg);
   font-family: var(--mono); flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(99,179,237,.25);
+  box-shadow: 0 0 16px rgba(147,197,253,.25);
 }
 .sb-logo-name { font-size: 13px; font-weight: 800; color: #fff; }
 .sb-logo-sub  { font-family: var(--mono); font-size: 8px; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase; }
@@ -209,8 +209,8 @@ body::after {
 }
 .nav-item:hover { color: var(--text); background: var(--surface); border-color: var(--border); }
 .nav-item.active {
-  background: rgba(99,179,237,.1);
-  border-color: rgba(99,179,237,.2);
+  background: rgba(147,197,253,.1);
+  border-color: rgba(147,197,253,.2);
   color: var(--cyan);
 }
 .nav-item.active .nav-item-dot {
@@ -286,7 +286,7 @@ body::after {
   font-size: 12px; font-weight: 600; font-family: var(--sans);
   cursor: pointer; transition: all .2s;
 }
-.btn-refresh:hover { background: rgba(99,179,237,.08); border-color: var(--border-hi); }
+.btn-refresh:hover { background: rgba(147,197,253,.08); border-color: var(--border-hi); }
 .btn-refresh svg { transition: transform .5s; }
 .btn-refresh:hover svg { transform: rotate(180deg); }
 
@@ -325,7 +325,7 @@ body::after {
   border-bottom: 1px solid rgba(255,255,255,.04);
 }
 .bt tr:last-child td { border-bottom: none; }
-.bt tr.hl-row td { background: rgba(99,179,237,.06); color: #fff; font-weight: 600; }
+.bt tr.hl-row td { background: rgba(147,197,253,.06); color: #fff; font-weight: 600; }
 .bt tr.hl-row td:first-child { color: var(--cyan); }
 .bt-num { text-align: right; font-family: var(--mono); font-size: 11px; }
 
@@ -367,7 +367,7 @@ body::after {
   text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
 }
 .b-green  { background: rgba(72,187,120,.15); color: var(--green); }
-.b-cyan   { background: rgba(99,179,237,.12); color: var(--cyan); }
+.b-cyan   { background: rgba(147,197,253,.12); color: var(--cyan); }
 .b-amber  { background: rgba(236,201,75,.13); color: var(--amber); }
 .b-red    { background: rgba(252,129,129,.12); color: var(--red); }
 
@@ -381,7 +381,7 @@ body::after {
 }
 .bar-green  { background: linear-gradient(90deg, var(--green), #276749); }
 .bar-amber  { background: linear-gradient(90deg, var(--amber), #b7791f); }
-.bar-cyan   { background: linear-gradient(90deg, var(--cyan),  #2b6cb0); }
+.bar-cyan   { background: linear-gradient(90deg, var(--cyan),  #3b82f6); }
 .bar-red    { background: linear-gradient(90deg, var(--red),   #9b2c2c); }
 
 .pc-meta { display: flex; justify-content: space-between; align-items: center; }
@@ -433,7 +433,7 @@ body::after {
 }
 .dt tr:last-child td { border-bottom: none; }
 .dt td:last-child { text-align: right; font-family: var(--mono); font-size: 11px; color: #fff; font-weight: 500; }
-.dt tr:hover td { background: rgba(99,179,237,.03); color: var(--text); }
+.dt tr:hover td { background: rgba(147,197,253,.03); color: var(--text); }
 
 /* ═══════════════════════════════════════════
    KPI ROW (user detail top)
@@ -1163,7 +1163,6 @@ function buildPerfCard(user, idx) {
    MODAL
 ═══════════════════════════════════════════ */
 function openDetail(user, current) {
-  // Perf kart tıklanınca modal açar (orijinal showDetails mantığı)
   showDetails(user, current);
 }
 
@@ -1228,7 +1227,6 @@ function calcStatus(current) {
   return { reached, next };
 }
 
-// Orijinal findAndExtract — mantık bire bir korundu
 function findAndExtract(matrix, header) {
   const list = [];
   for (let r = 0; r < matrix.length; r++) {
