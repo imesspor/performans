@@ -177,7 +177,56 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 /* NUM INPUT */
 .nilg{width:100%;text-align:center;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:22px;font-weight:700;padding:14px;outline:none}
 .nilg:focus{border-color:var(--green)}
+/* SEGMENTED */
+.seg{display:flex;background:var(--bg3);border-radius:var(--rsm);padding:3px;margin:10px 16px 0;gap:3px}
+.segb{flex:1;text-align:center;padding:8px 4px;border-radius:6px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;transition:all .15s;border:none;background:none;font-family:var(--font)}
+.segb.on{background:var(--green);color:#fff}
+/* COACH */
+.coachhero{background:linear-gradient(135deg,rgba(16,185,129,.16),rgba(59,130,246,.08));border:1px solid var(--green-bd);border-radius:var(--rlg);margin:12px 16px;padding:18px;text-align:center;position:relative;overflow:hidden}
+.coachhero.warn{background:linear-gradient(135deg,rgba(245,158,11,.16),rgba(244,63,94,.08));border-color:var(--amber-bd)}
+.coachhero.danger{background:linear-gradient(135deg,rgba(244,63,94,.18),rgba(245,158,11,.06));border-color:var(--red-bd)}
+.winpct{font-size:46px;font-weight:900;font-family:var(--mono);line-height:1}
+.coachadvice{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin:0 16px 12px;padding:14px 16px}
+.coachadvice h4{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cadv{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.5;color:var(--text2)}
+.cadv:last-child{border-bottom:none}
+.cadv .ci{font-size:16px;flex-shrink:0;line-height:1.4}
+.cadv b{color:var(--text)}
+.cmprow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.cmprow:last-child{border-bottom:none}
+.cmprow.me{background:var(--green-bg)}
+.cmpbar{height:7px;border-radius:4px;background:var(--bg3);overflow:hidden;flex:1;min-width:40px}
+.cmpfill{height:100%;border-radius:4px;transition:width .5s ease}
+.targetbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px}
+.tbx{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.tbx .tv{font-size:26px;font-weight:900;font-family:var(--mono)}
+.tbx .tl{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.3}
+/* SETTINGS */
+.setrow{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer}
+.setrow:active{background:var(--surface2)}
+.setrow .si{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.setrow .st{flex:1}
+.setrow .stt{font-size:15px;font-weight:700}
+.setrow .sts{font-size:12px;color:var(--text3);margin-top:1px}
+.setrow .sarr{color:var(--text3)}
+.syncdot{width:9px;height:9px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.syncdot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+.syncdot.err{background:var(--red)}
+.codebox{font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:12px;color:var(--text2);word-break:break-all;line-height:1.6;max-height:140px;overflow-y:auto}
+.steplist{counter-reset:s}
+.stepitem{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.stepitem:last-child{border-bottom:none}
+.stepnum{counter-increment:s;width:24px;height:24px;border-radius:50%;background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.stepnum::before{content:counter(s)}
+.steptxt{font-size:13px;color:var(--text2);line-height:1.5}
+.steptxt b{color:var(--text)}
+.idgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 0}
+.idcard{background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s}
+.idcard.on{border-color:var(--green);background:var(--green-bg)}
+.idcard:active{transform:scale(.97)}
 </style>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
 <div id="app">
@@ -187,8 +236,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="topbar">
     <div><h1>🀄 Yazboz</h1><div class="sub">101 Okey Skor Takip</div></div>
     <div class="topbar-r">
-      <div class="ibtn" onclick="go('s-players')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div class="ibtn" onclick="go('s-settings')" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="syncdot" id="topbar-syncdot" style="position:absolute;top:-2px;right:-2px;display:none"></span>
       </div>
     </div>
   </div>
@@ -310,9 +360,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div class="lstat"><div class="lsval" id="lv-baraj" style="color:var(--red)">101</div><div class="lslbl">Baraj</div></div>
     </div>
     <div style="margin-top:10px"><div class="pbg"><div class="pfill" id="lv-prog" style="width:0%"></div></div></div>
+    <div id="lv-idchip" onclick="openIdentity()" style="margin-top:10px;display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:5px 12px 5px 6px;cursor:pointer;width:fit-content">
+      <div class="av av0" id="lv-id-av" style="width:24px;height:24px;font-size:9px">?</div>
+      <span style="font-size:12px;font-weight:700;color:var(--text2)" id="lv-id-name">Ben kimim? →</span>
+    </div>
+  </div>
+  <div class="seg">
+    <button class="segb on" id="seg-tbl" onclick="setLiveTab('table')">📋 Tablo</button>
+    <button class="segb" id="seg-coach" onclick="setLiveTab('coach')">🧠 Koç</button>
   </div>
   <div class="scr-scroll" style="padding-bottom:120px" id="lv-scroll">
     <div id="lv-table"></div>
+    <div id="lv-coach" style="display:none"></div>
   </div>
   <div style="position:fixed;bottom:calc(64px + var(--sbt));left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:10px 16px;background:var(--bg);border-top:1px solid var(--border)">
     <button class="btn btn-g" id="lv-new-btn" onclick="openRoundModal()">
@@ -359,6 +418,76 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div style="width:38px"></div>
   </div>
   <div class="scr-scroll" id="gd-content"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="s-settings" class="screen">
+  <div class="topbar">
+    <div class="ibtn" onclick="go('s-home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg></div>
+    <h1>Ayarlar</h1>
+    <div style="width:38px"></div>
+  </div>
+  <div class="scr-scroll">
+    <div class="sec">Kimlik</div>
+    <div class="setrow" onclick="openIdentity()">
+      <div class="si" style="background:var(--green-bg)">👤</div>
+      <div class="st"><div class="stt">Ben kimim?</div><div class="sts" id="set-id-sub">Henüz seçilmedi</div></div>
+      <div class="sarr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
+    </div>
+
+    <div class="sec">Canlı Takip</div>
+    <div class="setrow" onclick="go('s-sync')">
+      <div class="si" style="background:var(--blue-bg)">☁️</div>
+      <div class="st"><div class="stt">Senkronizasyon</div><div class="sts" id="set-sync-sub">Kapalı — sadece bu cihaz</div></div>
+      <span class="syncdot" id="set-syncdot"></span>
+      <div class="sarr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
+    </div>
+
+    <div class="sec">Yedekleme</div>
+    <div class="card">
+      <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px">Tüm oyuncular, oyunlar ve geçmiş tek dosyaya kaydedilir. İstediğin zaman geri yükleyebilirsin.</p>
+      <button class="btn btn-g" onclick="exportData()" style="margin-bottom:10px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Yedek İndir (.json)
+      </button>
+      <button class="btn btn-s" onclick="document.getElementById('import-file').click()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Yedekten Yükle
+      </button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+    </div>
+    <div id="set-datainfo" style="padding:0 16px"></div>
+
+    <div class="sec" style="color:var(--red)">Tehlikeli Bölge</div>
+    <div style="padding:0 16px 24px">
+      <button class="btn btn-d" onclick="askWipe()">Tüm Verileri Sil</button>
+      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Silmeden önce yedek almanı öneririz.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC -->
+<div id="s-sync" class="screen">
+  <div class="topbar">
+    <div class="ibtn" onclick="go('s-settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg></div>
+    <h1>Canlı Takip</h1>
+    <div style="width:38px"></div>
+  </div>
+  <div class="scr-scroll" id="sync-content"></div>
+</div>
+
+<!-- MODAL: KİMLİK -->
+<div class="overlay" id="m-identity">
+  <div class="sheet">
+    <div class="mhandle"></div>
+    <div class="mtitle">Ben kimim?</div>
+    <div style="padding:0 18px 16px">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Bu cihazda senin oyuncunu seç. Koç analizleri ve tavsiyeler sana özel olacak.</p>
+      <div id="identity-list" class="idgrid"></div>
+      <div id="identity-empty" style="display:none;font-size:13px;color:var(--text3);padding:12px 0;text-align:center">Önce oyuncu ekle. (Ayarlar değil, Oyuncular sekmesi)</div>
+      <button class="btn btn-s" style="margin-top:16px" onclick="closeModal('m-identity')">Kapat</button>
+    </div>
+  </div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -464,14 +593,53 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="toast"></div>
 
 <script>
-// ─── DB ───────────────────────────────────────────────────────
-var DBKEY = 'okey_v2';
-function loadDB() {
-  try { return JSON.parse(localStorage.getItem(DBKEY)) || {players:[],games:[]}; }
-  catch(e) { return {players:[],games:[]}; }
+// ─── DB + DEPOLAMA ────────────────────────────────────────────
+var DBKEY   = 'okey_v2';     // ana veri (oyuncular + oyunlar)
+var SYNCKEY = 'okey_sync_v1';// firebase config + oda kodu
+var MEKEY   = 'okey_me_v1';  // bu cihazdaki kimlik (senkronlanmaz)
+var DEVKEY  = 'okey_dev_v1'; // cihaz kimliği
+
+function getDeviceId() {
+  var d = null;
+  try { d = localStorage.getItem(DEVKEY); } catch(e) {}
+  if (!d) { d = 'dev_' + Math.random().toString(36).slice(2,10); try { localStorage.setItem(DEVKEY, d); } catch(e) {} }
+  return d;
 }
-function saveDB() { localStorage.setItem(DBKEY, JSON.stringify(db)); }
+var DEVICE_ID = getDeviceId();
+
+function ensureShape(o) {
+  if (!o || typeof o !== 'object') o = {};
+  if (!Array.isArray(o.players)) o.players = [];
+  if (!Array.isArray(o.games)) o.games = [];
+  if (typeof o._rev !== 'number') o._rev = 0;
+  if (typeof o._updatedAt !== 'number') o._updatedAt = Date.now();
+  return o;
+}
+function loadDB() {
+  try { return ensureShape(JSON.parse(localStorage.getItem(DBKEY))); }
+  catch(e) { return ensureShape(null); }
+}
+// touchedId: değişen oyunun id'si (senkron çakışma çözümü için zaman damgası)
+function saveDB(touchedId) {
+  db._rev = (db._rev || 0) + 1;
+  db._updatedAt = Date.now();
+  db._editor = DEVICE_ID;
+  if (touchedId) { var g = db.games.find(function(x){return x.id===touchedId;}); if (g) g._uAt = Date.now(); }
+  try { localStorage.setItem(DBKEY, JSON.stringify(db)); } catch(e) {}
+  if (!APPLYING_REMOTE) pushSync();
+  markSyncUI();
+}
 var db = loadDB();
+
+// ─── SENKRON DURUMU ───────────────────────────────────────────
+var SYNC = { cfg:null, room:'', status:'off', fbRef:null, app:null, lastPush:0, pushTimer:null };
+var APPLYING_REMOTE = false;
+function loadSyncCfg() {
+  try { var s = JSON.parse(localStorage.getItem(SYNCKEY)); if (s && s.room) { SYNC.cfg = s.cfg; SYNC.room = s.room; } } catch(e) {}
+}
+function saveSyncCfg() {
+  try { localStorage.setItem(SYNCKEY, JSON.stringify({cfg:SYNC.cfg, room:SYNC.room})); } catch(e) {}
+}
 
 // ─── SETUP STATE ──────────────────────────────────────────────
 var SS = {
@@ -514,7 +682,7 @@ function gp(id) { return db.players.find(function(p) { return p.id === id; }); }
 function activeGame() { return db.games.find(function(g) { return g.status === 'active'; }); }
 
 // ─── NAVIGATION ───────────────────────────────────────────────
-var SCREENS = ['s-home','s-setup','s-live','s-history','s-players','s-pdetail','s-gdetail'];
+var SCREENS = ['s-home','s-setup','s-live','s-history','s-players','s-pdetail','s-gdetail','s-settings','s-sync'];
 var NAVMAP = {'s-home':'n-home','s-live':'n-live','s-history':'n-hist','s-players':'n-play'};
 function go(id) {
   SCREENS.forEach(function(s) { document.getElementById(s).classList.remove('active'); });
@@ -526,6 +694,8 @@ function go(id) {
   else if (id === 's-live') renderLive();
   else if (id === 's-history') renderHistory();
   else if (id === 's-players') renderPlayers();
+  else if (id === 's-settings') renderSettings();
+  else if (id === 's-sync') renderSync();
 }
 
 // ─── PENALTY LOGIC ────────────────────────────────────────────
@@ -737,7 +907,7 @@ function startGame() {
     rounds: []
   };
   db.games.push(game);
-  saveDB();
+  saveDB(game.id);
   SS.selPlayers = [];
   toast('Oyun başladı! 🎮');
   go('s-live');
@@ -772,6 +942,9 @@ function renderLive() {
   }
   document.getElementById('undo-btn').style.display = n > 0 ? 'flex' : 'none';
   buildTable(game, totals, ranks);
+  updateIdChip();
+  applyLiveTab();
+  if (LIVE_TAB === 'coach') renderCoach(game);
 }
 
 function buildTable(game, totals, ranks) {
@@ -984,7 +1157,7 @@ function submitRound() {
     endGame(game);
     return;
   }
-  saveDB();
+  saveDB(game.id);
   closeModal('m-round');
   renderLive();
   toast((game.rounds.length) + '. el kaydedildi!');
@@ -998,7 +1171,7 @@ function endGame(game) {
   game.finishedAt = new Date().toISOString();
   game.rankings = ranks;
   game.winnerId = ranks[0];
-  saveDB();
+  saveDB(game.id);
   if (game.settings.bill) showBillModal(game, totals, ranks);
   else showGameOverModal(game, totals, ranks);
 }
@@ -1083,7 +1256,7 @@ function showBillModal(game, totals, ranks) {
       var split = calcSplit(amt, selType, ranks, totals);
       var payerIds = Object.keys(split).filter(function(id) { return split[id] > 0; });
       game.bill = { totalAmount: amt, paymentType: selType, payerIds: payerIds, splitAmounts: split };
-      saveDB();
+      saveDB(game.id);
     }
     closeModal('m-gameover');
     document.getElementById('n-live').style.display = 'none';
@@ -1120,7 +1293,7 @@ function undoRound() {
   if (!game || game.rounds.length === 0) return;
   confirm2('Son eli geri al?', 'Son girilen el silinecek.', function() {
     game.rounds.pop();
-    saveDB();
+    saveDB(game.id);
     renderLive();
     toast('Son el geri alındı.');
   });
@@ -1128,7 +1301,7 @@ function undoRound() {
 function askEndGame() {
   confirm2('Oyunu bitir?', 'Oyun tamamlanmamış sayılacak.', function() {
     var game = activeGame();
-    if (game) { game.status = 'abandoned'; saveDB(); }
+    if (game) { game.status = 'abandoned'; saveDB(game.id); }
     document.getElementById('n-live').style.display = 'none';
     go('s-home');
     toast('Oyun sonlandırıldı.');
@@ -1393,10 +1566,532 @@ document.querySelectorAll('.overlay').forEach(function(o) {
 // ─── ENTER KEY ────────────────────────────────────────────────
 document.getElementById('p-inp').addEventListener('keydown', function(e) { if (e.key === 'Enter') savePlayer(); });
 
+// ═══════════════════════════════════════════════════════════════
+// CANLI SENKRON (Firebase Realtime Database)
+// ═══════════════════════════════════════════════════════════════
+function fbReady(){ return typeof firebase !== 'undefined' && firebase.initializeApp && firebase.database; }
+function normGame(g){ if(!g)return g; if(!Array.isArray(g.rounds))g.rounds=[]; if(!Array.isArray(g.playerIds))g.playerIds=[]; if(!g.settings)g.settings={}; return g; }
+function normDB(o){ o=ensureShape(o); o.games=o.games.map(normGame); o.players=o.players.filter(function(p){return p&&p.id;}); return o; }
+
+function connectSync(){
+  if (!SYNC.cfg || !SYNC.room){ SYNC.status='off'; markSyncUI(); return; }
+  if (!fbReady()){ SYNC.status='error'; markSyncUI(); return; }
+  try {
+    if (!SYNC.app){
+      try { SYNC.app = firebase.app('yazboz'); } catch(e){ SYNC.app = firebase.initializeApp(SYNC.cfg, 'yazboz'); }
+    }
+    var rtdb = SYNC.app.database();
+    var ref = rtdb.ref('yazboz_rooms/' + SYNC.room + '/state');
+    SYNC.fbRef = ref;
+    SYNC.status='connecting'; markSyncUI();
+    ref.off();
+    ref.on('value', function(snap){
+      var remote = snap.val();
+      if (remote && remote.data){ applyRemote(remote.data); SYNC.status='on'; }
+      else { pushSync(true); SYNC.status='on'; }
+      markSyncUI();
+    }, function(err){ SYNC.status='error'; markSyncUI(); });
+    rtdb.ref('.info/connected').on('value', function(s){
+      if (SYNC.status!=='error'){ SYNC.status = s.val() ? 'on' : 'connecting'; markSyncUI(); }
+    });
+  } catch(e){ SYNC.status='error'; markSyncUI(); }
+}
+function disconnectSync(){
+  try { if (SYNC.fbRef) SYNC.fbRef.off(); } catch(e){}
+  try { if (SYNC.app) SYNC.app.database().ref('.info/connected').off(); } catch(e){}
+  SYNC.fbRef=null; SYNC.cfg=null; SYNC.room=''; SYNC.status='off';
+  try { localStorage.removeItem(SYNCKEY); } catch(e){}
+  markSyncUI();
+}
+function pushSync(force){
+  if (!SYNC.fbRef) return;
+  if (SYNC.pushTimer) clearTimeout(SYNC.pushTimer);
+  SYNC.pushTimer = setTimeout(function(){
+    if (!SYNC.fbRef) return;
+    try {
+      var clean = JSON.parse(JSON.stringify({ data: db, at: Date.now(), by: DEVICE_ID }));
+      SYNC.fbRef.set(clean);
+    } catch(e){}
+  }, force ? 0 : 350);
+}
+function stripMeta(o){
+  return JSON.stringify({
+    players:(o.players||[]).map(function(p){return {id:p.id,name:p.name};}),
+    games:(o.games||[]).map(function(g){ return {id:g.id,status:g.status,rounds:(g.rounds||[]).length,bill:!!g.bill,winnerId:g.winnerId}; })
+  });
+}
+function applyRemote(remote){
+  remote = normDB(remote);
+  var merged = mergeDB(db, remote);
+  var sameAsLocal = stripMeta(merged) === stripMeta(db) && merged._rev <= db._rev;
+  if (sameAsLocal) return;
+  APPLYING_REMOTE = true;
+  db = merged;
+  try { localStorage.setItem(DBKEY, JSON.stringify(db)); } catch(e){}
+  APPLYING_REMOTE = false;
+  // birleşmede yerelde fazladan bilgi varsa buluta yükle (yayılım)
+  if (stripMeta(merged) !== stripMeta(remote)) pushSync();
+  refreshActive();
+}
+function mergeDB(local, remote){
+  local=normDB(local); remote=normDB(remote);
+  var preferRemote = (remote._rev||0) >= (local._rev||0);
+  var pmap={};
+  (preferRemote?local.players:remote.players).forEach(function(p){ if(p&&p.id) pmap[p.id]=p; });
+  (preferRemote?remote.players:local.players).forEach(function(p){ if(p&&p.id) pmap[p.id]=p; });
+  var gmap={};
+  function consider(g){
+    if(!g||!g.id) return; g=normGame(g);
+    var ex=gmap[g.id];
+    if(!ex){ gmap[g.id]=g; return; }
+    var ta=g._uAt||0, tb=ex._uAt||0, na=g.rounds.length, nb=ex.rounds.length, win=false;
+    if (ta!==tb) win=ta>tb;
+    else if (g.status!=='active' && ex.status==='active') win=true;
+    else if (na!==nb) win=na>nb;
+    if (win) gmap[g.id]=g;
+  }
+  local.games.forEach(consider); remote.games.forEach(consider);
+  return normDB({
+    players:Object.keys(pmap).map(function(k){return pmap[k];}),
+    games:Object.keys(gmap).map(function(k){return gmap[k];}),
+    _rev:Math.max(local._rev||0, remote._rev||0),
+    _updatedAt:Math.max(local._updatedAt||0, remote._updatedAt||0)
+  });
+}
+function refreshActive(){
+  var act=document.querySelector('.screen.active'); if(!act) return;
+  var id=act.id;
+  var roundOpen=document.getElementById('m-round').classList.contains('open');
+  var playerOpen=document.getElementById('m-player').classList.contains('open');
+  if(id==='s-home') renderHome();
+  else if(id==='s-live'){ if(!roundOpen) renderLive(); }
+  else if(id==='s-history') renderHistory();
+  else if(id==='s-players'){ if(!playerOpen) renderPlayers(); }
+  else if(id==='s-settings') renderSettings();
+  else if(id==='s-sync') renderSync();
+  document.getElementById('n-live').style.display = activeGame()? 'flex':'none';
+}
+function markSyncUI(){
+  var dot=document.getElementById('topbar-syncdot');
+  if(dot){
+    dot.className='syncdot'+(SYNC.status==='on'?' on':SYNC.status==='error'?' err':'');
+    dot.style.display = (SYNC.status==='off')?'none':'block';
+  }
+  var sset=document.getElementById('s-settings');
+  if(sset && sset.classList.contains('active')){
+    var ss=document.getElementById('set-sync-sub'), sd=document.getElementById('set-syncdot');
+    if(ss&&sd){
+      if(SYNC.status==='on'){ ss.textContent='Açık · Oda: '+SYNC.room; sd.className='syncdot on'; }
+      else if(SYNC.status==='connecting'){ ss.textContent='Bağlanıyor… · Oda: '+SYNC.room; sd.className='syncdot'; }
+      else if(SYNC.status==='error'){ ss.textContent='Bağlantı hatası — ayarları kontrol et'; sd.className='syncdot err'; }
+      else { ss.textContent='Kapalı — sadece bu cihaz'; sd.className='syncdot'; }
+    }
+  }
+}
+
+// ─── SENKRON EKRANI ───────────────────────────────────────────
+function renderSync(){
+  var el=document.getElementById('sync-content');
+  var connected = (SYNC.cfg && SYNC.room);
+  el.innerHTML = connected ? syncConnectedView() : syncSetupView();
+}
+function syncConnectedView(){
+  var dotcls = SYNC.status==='on'?'syncdot on':SYNC.status==='error'?'syncdot err':'syncdot';
+  var stxt = SYNC.status==='on'?'Bağlı · canlı':SYNC.status==='connecting'?'Bağlanıyor…':SYNC.status==='error'?'Bağlantı hatası':'Kapalı';
+  var h='<div style="padding:16px">';
+  h+='<div class="card" style="margin:0 0 12px;display:flex;align-items:center;gap:12px">';
+  h+='<span class="'+dotcls+'" style="width:12px;height:12px"></span>';
+  h+='<div style="flex:1"><div style="font-size:15px;font-weight:800">'+stxt+'</div><div style="font-size:12px;color:var(--text3)">Oda: <b style="color:var(--text2)">'+SYNC.room+'</b></div></div>';
+  if(SYNC.status==='error') h+='<button class="btn btn-s btn-sm" onclick="connectSync()">Tekrar Dene</button>';
+  h+='</div>';
+  h+='<p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px">Bu odadaki herkes aynı veriyi canlı görür. Biri el girince diğerlerinin ekranı anında güncellenir.</p>';
+  h+='<div class="ilbl">Arkadaşlarını davet et</div>';
+  h+='<p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px">Linki gönder. Açan kişi tek dokunuşla bu odaya bağlanır — Firebase kurmasına gerek yok.</p>';
+  h+='<button class="btn btn-g" onclick="copyJoinLink()" style="margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Davet Linkini Kopyala</button>';
+  h+='<button class="btn btn-d" onclick="askDisconnect()">Senkronu Kapat</button>';
+  h+='<p style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">Kapatsan bile veriler bu cihazda kalır.</p>';
+  h+='</div>';
+  return h;
+}
+function syncSetupView(){
+  var h='<div style="padding:16px">';
+  h+='<div class="hero" style="margin:0 0 16px"><h2 style="font-size:18px;font-weight:900;margin-bottom:4px">☁️ Canlı Takip</h2><p style="font-size:13px;color:var(--text2);line-height:1.5">Tüm telefonlar aynı oyunu canlı görsün. Biri el girince hepsinde anında görünür. Ücretsiz Firebase ile çalışır.</p></div>';
+  if(SYNC.status==='error') h+='<div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:14px;line-height:1.5">Bağlanılamadı. Config veya Realtime Database kuralları yanlış olabilir; adımları kontrol et.</div>';
+  h+='<div class="ilbl">1 · Firebase Config</div>';
+  h+='<p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Firebase projenden aldığın config nesnesini yapıştır (apiKey, databaseURL içeren süslü parantezli kısım).</p>';
+  h+='<textarea class="inp" id="sync-cfg" rows="7" placeholder=\'{ "apiKey": "...", "databaseURL": "https://...firebaseio.com", "projectId": "..." }\' style="font-family:var(--mono);font-size:12px;resize:vertical"></textarea>';
+  h+='<div class="ilbl" style="margin-top:14px">2 · Oda Kodu</div>';
+  h+='<p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Arkadaşlarınla aynı kodu kullanın. Aynı oda = aynı veri.</p>';
+  h+='<input class="inp" id="sync-room" placeholder="kanka-okey" autocomplete="off" autocapitalize="off">';
+  h+='<button class="btn btn-g" style="margin-top:16px" onclick="doConnect()">Bağlan ve Senkronla</button>';
+  h+='<div class="sec" style="padding:20px 0 8px">Firebase nasıl kurulur? (tek seferlik ~3 dk)</div>';
+  h+='<div class="card" style="margin:0"><div class="steplist">';
+  h+=step('<b>console.firebase.google.com</b> adresine gir, Google hesabınla giriş yap.');
+  h+=step('<b>Add project</b> → isim ver → oluştur (Analytics\'i kapatabilirsin).');
+  h+=step('Sol menü <b>Build → Realtime Database</b> → <b>Create Database</b> → bölge seç → <b>Test mode</b> ile başlat.');
+  h+=step('Sol üst <b>⚙️ Project settings</b> → <b>Your apps</b> → <b>Web (&lt;/&gt;)</b> simgesine bas, uygulama ekle.');
+  h+=step('Çıkan koddaki <b>firebaseConfig = { ... }</b> süslü parantezli nesneyi kopyala, yukarı yapıştır.');
+  h+=step('Oda kodu yaz, <b>Bağlan</b>\'a bas; sonra <b>Davet Linki</b>\'ni arkadaşlarına gönder.');
+  h+='</div></div>';
+  h+='<div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:11px;color:var(--amber);margin-top:14px;line-height:1.5">⚠️ Test mode 30 gün açıktır. Uzun süreli kullanım için Realtime Database → Rules kısmından kuralları düzenle.</div>';
+  h+='</div>';
+  return h;
+}
+function step(t){ return '<div class="stepitem"><div class="stepnum"></div><div class="steptxt">'+t+'</div></div>'; }
+function parseFirebaseConfig(raw){
+  var m=raw.match(/\{[\s\S]*\}/); if(!m) return null;
+  var body=m[0];
+  try { return JSON.parse(body); } catch(e){}
+  try { return (new Function('return ('+body+')'))(); } catch(e){}
+  return null;
+}
+window.doConnect=function(){
+  var raw=document.getElementById('sync-cfg').value.trim();
+  var room=document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'-').replace(/^-+|-+$/g,'');
+  if(!raw){ toast('Firebase config yapıştır.'); return; }
+  if(!room){ toast('Oda kodu gir.'); return; }
+  var cfg=parseFirebaseConfig(raw);
+  if(!cfg){ toast('Config okunamadı. Süslü parantezli nesneyi yapıştır.'); return; }
+  if(!cfg.databaseURL){ toast('Config\'de databaseURL yok — Realtime Database oluşturdun mu?'); return; }
+  if(!fbReady()){ toast('Firebase yüklenemedi. İnternet bağlantını kontrol et.'); return; }
+  SYNC.cfg=cfg; SYNC.room=room; saveSyncCfg();
+  if(SYNC.app){ try{ SYNC.app.delete(); }catch(e){} SYNC.app=null; }
+  connectSync(); toast('Bağlanıyor…');
+  setTimeout(renderSync, 500);
+};
+window.askDisconnect=function(){ confirm2('Senkronu kapat?', 'Bu cihaz buluttan ayrılır; veriler cihazda kalır.', function(){ disconnectSync(); toast('Senkron kapatıldı.'); renderSync(); }); };
+function buildJoinLink(){
+  var payload={ cfg:SYNC.cfg, room:SYNC.room }, b64='';
+  try { b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); } catch(e){}
+  return location.href.split('#')[0]+'#join='+b64;
+}
+window.copyJoinLink=function(){ copyText(buildJoinLink(),'Davet linki kopyalandı 🔗'); };
+function copyText(txt, okMsg){
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){toast(okMsg||'Kopyalandı ✓');}, function(){fallbackCopy(txt,okMsg);});
+  else fallbackCopy(txt,okMsg);
+}
+function fallbackCopy(txt,okMsg){
+  var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); toast(okMsg||'Kopyalandı ✓'); }catch(e){ toast('Kopyalanamadı — linki elle seç.'); }
+  document.body.removeChild(ta);
+}
+function handleJoinHash(){
+  var h=location.hash||''; var m=h.match(/join=([^&]+)/); if(!m) return false;
+  var payload=null;
+  try { payload=JSON.parse(decodeURIComponent(escape(atob(m[1])))); } catch(e){}
+  try { history.replaceState(null,'',location.href.split('#')[0]); } catch(e){}
+  if(!payload || !payload.cfg || !payload.room) return false;
+  confirm2('Odaya bağlan?', '"'+payload.room+'" odasına bağlanıp verileri canlı paylaşmak ister misin?', function(){
+    SYNC.cfg=payload.cfg; SYNC.room=payload.room; saveSyncCfg();
+    connectSync(); toast('"'+payload.room+'" odasına bağlanılıyor…'); go('s-settings');
+  });
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KİMLİK (Ben kimim?)
+// ═══════════════════════════════════════════════════════════════
+function getMyId(){ try{ return localStorage.getItem(MEKEY)||null; }catch(e){ return null; } }
+function setMyId(id){ try{ localStorage.setItem(MEKEY, id); }catch(e){} }
+function identityPool(){
+  var ag=activeGame();
+  if(ag) return ag.playerIds.map(function(id){return gp(id);}).filter(Boolean);
+  return db.players.slice();
+}
+function openIdentity(){ renderIdentityList(); openModal('m-identity'); }
+function renderIdentityList(){
+  var pool=identityPool(), listEl=document.getElementById('identity-list'), emptyEl=document.getElementById('identity-empty');
+  if(pool.length===0){ listEl.innerHTML=''; emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+  var me=getMyId(), html='';
+  pool.forEach(function(p){
+    var idx=db.players.findIndex(function(x){return x.id===p.id;});
+    var on=me===p.id?' on':'';
+    html+='<div class="idcard'+on+'" onclick="setIdentity(\''+p.id+'\')">';
+    html+='<div class="av '+avc(idx<0?0:idx)+'" style="width:44px;height:44px;font-size:15px;margin:0 auto 8px">'+ini(p.name)+'</div>';
+    html+='<div style="font-size:13px;font-weight:700">'+p.name+'</div>';
+    if(on) html+='<div style="font-size:10px;color:var(--green);margin-top:2px">✓ Bu benim</div>';
+    html+='</div>';
+  });
+  listEl.innerHTML=html;
+}
+function setIdentity(id){
+  setMyId(id); var p=gp(id);
+  toast((p?p.name:'Kimlik')+' olarak ayarlandı 👤');
+  closeModal('m-identity'); updateIdChip();
+  var ag=activeGame();
+  if(ag && document.getElementById('s-live').classList.contains('active') && LIVE_TAB==='coach') renderCoach(ag);
+  if(document.getElementById('s-settings').classList.contains('active')) renderSettings();
+}
+function updateIdChip(){
+  var me=getMyId(), p=me?gp(me):null;
+  var nameEl=document.getElementById('lv-id-name'), avEl=document.getElementById('lv-id-av');
+  if(!nameEl||!avEl) return;
+  avEl.style.width='24px'; avEl.style.height='24px'; avEl.style.fontSize='9px';
+  if(p){
+    var idx=db.players.findIndex(function(x){return x.id===p.id;});
+    nameEl.textContent='Ben: '+p.name; avEl.textContent=ini(p.name); avEl.className='av '+avc(idx<0?0:idx);
+  } else { nameEl.textContent='Ben kimim? →'; avEl.textContent='?'; avEl.className='av av0'; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KOÇ / ANALİZ
+// ═══════════════════════════════════════════════════════════════
+var LIVE_TAB='table';
+function applyLiveTab(){
+  var t=document.getElementById('seg-tbl'), c=document.getElementById('seg-coach');
+  var tv=document.getElementById('lv-table'), cv=document.getElementById('lv-coach');
+  if(t) t.classList.toggle('on', LIVE_TAB==='table');
+  if(c) c.classList.toggle('on', LIVE_TAB==='coach');
+  if(tv) tv.style.display = LIVE_TAB==='table'?'block':'none';
+  if(cv) cv.style.display = LIVE_TAB==='coach'?'block':'none';
+}
+function setLiveTab(t){
+  LIVE_TAB=t; applyLiveTab();
+  var g=activeGame(); if(!g) return;
+  if(t==='coach') renderCoach(g);
+  else { var tot=calcTotals(g); buildTable(g,tot,getRankings(tot)); }
+}
+function penaltyPool(game){
+  var pool=[];
+  game.rounds.forEach(function(r){ r.scores.forEach(function(s){ if(s.pid!==r.finId && s.final>=0 && s.final<101) pool.push(s.final); }); });
+  return pool;
+}
+function estimateSwing(game){
+  var pool=penaltyPool(game).filter(function(v){return v>0;});
+  if(pool.length===0) return null;
+  return pool.reduce(function(a,b){return a+b;},0)/pool.length;
+}
+function roundsLeft(game){
+  var s=game.settings;
+  if(s.endCond==='set_count') return Math.max(0, s.setCnt - game.rounds.length);
+  return null;
+}
+function simulateWinChances(game, trials){
+  trials=trials||3000;
+  var s=game.settings, players=game.playerIds.slice(), n=players.length, base=calcTotals(game);
+  var pool=penaltyPool(game); if(pool.length<3) pool=[0,0,5,10,10,15,20,20,25,30,40,50];
+  var setLeft=(s.endCond==='set_count')?Math.max(0,s.setCnt-game.rounds.length):null;
+  var wins={}; players.forEach(function(p){wins[p]=0;});
+  var samp=function(){ return pool[(Math.random()*pool.length)|0]; };
+  if(n===0) return wins;
+  if(setLeft===0){ // oyun bitmiş gibi: mevcut lider %100
+    var rk=getRankings(base); wins[rk[0]]=trials;
+    var r={}; players.forEach(function(p){r[p]=wins[p]/trials;}); return r;
+  }
+  for(var t=0;t<trials;t++){
+    var tot={}; players.forEach(function(p){tot[p]=base[p]||0;});
+    var played=0, guard=0;
+    while(true){
+      if(setLeft!==null){ if(played>=setLeft) break; }
+      else { var mx=-1e9; players.forEach(function(p){ if(tot[p]>mx)mx=tot[p]; }); if(mx>=s.penLimit) break; if(guard++>80) break; }
+      var fin=players[(Math.random()*n)|0];
+      var okey=Math.random()<0.08;
+      players.forEach(function(p){ if(p===fin){ tot[p]+= okey?-101:0; } else { tot[p]+=samp(); } });
+      played++;
+      if(setLeft!==null && played>=setLeft) break;
+    }
+    var best=null, bestV=1e9;
+    players.forEach(function(p){ if(tot[p]<bestV){bestV=tot[p]; best=p;} });
+    if(best) wins[best]++;
+  }
+  var res={}; players.forEach(function(p){ res[p]=wins[p]/trials; }); return res;
+}
+function analyzePosition(game, myId){
+  var totals=calcTotals(game), ranks=getRankings(totals), n=game.playerIds.length, s=game.settings;
+  var myTotal=totals[myId]||0, myRank=ranks.indexOf(myId);
+  var leaderId=ranks[0], leaderTotal=totals[leaderId]||0;
+  var rl=roundsLeft(game), swing=estimateSwing(game), swingDisp=swing?Math.round(swing):20;
+  var gapToLeader=myTotal-leaderTotal;
+  var leadBehind=myRank<n-1?((totals[ranks[myRank+1]]||0)-myTotal):null;
+  var maxTotal=Math.max.apply(null,[0].concat(game.playerIds.map(function(p){return totals[p]||0;})));
+  var toLimit=s.endCond==='penalty_limit'?(s.penLimit-maxTotal):null;
+  var iAmLimitRisk=s.endCond==='penalty_limit'&&(s.penLimit-myTotal)<=swingDisp*1.5;
+  return { totals:totals, ranks:ranks, n:n, s:s, myTotal:myTotal, myRank:myRank, leaderId:leaderId, leaderTotal:leaderTotal,
+    roundsLeft:rl, swing:swingDisp, gapToLeader:gapToLeader, leadBehind:leadBehind, toLimit:toLimit,
+    iAmLeader:myRank===0, iAmLast:myRank===n-1, iAmLimitRisk:iAmLimitRisk };
+}
+function renderCoach(game){
+  var el=document.getElementById('lv-coach'); if(!el) return;
+  var myId=getMyId(); if(myId && game.playerIds.indexOf(myId)===-1) myId=null;
+  if(!myId){ el.innerHTML=coachNoIdentity(game); return; }
+  var A=analyzePosition(game, myId), win=simulateWinChances(game), myWin=Math.round((win[myId]||0)*100);
+  var mood=A.iAmLeader?'':(A.iAmLimitRisk?'danger':(myWin<20?'warn':''));
+  var emoji=A.iAmLeader?'🥇':myWin>=50?'🔥':myWin>=25?'💪':A.iAmLimitRisk?'⚠️':'🎯';
+  var headline=A.iAmLeader?'Öndesin!':myWin>=50?'Favorisin!':myWin>=25?'Yarıştasın':A.iAmLimitRisk?'Dikkat!':'Geriden geliyorsun';
+  var col=myWin>=50?'var(--green)':myWin>=25?'var(--amber)':'var(--red)';
+  var html='';
+  html+='<div class="coachhero '+mood+'"><div style="font-size:34px;margin-bottom:2px">'+emoji+'</div>';
+  html+='<div class="winpct" style="color:'+col+'">%'+myWin+'</div>';
+  html+='<div style="font-size:13px;color:var(--text2);font-weight:700;margin-top:4px">kazanma ihtimalin · '+headline+'</div>';
+  html+='<div style="font-size:11px;color:var(--text3);margin-top:6px">'+A.n+' kişilik oyunda eşit şans %'+Math.round(100/A.n)+' · 3000 simülasyon</div></div>';
+  html+=targetCards(A);
+  html+='<div class="coachadvice"><h4>🎮 Nasıl oynamalısın</h4>';
+  strategyAdvice(A).forEach(function(a){ html+='<div class="cadv"><span class="ci">'+a.i+'</span><div>'+a.t+'</div></div>'; });
+  html+='</div>';
+  html+='<div class="sec">Herkesin Durumu</div>'+comparisonRows(game, A, win, myId);
+  var threat=biggestThreat(A, win, myId);
+  if(threat){ html+='<div class="coachadvice" style="margin-top:12px"><h4>⚔️ En büyük rakibin</h4><div class="cadv"><span class="ci">👤</span><div>'+threat+'</div></div></div>'; }
+  html+='<div style="height:16px"></div>';
+  el.innerHTML=html;
+}
+function targetCards(A){
+  var html='<div class="targetbox">';
+  if(A.iAmLeader){
+    var lead=A.leadBehind!=null?A.leadBehind:0;
+    html+='<div class="tbx"><div class="tv" style="color:var(--green)">+'+lead+'</div><div class="tl">takipçine fark<br>(korumalısın)</div></div>';
+    if(A.roundsLeft!==null) html+='<div class="tbx"><div class="tv">'+A.roundsLeft+'</div><div class="tl">el kaldı<br>temiz bitir</div></div>';
+    else html+='<div class="tbx"><div class="tv">'+(A.toLimit!=null?A.toLimit:'-')+'</div><div class="tl">puan sonra<br>oyun biter</div></div>';
+  } else {
+    var pts=A.gapToLeader, handsNorm=Math.max(1,Math.ceil(pts/Math.max(1,A.swing)));
+    html+='<div class="tbx"><div class="tv" style="color:var(--red)">'+pts+'</div><div class="tl">puan açığın<br>lidere</div></div>';
+    html+='<div class="tbx"><div class="tv">'+handsNorm+'</div><div class="tl">el kazanman<br>gerek (normal)</div></div>';
+  }
+  html+='</div>';
+  if(!A.iAmLeader){
+    var perRound=A.roundsLeft?Math.ceil(A.gapToLeader/Math.max(1,A.roundsLeft)):null;
+    html+='<div style="padding:8px 16px 0;font-size:12px;color:var(--text3);line-height:1.6">';
+    if(A.roundsLeft!==null && A.roundsLeft>0) html+='Kalan <b style="color:var(--text2)">'+A.roundsLeft+'</b> elde, el başına ortalama <b style="color:var(--text2)">~'+perRound+'</b> puan kazanmalısın. ';
+    html+='Okey atarsan (−101) tek elde büyük sıçrama: ~<b style="color:var(--text2)">'+Math.max(1,Math.ceil(A.gapToLeader/101))+'</b> okey yeter.';
+    html+='</div>';
+  }
+  return html;
+}
+function strategyAdvice(A){
+  var out=[], s=A.s;
+  if(A.iAmLeader){
+    out.push({i:'🛡️', t:'<b>Güvenli oyna.</b> Öndesin, riske girme. Eli temiz bitirip 0 almaya odaklan, ceza biriktirme.'});
+    out.push({i:'🚫', t:'Gereksiz <b>çift açma / elden bitirme</b> denemelerine girme; tutmazsa elinde yüksek ceza kalır.'});
+    out.push({i:'👀', t:'Rakiplerin yüksek puan toplamasını bekle. Sen sabit kaldıkça fark açılır.'});
+    if(s.endCond==='penalty_limit') out.push({i:'🎯', t:'Bir rakip baraja yaklaşınca oyun biter; o an en düşük sen olmalısın. Aceleci kapanış yapma.'});
+  } else if(A.gapToLeader<=A.swing){
+    out.push({i:'🔥', t:'<b>Lidere çok yakınsın</b> ('+A.gapToLeader+' puan). Tek iyi el seni öne geçirir.'});
+    out.push({i:'🎯', t:'<b>Okey atmayı</b> hedefle — bitirene −101, doğrudan lider olursun.'});
+    out.push({i:'✌️', t:'Diğerlerinde puan birikmişse <b>çift açarak / elden bitirerek</b> 2x ceza yükle, aranı aç.'});
+  } else if(A.iAmLast || (A.roundsLeft!=null && A.gapToLeader > A.roundsLeft*A.swing)){
+    out.push({i:'⚡', t:'<b>Agresif oyna.</b> Açığın büyük ('+A.gapToLeader+' puan); normal bitişle yetişmek zor.'});
+    out.push({i:'🎯', t:'<b>Okey atmaya</b> oyna (−101). Tek okey birkaç normal eli telafi eder.'});
+    out.push({i:'✌️', t:'<b>Çift açma / elden bitirme</b> ile rakiplere 2x ceza yaz — fark hızlı kapanır.'});
+    out.push({i:'❌', t:'<b>Yanlış açmaktan kaçın!</b> +101 sabit ceza seni tamamen gömer.'});
+  } else {
+    out.push({i:'⚖️', t:'<b>Dengeli oyna.</b> Lidere '+A.gapToLeader+' puan açığın var, ulaşılabilir mesafe.'});
+    out.push({i:'🎯', t:'Fırsat görürsen <b>okey at</b>; göremezsen eli temiz bitirip 0 al, ceza yeme.'});
+    if(A.leadBehind!=null) out.push({i:'👇', t:'Arkandakini izle: sana <b>'+A.leadBehind+'</b> puan yakın. Yüksek ceza yersen sıra değişir.'});
+  }
+  if(A.iAmLimitRisk) out.unshift({i:'⚠️', t:'<b>Baraja çok yakınsın!</b> Limite '+A.toLimit+' puan kaldı. Bu el yüksek ceza yeme, elenebilirsin.'});
+  return out;
+}
+function comparisonRows(game, A, win, myId){
+  var totals=A.totals, ranks=A.ranks, n=A.n, s=A.s, html='', icons=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+  ranks.forEach(function(pid,i){
+    var p=gp(pid), idx=db.players.findIndex(function(x){return x.id===pid;});
+    var tot=totals[pid]||0, wp=Math.round((win[pid]||0)*100), isMe=pid===myId, status='';
+    if(i===0) status='<span class="bdg bdg-g">Lider</span>';
+    else if(i===n-1) status='<span class="bdg bdg-r">Sonuncu</span>';
+    else status='<span class="bdg bdg-b">'+(i+1)+'.</span>';
+    if(s.endCond==='penalty_limit' && (s.penLimit-tot)<=A.swing*1.5) status+=' <span class="bdg bdg-a">⚠️ baraj</span>';
+    var barCol=wp>=40?'var(--green)':wp>=20?'var(--amber)':'var(--red)';
+    html+='<div class="cmprow'+(isMe?' me':'')+'">';
+    html+='<span style="font-size:15px;width:18px;text-align:center;flex-shrink:0">'+(icons[i]||'·')+'</span>';
+    html+='<div class="av '+avc(idx<0?0:idx)+'" style="width:30px;height:30px;font-size:10px">'+ini(p?p.name:'?')+'</div>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">'+(p?p.name:'?')+(isMe?' (sen)':'')+'</span>'+status+'</div>';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-top:5px"><div class="cmpbar"><div class="cmpfill" style="width:'+Math.max(4,wp)+'%;background:'+barCol+'"></div></div><span style="font-size:11px;font-family:var(--mono);color:var(--text3);white-space:nowrap">%'+wp+'</span></div>';
+    html+='</div>';
+    html+='<div style="text-align:right;flex-shrink:0"><div style="font-family:var(--mono);font-size:16px;font-weight:800;color:'+(tot<0?'var(--green)':'var(--text)')+'">'+tot+'</div><div style="font-size:9px;color:var(--text3)">puan</div></div>';
+    html+='</div>';
+  });
+  return '<div>'+html+'</div>';
+}
+function biggestThreat(A, win, myId){
+  var totals=A.totals, ranks=A.ranks;
+  if(A.iAmLeader){
+    var chaser=ranks[1]; if(!chaser) return null;
+    var p=gp(chaser), gap=(totals[chaser]||0)-A.myTotal;
+    return '<b>'+(p?p.name:'?')+'</b> '+gap+' puan geride, %'+Math.round((win[chaser]||0)*100)+' şansı var. Onu yaklaştıracak yüksek cezalardan kaçın.';
+  } else {
+    var p2=gp(A.leaderId);
+    return '<b>'+(p2?p2.name:'?')+'</b> lider ('+A.leaderTotal+' puan, %'+Math.round((win[A.leaderId]||0)*100)+'). Geçmek için '+A.gapToLeader+' puan kapatmalısın.';
+  }
+}
+function coachNoIdentity(game){
+  var h='<div class="coachhero warn"><div style="font-size:34px;margin-bottom:6px">👤</div>';
+  h+='<div style="font-size:18px;font-weight:800">Önce kim olduğunu seç</div>';
+  h+='<div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5">Koç sana özel analiz yapsın diye bu cihazda hangi oyuncu olduğunu bilmeli.</div>';
+  h+='<button class="btn btn-g" style="margin-top:14px;width:auto;display:inline-flex;padding:11px 22px" onclick="openIdentity()">Ben kimim? Seç</button></div>';
+  var win=simulateWinChances(game), totals=calcTotals(game), ranks=getRankings(totals);
+  h+='<div class="sec">Herkesin Kazanma Şansı</div>';
+  var A={totals:totals,ranks:ranks,n:game.playerIds.length,s:game.settings,swing:estimateSwing(game)||20,myTotal:-99999,leaderId:ranks[0],leaderTotal:totals[ranks[0]]||0};
+  h+=comparisonRows(game, A, win, null);
+  h+='<div style="height:16px"></div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AYARLAR + YEDEK
+// ═══════════════════════════════════════════════════════════════
+function renderSettings(){
+  var me=getMyId(), p=me?gp(me):null;
+  document.getElementById('set-id-sub').textContent = p? p.name : 'Henüz seçilmedi';
+  markSyncUI();
+  renderDataInfo();
+}
+function renderDataInfo(){
+  var finished=db.games.filter(function(g){return g.status==='finished';}).length;
+  var el=document.getElementById('set-datainfo'); if(!el) return;
+  el.innerHTML='<div class="card" style="margin-top:4px">'
+    +'<div class="srow"><span class="slbl">Kayıtlı oyuncu</span><span class="sval">'+db.players.length+'</span></div>'
+    +'<div class="srow"><span class="slbl">Tamamlanan oyun</span><span class="sval">'+finished+'</span></div>'
+    +'<div class="srow"><span class="slbl">Toplam kayıt</span><span class="sval">'+db.games.length+'</span></div>'
+    +'<div class="srow" style="border:none"><span class="slbl">Son değişiklik</span><span class="sval" style="font-size:12px">'+(db._updatedAt?new Date(db._updatedAt).toLocaleString('tr-TR'):'-')+'</span></div></div>';
+}
+function exportData(){
+  var payload={ app:'yazboz-101okey', version:2, exportedAt:new Date().toISOString(), data:{players:db.players, games:db.games} };
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download='yazboz-yedek-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },100);
+  toast('Yedek indirildi 💾');
+}
+function importData(ev){
+  var file=ev.target.files&&ev.target.files[0]; if(!file) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var obj=JSON.parse(rd.result), inc=obj.data?obj.data:obj;
+      if(!inc || !Array.isArray(inc.players) || !Array.isArray(inc.games)) throw new Error('format');
+      confirm2('Yedeği yükle?', 'Mevcut verilerle birleştirilecek. Çakışmada en güncel kayıt kalır, hiçbir şey silinmez.', function(){
+        db=mergeDB(db, normDB({players:inc.players, games:inc.games, _rev:(db._rev||0)+1}));
+        saveDB(); toast('Yedek yüklendi ✓'); renderSettings();
+      });
+    }catch(e){ toast('Geçersiz yedek dosyası ✗'); }
+    ev.target.value='';
+  };
+  rd.readAsText(file);
+}
+function askWipe(){
+  confirm2('Tüm verileri sil?', 'Tüm oyuncular, oyunlar ve geçmiş bu cihazdan kalıcı silinir. Geri alınamaz! (Senkron açıksa diğer cihazlardan veri geri gelebilir.)', function(){
+    db=normDB({players:[],games:[]}); saveDB();
+    try{ localStorage.removeItem(MEKEY); }catch(e){}
+    toast('Tüm veriler silindi.'); go('s-home');
+  });
+}
+
 // ─── INIT ─────────────────────────────────────────────────────
 (function() {
+  loadSyncCfg();
   if (activeGame()) document.getElementById('n-live').style.display = 'flex';
+  updateIdChip();
   renderHome();
+  window.addEventListener('load', function(){
+    var joining=handleJoinHash();
+    if(!joining && SYNC.cfg && SYNC.room) connectSync();
+    markSyncUI();
+  });
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && SYNC.cfg && SYNC.room && SYNC.status!=='on') connectSync();
+  });
 })();
 </script>
 </body>
