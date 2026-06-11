@@ -301,7 +301,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="pill" id="b-ozel" onclick="setBaraj('ozel')">Özel</div>
       </div>
       <div id="b-ozel-wrap" style="display:none;margin-top:10px">
-        <input class="inp" type="number" id="b-ozel-val" placeholder="Baraj puanı..." min="10" max="500">
+        <input class="inp" type="number" inputmode="numeric" id="b-ozel-val" placeholder="Baraj puanı..." min="10" max="500">
       </div>
     </div>
     <div class="ssec">
@@ -319,12 +319,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="pill" id="s-oz" onclick="setSetCnt('ozel')">Özel</div>
         </div>
         <div id="s-oz-wrap" style="display:none;margin-top:10px">
-          <input class="inp" type="number" id="s-oz-val" placeholder="Set sayısı..." min="1" max="100">
+          <input class="inp" type="number" inputmode="numeric" id="s-oz-val" placeholder="Set sayısı..." min="1" max="100">
         </div>
       </div>
       <div id="e-lim-cfg" style="display:none">
         <div class="ilbl">Eleme Puanı</div>
-        <input class="inp" type="number" id="e-lim-val" placeholder="Örn: 101" value="101" min="20">
+        <input class="inp" type="number" inputmode="numeric" id="e-lim-val" placeholder="Örn: 101" value="101" min="20">
       </div>
     </div>
     <div class="ssec">
@@ -533,27 +533,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="sheet">
     <div class="mhandle"></div>
     <div class="mtitle" id="m-round-title">El Girişi</div>
-    <div style="padding:0 18px 6px"><div class="ilbl">Bitiş Tipi</div></div>
-    <div class="ftgrid" id="ft-grid">
-      <div class="ftbtn on" data-ft="normal" onclick="selFT('normal')">
-        <div class="fticon">🃏</div><div class="ftlbl">Normal</div><div class="ftdesc">Standart bitiş</div>
-      </div>
-      <div class="ftbtn" data-ft="okey_throw" onclick="selFT('okey_throw')">
-        <div class="fticon">🎯</div><div class="ftlbl">Okey Attı</div><div class="ftdesc">Bitene -101 puan</div>
-      </div>
-      <div class="ftbtn" data-ft="double_open" onclick="selFT('double_open')">
-        <div class="fticon">✌️</div><div class="ftlbl">Çift Açtı</div><div class="ftdesc">Diğerlerine 2x ceza</div>
-      </div>
-      <div class="ftbtn" data-ft="hand_finish" onclick="selFT('hand_finish')">
-        <div class="fticon">✋</div><div class="ftlbl">Elden Bitti</div><div class="ftdesc">Diğerlerine 2x ceza</div>
-      </div>
-      <div class="ftbtn" data-ft="wrong_open" onclick="selFT('wrong_open')">
-        <div class="fticon">❌</div><div class="ftlbl">Yanlış Açtı</div><div class="ftdesc">+101 sabit ceza</div>
-      </div>
-    </div>
     <div id="fin-wrap" style="padding:0 18px 12px">
-      <div class="ilbl" id="fin-lbl">Eli Bitiren Oyuncu</div>
+      <div class="ilbl" id="fin-lbl">Eli Bitiren Oyuncu <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px">(opsiyonel)</span></div>
       <div id="fin-list"></div>
+    </div>
+    <!-- İLK AÇIŞ TAKİP -->
+    <div id="open-wrap" style="padding:0 18px 12px;border-top:1px solid var(--border);margin-top:4px">
+      <div class="ilbl" style="margin-top:10px">Bu Elde İlk Açış <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px">(opsiyonel)</span></div>
+      <div id="open-list"></div>
     </div>
     <div style="padding:0 18px 6px"><div class="ilbl" id="ri-lbl">Ceza Puanları</div></div>
     <div id="ri-list"></div>
@@ -653,7 +640,7 @@ var SS = {
 };
 
 // ─── ROUND MODAL STATE ────────────────────────────────────────
-var RS = { ft: 'normal', finId: null };
+var RS = { finId: null, openerId: null, openerScore: null };
 
 // ─── UTILS ────────────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -699,20 +686,9 @@ function go(id) {
 }
 
 // ─── PENALTY LOGIC ────────────────────────────────────────────
-function calcPenalties(rawScores, ft, finId) {
+function calcPenalties(rawScores, finId) {
   return rawScores.map(function(s) {
-    var fp = s.raw;
-    if (s.pid === finId) {
-      if (ft === 'okey_throw') fp = -101;
-      else if (ft === 'double_open') fp = 0;
-      else if (ft === 'hand_finish') fp = 0;
-      else if (ft === 'wrong_open') fp = 101;
-      else fp = 0; // normal: bitiren 0 alır
-    } else {
-      if (ft === 'double_open') fp = s.raw * 2;
-      else if (ft === 'hand_finish') fp = s.raw * 2;
-    }
-    return {pid: s.pid, raw: s.raw, final: fp};
+    return {pid: s.pid, raw: s.raw, final: (s.pid === finId) ? 0 : s.raw};
   });
 }
 
@@ -976,10 +952,7 @@ function buildTable(game, totals, ranks) {
       if (typeof v === 'number') { cls = v < 0 ? 'neg' : v > 50 ? 'hi' : ''; }
       var disp = v;
       if (r.finId === pid) {
-        if (r.ft === 'okey_throw') disp = '🎯';
-        else if (r.ft === 'double_open') disp = '✌' + v;
-        else if (r.ft === 'hand_finish') disp = '✋' + v;
-        else if (r.ft === 'wrong_open') disp = '❌' + v;
+        disp = (typeof v === 'number' && v === 0) ? '✓' : v;
       }
       html += '<td class="' + cls + '" style="font-size:11px">' + disp + '</td>';
     });
@@ -988,6 +961,20 @@ function buildTable(game, totals, ranks) {
     html += '</tr>';
   });
   html += '</tbody></table></div>';
+  // Açış durumu bandı
+  var currentOpener = getGameCurrentOpener(game);
+  if (currentOpener) {
+    var opP = gp(currentOpener.pid);
+    var opIdx = players.indexOf(currentOpener.pid);
+    html += '<div style="margin:4px 16px 8px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:8px 12px;font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px">';
+    html += '<div class="av ' + avc(opIdx<0?0:opIdx) + '" style="width:22px;height:22px;font-size:8px;flex-shrink:0">' + ini(opP?opP.name:'?') + '</div>';
+    if (s.gameType === 'katlamali') {
+      html += '🔓 <b>' + (opP?opP.name:'?') + '</b> ' + currentOpener.score + ' ile açıkta &mdash; katlamalı geçiş için >' + currentOpener.score + ' gerekli';
+    } else {
+      html += '🔓 <b>' + (opP?opP.name:'?') + '</b> ' + currentOpener.score + ' ile açtı';
+    }
+    html += '</div>';
+  }
   // Uyarı
   var maxTotal = Math.max.apply(null, [0].concat(Object.values(totals)));
   if (maxTotal >= s.baraj * 0.8 && maxTotal < s.baraj) {
@@ -1002,31 +989,20 @@ function buildTable(game, totals, ranks) {
 function openRoundModal() {
   var game = activeGame();
   if (!game) return;
-  RS = { ft: 'normal', finId: null };
+  RS = { finId: null, openerId: null, openerScore: null };
   document.getElementById('m-round-title').textContent = (game.rounds.length + 1) + '. El Girişi';
-  document.querySelectorAll('.ftbtn').forEach(function(b) { b.classList.toggle('on', b.dataset.ft === 'normal'); });
   buildFinList(game);
+  buildOpenList(game);
   buildRiList(game);
   openModal('m-round');
 }
 
-function selFT(ft) {
-  RS.ft = ft;
-  RS.finId = null;
-  document.querySelectorAll('.ftbtn').forEach(function(b) { b.classList.toggle('on', b.dataset.ft === ft); });
-  document.getElementById('fin-lbl').textContent = ft === 'normal' ? 'Eli Bitiren Oyuncu' : 'Bitişi Yapan Oyuncu';
-  var game = activeGame();
-  if (!game) return;
-  buildFinList(game);
-  buildRiList(game);
-  checkWarn(game);
-}
-
 function buildFinList(game) {
-  var html = '';
+  var html = '<div style="padding:6px 0 2px;font-size:12px;color:var(--text3)">Seçilmezse el "açılmamış" sayılır.</div>';
   game.playerIds.forEach(function(pid, i) {
     var p = gp(pid);
-    var chkCls = (RS.finId === pid) ? 'chkbox on' : 'chkbox';
+    var isOn = RS.finId === pid;
+    var chkCls = isOn ? 'chkbox on' : 'chkbox';
     html += '<div class="psrow" style="cursor:pointer" onclick="selFin(\'' + pid + '\')">';
     html += '<div class="' + chkCls + '" id="fc-' + pid + '">';
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20,6 9,17 4,12"/></svg>';
@@ -1039,43 +1015,77 @@ function buildFinList(game) {
 }
 
 function selFin(pid) {
-  RS.finId = pid;
+  RS.finId = (RS.finId === pid) ? null : pid; // toggle
   document.querySelectorAll('[id^="fc-"]').forEach(function(el) { el.classList.remove('on'); });
-  var fc = document.getElementById('fc-' + pid);
-  if (fc) fc.classList.add('on');
+  if (RS.finId) {
+    var fc = document.getElementById('fc-' + RS.finId);
+    if (fc) fc.classList.add('on');
+  }
   var game = activeGame();
   if (game) { buildRiList(game); checkWarn(game); }
 }
 
+function buildOpenList(game) {
+  var currentOpener = getGameCurrentOpener(game);
+  var html = '';
+  if (currentOpener) {
+    var cp = gp(currentOpener.pid);
+    var ci = game.playerIds.indexOf(currentOpener.pid);
+    html += '<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rsm);padding:8px 12px;font-size:12px;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:8px">';
+    html += '<div class="av ' + avc(ci<0?0:ci) + '" style="width:22px;height:22px;font-size:8px">' + ini(cp?cp.name:'?') + '</div>';
+    html += '✓ Açık: <b>' + (cp?cp.name:'?') + '</b> ' + currentOpener.score + ' puan ile açıkta</div>';
+  } else {
+    html += '<div style="font-size:12px;color:var(--text3);padding:2px 0 6px">Bu oyunda henüz kimse açmadı.</div>';
+  }
+  // Select opener
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+  game.playerIds.forEach(function(pid, i) {
+    var p = gp(pid);
+    var isOn = RS.openerId === pid;
+    html += '<div style="padding:7px 14px;border-radius:20px;border:1px solid '+(isOn?'var(--amber-bd)':'var(--border2)')+';background:'+(isOn?'var(--amber-bg)':'var(--bg3)')+';font-size:13px;font-weight:700;color:'+(isOn?'var(--amber)':'var(--text2)')+';cursor:pointer" onclick="selOpener(\'' + pid + '\')">' + (p?p.name:'?') + '</div>';
+  });
+  html += '</div>';
+  if (RS.openerId) {
+    var op = gp(RS.openerId);
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:4px">';
+    html += '<span style="font-size:13px;color:var(--text2)">' + (op?op.name:'?') + ' açış puanı:</span>';
+    html += '<input class="riinp" type="number" inputmode="numeric" id="opener-score" placeholder="0" value="' + (RS.openerScore||'') + '" oninput="RS.openerScore=parseInt(this.value)||null" style="width:80px">';
+    html += '</div>';
+  }
+  document.getElementById('open-list').innerHTML = html;
+}
+
+function selOpener(pid) {
+  RS.openerId = (RS.openerId === pid) ? null : pid;
+  RS.openerScore = null;
+  buildOpenList(activeGame());
+}
+
+function getGameCurrentOpener(game) {
+  // Son kaydedilmiş açış bilgisini bul
+  for (var i = game.rounds.length - 1; i >= 0; i--) {
+    if (game.rounds[i].opener) return game.rounds[i].opener;
+  }
+  return null;
+}
 function buildRiList(game) {
-  var ft = RS.ft;
   var finId = RS.finId;
   var totals = calcTotals(game);
-  var lbl = document.getElementById('ri-lbl');
-  if (ft === 'hand_finish' && finId) lbl.textContent = 'Diğerlerinin ceza puanları (2x uygulanacak)';
-  else if (ft === 'double_open' && finId) lbl.textContent = 'Diğerlerinin ceza puanları (2x uygulanacak)';
-  else lbl.textContent = 'Ceza Puanları';
+  document.getElementById('ri-lbl').textContent = 'Ceza Puanları';
   var html = '';
   game.playerIds.forEach(function(pid, i) {
     var p = gp(pid);
     var cur = totals[pid] || 0;
     var isFinisher = pid === finId;
-    var disabled = '';
-    var val = '';
-    var hint = '';
-    if (isFinisher) {
-      if (ft === 'okey_throw') { val = '-101'; disabled = 'disabled'; hint = '-101 otomatik'; }
-      else if (ft === 'double_open') { val = '0'; disabled = 'disabled'; hint = '0 (biten)'; }
-      else if (ft === 'hand_finish') { val = '0'; disabled = 'disabled'; hint = '0 (elden bitti)'; }
-      else if (ft === 'wrong_open') { val = '101'; disabled = 'disabled'; hint = '+101 ceza'; }
-      else { val = '0'; disabled = 'disabled'; hint = '0 (eli bitirdi)'; }
-    }
+    var disabled = isFinisher ? 'disabled' : '';
+    var val = isFinisher ? '0' : '';
+    var hint = isFinisher ? '0 (eli bitirdi)' : '';
     html += '<div class="rirow">';
     html += '<div class="av ' + avc(i) + '" style="width:30px;height:30px;font-size:10px">' + ini(p ? p.name : '?') + '</div>';
     html += '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + (p ? p.name : '?') + '</div>';
     if (hint) html += '<div style="font-size:10px;color:var(--green)">' + hint + '</div>';
     html += '</div>';
-    html += '<input class="riinp" type="number" id="ri-' + pid + '" value="' + val + '" placeholder="0" ' + disabled + ' oninput="previewRi(\'' + pid + '\',' + cur + ')">';
+    html += '<input class="riinp" type="number" inputmode="numeric" id="ri-' + pid + '" value="' + val + '" placeholder="0" ' + disabled + ' oninput="previewRi(\'' + pid + '\',' + cur + ')">';
     html += '<div class="riprev" id="rp-' + pid + '">' + cur + '</div>';
     html += '</div>';
   });
@@ -1084,16 +1094,7 @@ function buildRiList(game) {
 
 function previewRi(pid, cur) {
   var v = parseInt(document.getElementById('ri-' + pid).value) || 0;
-  var ft = RS.ft;
-  var finId = RS.finId;
-  var fp = v;
-  if (pid === finId) {
-    if (ft === 'okey_throw') fp = -101;
-    else if (ft === 'double_open' || ft === 'hand_finish' || ft === 'normal') fp = 0;
-    else if (ft === 'wrong_open') fp = 101;
-  } else {
-    if (ft === 'double_open' || ft === 'hand_finish') fp = v * 2;
-  }
+  var fp = (pid === RS.finId) ? 0 : v;
   var newT = cur + fp;
   var rp = document.getElementById('rp-' + pid);
   if (rp) {
@@ -1107,20 +1108,11 @@ function checkWarn(game) {
   var wEl = document.getElementById('ri-warn');
   if (!wEl || !game) return;
   var totals = calcTotals(game);
-  var ft = RS.ft;
-  var finId = RS.finId;
   var msgs = [];
   game.playerIds.forEach(function(pid) {
     var inp = document.getElementById('ri-' + pid);
     var raw = inp ? (parseInt(inp.value) || 0) : 0;
-    var fp = raw;
-    if (pid === finId) {
-      if (ft === 'okey_throw') fp = -101;
-      else if (ft === 'double_open' || ft === 'hand_finish' || ft === 'normal') fp = 0;
-      else if (ft === 'wrong_open') fp = 101;
-    } else {
-      if (ft === 'double_open' || ft === 'hand_finish') fp = raw * 2;
-    }
+    var fp = (pid === RS.finId) ? 0 : raw;
     var newT = (totals[pid] || 0) + fp;
     var p = gp(pid);
     var nm = p ? p.name : '?';
@@ -1138,19 +1130,26 @@ function checkWarn(game) {
 function submitRound() {
   var game = activeGame();
   if (!game) return;
-  if (!RS.finId) { toast('Lütfen eli bitiren oyuncuyu seçin!'); return; }
   var rawScores = game.playerIds.map(function(pid) {
     var inp = document.getElementById('ri-' + pid);
     var raw = inp ? (parseInt(inp.value) || 0) : 0;
-    if (pid === RS.finId) {
-      if (RS.ft === 'okey_throw') raw = -101;
-      else if (RS.ft === 'double_open' || RS.ft === 'hand_finish' || RS.ft === 'normal') raw = 0;
-      else if (RS.ft === 'wrong_open') raw = 101;
-    }
+    if (pid === RS.finId) raw = 0;
     return {pid: pid, raw: raw};
   });
-  var scores = calcPenalties(rawScores, RS.ft, RS.finId);
-  var round = { id: uid(), roundNumber: game.rounds.length + 1, ft: RS.ft, finId: RS.finId, scores: scores, ts: new Date().toISOString() };
+  var scores = calcPenalties(rawScores, RS.finId);
+  // Açış bilgisi: eğer bu elde birisi açtıysa kaydet
+  var openerData = null;
+  if (RS.openerId && RS.openerScore) {
+    var prevOpener = getGameCurrentOpener(game);
+    // Katlamalı kontrol: yeni açış mevcut açıştan yüksekse geçer
+    var passes = !prevOpener || (game.settings.gameType === 'katlamali' && RS.openerScore > prevOpener.score);
+    if (passes || !prevOpener) {
+      var op = gp(RS.openerId);
+      openerData = { pid: RS.openerId, score: RS.openerScore, name: op ? op.name : '?' };
+    }
+  }
+  var round = { id: uid(), roundNumber: game.rounds.length + 1, finId: RS.finId || null, scores: scores, ts: new Date().toISOString() };
+  if (openerData) round.opener = openerData;
   game.rounds.push(round);
   if (isGameOver(game)) {
     closeModal('m-round');
@@ -1206,7 +1205,7 @@ function showBillModal(game, totals, ranks) {
     html += '<div style="font-size:36px">🏆</div>';
     html += '<div style="font-size:18px;font-weight:900;margin:6px 0">' + (winner ? winner.name : '?') + ' Kazandı!</div></div>';
     html += '<div class="igrp"><div class="ilbl">Toplam Hesap (₺)</div>';
-    html += '<input class="nilg" type="number" id="bill-amt" placeholder="0.00" min="0" oninput="updateBillPrev()"></div>';
+    html += '<input class="nilg" type="number" inputmode="numeric" id="bill-amt" placeholder="0.00" min="0" oninput="updateBillPrev()"></div>';
     html += '<div class="ilbl" style="margin-bottom:8px">Ödeme Tipi</div>';
     html += '<div class="pills" style="margin-bottom:16px">';
     html += '<div class="pill ' + (selType==='loser_pays'?'on':'') + '" id="bpt-l" onclick="setBillType(\'loser_pays\')">Kaybeden Öder</div>';
@@ -1518,6 +1517,18 @@ function showGDetail(gid) {
     });
     html += '</div>';
   }
+  // Açış geçmişi
+  var openerHistory = game.rounds.filter(function(r){return r.opener;});
+  if (openerHistory.length > 0) {
+    html += '<div class="sec">Açış Geçmişi</div><div class="card" style="margin:0 16px 12px">';
+    openerHistory.forEach(function(r) {
+      var op = r.opener;
+      var opP = gp(op.pid);
+      var opIdx = game.playerIds.indexOf(op.pid);
+      html += '<div class="srow"><div style="display:flex;align-items:center;gap:8px"><div class="av ' + avc(opIdx<0?0:opIdx) + '" style="width:22px;height:22px;font-size:8px">' + ini(opP?opP.name:'?') + '</div><span class="slbl">' + r.roundNumber + '. elde: ' + (opP?opP.name:'?') + '</span></div><span class="sval" style="color:var(--amber)">' + op.score + ' puan</span></div>';
+    });
+    html += '</div>';
+  }
   html += '<div class="sec">El Detayları</div>';
   html += '<div style="overflow-x:auto;padding:0 16px 16px">';
   var minW = Math.max(300, 80 + game.rounds.length * 40 + 50);
@@ -1529,7 +1540,7 @@ function showGDetail(gid) {
   });
   html += '</tr></thead><tbody>';
   game.rounds.forEach(function(r) {
-    var ftIcon = r.ft==='okey_throw'?'🎯':r.ft==='double_open'?'✌️':r.ft==='hand_finish'?'✋':r.ft==='wrong_open'?'❌':'';
+    var ftIcon = r.finId ? '✓' : '';
     html += '<tr><td style="text-align:left;font-size:11px">' + r.roundNumber + ftIcon + '</td>';
     game.playerIds.forEach(function(pid) {
       var sc = r.scores.find(function(x) { return x.pid === pid; });
@@ -1664,12 +1675,40 @@ function refreshActive(){
   var roundOpen=document.getElementById('m-round').classList.contains('open');
   var playerOpen=document.getElementById('m-player').classList.contains('open');
   if(id==='s-home') renderHome();
-  else if(id==='s-live'){ if(!roundOpen) renderLive(); }
+  else if(id==='s-live'){
+    // Canlı ekranda tablo her zaman güncellenir; el modal açıksa sadece tablo güncellenir (form korunur)
+    var game=activeGame();
+    if(game){
+      var totals=calcTotals(game), ranks=getRankings(totals);
+      buildTable(game,totals,ranks);
+      // Header stats güncelle
+      renderLiveHeader(game,totals,ranks);
+    }
+    if(!roundOpen) renderLive();
+  }
   else if(id==='s-history') renderHistory();
   else if(id==='s-players'){ if(!playerOpen) renderPlayers(); }
   else if(id==='s-settings') renderSettings();
   else if(id==='s-sync') renderSync();
   document.getElementById('n-live').style.display = activeGame()? 'flex':'none';
+}
+
+function renderLiveHeader(game, totals, ranks){
+  var n=game.rounds.length, s=game.settings;
+  var sub=s.endCond==='set_count'?(n+'/'+s.setCnt+' el'):(n+'. el');
+  sub+=' · '+(s.gameType==='katlamali'?'Katlamalı':'Katlamasız');
+  var lsub=document.getElementById('live-sub'); if(lsub) lsub.textContent=sub;
+  var lel=document.getElementById('lv-el'); if(lel) lel.textContent=n;
+  if(s.endCond==='set_count'){
+    var lk=document.getElementById('lv-kalan'); if(lk) lk.textContent=Math.max(0,s.setCnt-n);
+    var pct=Math.min(100,n/s.setCnt*100);
+    var lp=document.getElementById('lv-prog'); if(lp){lp.style.width=pct+'%';lp.classList.toggle('dng',pct>80);}
+  } else {
+    var mx=Math.max.apply(null,[0].concat(Object.values(totals)));
+    var lk2=document.getElementById('lv-kalan'); if(lk2) lk2.textContent=Math.max(0,s.penLimit-mx);
+    var pct2=Math.min(100,mx/s.penLimit*100);
+    var lp2=document.getElementById('lv-prog'); if(lp2){lp2.style.width=pct2+'%';lp2.classList.toggle('dng',pct2>75);}
+  }
 }
 function markSyncUI(){
   var dot=document.getElementById('topbar-syncdot');
