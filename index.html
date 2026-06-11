@@ -286,6 +286,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
     </div>
     <div class="ssec">
+      <div class="sec" style="padding:0 0 10px">Oyun Modu</div>
+      <div class="pills">
+        <div class="pill on" id="m-tekli" onclick="setPlayMode('tekli')">👤 Bireysel</div>
+        <div class="pill" id="m-esli" onclick="setPlayMode('esli')">👥 Eşli</div>
+      </div>
+      <div id="esli-cfg" style="display:none;margin-top:12px">
+        <div class="ilbl" style="margin-bottom:6px">Eş Çiftleri (1-3 vs 2-4)</div>
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.7" id="esli-preview">4 oyuncu seçilince çiftler gösterilir</div>
+      </div>
+    </div>
+    <div class="ssec">
       <div class="sec" style="padding:0 0 10px">Oyun Tipi</div>
       <div class="pills">
         <div class="pill on" id="t-kat" onclick="setGameType('katlamali')">Katlamalı</div>
@@ -301,7 +312,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="pill" id="b-ozel" onclick="setBaraj('ozel')">Özel</div>
       </div>
       <div id="b-ozel-wrap" style="display:none;margin-top:10px">
-        <input class="inp" type="number" inputmode="numeric" id="b-ozel-val" placeholder="Baraj puanı..." min="10" max="500">
+        <input class="inp" type="number" id="b-ozel-val" placeholder="Baraj puanı..." min="10" max="500">
       </div>
     </div>
     <div class="ssec">
@@ -311,20 +322,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="pill" id="e-lim" onclick="setEndCond('penalty_limit')">Ceza Limiti</div>
       </div>
       <div id="e-set-cfg">
-        <div class="ilbl">Set Sayısı</div>
+        <div class="ilbl">Kaç Set Oynanacak</div>
         <div class="pills">
-          <div class="pill on" id="s-5" onclick="setSetCnt(5)">5 Set</div>
+          <div class="pill" id="s-2" onclick="setSetCnt(2)">2 Set</div>
+          <div class="pill on" id="s-3" onclick="setSetCnt(3)">3 Set</div>
+          <div class="pill" id="s-5" onclick="setSetCnt(5)">5 Set</div>
           <div class="pill" id="s-7" onclick="setSetCnt(7)">7 Set</div>
-          <div class="pill" id="s-11" onclick="setSetCnt(11)">11 Set</div>
           <div class="pill" id="s-oz" onclick="setSetCnt('ozel')">Özel</div>
         </div>
         <div id="s-oz-wrap" style="display:none;margin-top:10px">
-          <input class="inp" type="number" inputmode="numeric" id="s-oz-val" placeholder="Set sayısı..." min="1" max="100">
+          <input class="inp" type="number" id="s-oz-val" placeholder="Set sayısı..." min="1" max="100">
         </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text3);line-height:1.5">🃏 Her set <b>7 el</b> oynanır · İstediğinde "Seti Bitir" ile daha erken bitirebilirsin</div>
       </div>
       <div id="e-lim-cfg" style="display:none">
         <div class="ilbl">Eleme Puanı</div>
-        <input class="inp" type="number" inputmode="numeric" id="e-lim-val" placeholder="Örn: 101" value="101" min="20">
+        <input class="inp" type="number" id="e-lim-val" placeholder="Örn: 101" value="101" min="20">
       </div>
     </div>
     <div class="ssec">
@@ -374,10 +387,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div id="lv-coach" style="display:none"></div>
   </div>
   <div style="position:fixed;bottom:calc(64px + var(--sbt));left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:10px 16px;background:var(--bg);border-top:1px solid var(--border)">
-    <button class="btn btn-g" id="lv-new-btn" onclick="openRoundModal()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Yeni El Gir
-    </button>
+    <div id="lv-btn-area" style="display:flex;gap:8px">
+      <button class="btn btn-g" id="lv-new-btn" onclick="openRoundModal()" style="flex:2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Yeni El Gir
+      </button>
+      <button class="btn btn-s" id="lv-finish-set-btn" onclick="openFinishSetModal()" style="flex:1;display:none;border-color:var(--amber-bd);color:var(--amber)">
+        🏁 Seti Bitir
+      </button>
+    </div>
   </div>
 </div>
 
@@ -533,17 +551,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="sheet">
     <div class="mhandle"></div>
     <div class="mtitle" id="m-round-title">El Girişi</div>
-    <div id="fin-wrap" style="padding:0 18px 12px">
-      <div class="ilbl" id="fin-lbl">Eli Bitiren Oyuncu <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px">(opsiyonel)</span></div>
-      <div id="fin-list"></div>
-    </div>
-    <!-- İLK AÇIŞ TAKİP -->
-    <div id="open-wrap" style="padding:0 18px 12px;border-top:1px solid var(--border);margin-top:4px">
-      <div class="ilbl" style="margin-top:10px">Bu Elde İlk Açış <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px">(opsiyonel)</span></div>
-      <div id="open-list"></div>
-    </div>
-    <div style="padding:0 18px 6px"><div class="ilbl" id="ri-lbl">Ceza Puanları</div></div>
+    <div style="padding:0 18px 6px"><div class="ilbl" id="ri-lbl">Puanlar</div></div>
     <div id="ri-list"></div>
+    <div style="padding:8px 18px 0">
+      <div class="ilbl" style="margin-bottom:6px">El Açanlar <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px">(opsiyonel)</span></div>
+      <div id="opener-list"></div>
+      <button class="btn btn-s btn-sm" style="margin-top:8px;margin-bottom:4px" onclick="addOpener()">+ El Açan Ekle</button>
+    </div>
     <div style="padding:12px 18px">
       <div id="ri-warn" style="display:none;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--amber);margin-bottom:12px;line-height:1.5"></div>
       <div style="display:flex;gap:10px">
@@ -551,6 +565,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <button class="btn btn-g" style="flex:2" onclick="submitRound()">Eli Onayla ✓</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: SET BİTİŞİ -->
+<div class="overlay" id="m-finset">
+  <div class="sheet">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="m-finset-title">Seti Bitir</div>
+    <div id="m-finset-content" style="padding:0 18px 16px"></div>
   </div>
 </div>
 
@@ -634,13 +657,14 @@ var SS = {
   gameType: 'katlamali',
   baraj: 101,
   endCond: 'set_count',
-  setCnt: 5,
+  setCnt: 3,
   penLimit: 101,
-  bill: false
+  bill: false,
+  playMode: 'tekli'  // 'tekli' veya 'esli'
 };
 
 // ─── ROUND MODAL STATE ────────────────────────────────────────
-var RS = { finId: null, openerId: null, openerScore: null };
+var RS = { ft: 'normal', finId: null };
 
 // ─── UTILS ────────────────────────────────────────────────────
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -686,9 +710,20 @@ function go(id) {
 }
 
 // ─── PENALTY LOGIC ────────────────────────────────────────────
-function calcPenalties(rawScores, finId) {
+function calcPenalties(rawScores, ft, finId) {
   return rawScores.map(function(s) {
-    return {pid: s.pid, raw: s.raw, final: (s.pid === finId) ? 0 : s.raw};
+    var fp = s.raw;
+    if (s.pid === finId) {
+      if (ft === 'okey_throw') fp = -101;
+      else if (ft === 'double_open') fp = 0;
+      else if (ft === 'hand_finish') fp = 0;
+      else if (ft === 'wrong_open') fp = 101;
+      else fp = 0; // normal: bitiren 0 alır
+    } else {
+      if (ft === 'double_open') fp = s.raw * 2;
+      else if (ft === 'hand_finish') fp = s.raw * 2;
+    }
+    return {pid: s.pid, raw: s.raw, final: fp};
   });
 }
 
@@ -705,14 +740,164 @@ function getRankings(totals) {
   return Object.keys(totals).sort(function(a,b) { return totals[a] - totals[b]; });
 }
 
+// ─── SET PUANLAMA ─────────────────────────────────────────────
+// Her oyunun (setin) sonunda oyunculara sıralama puanı verilir.
+// Tekli: 1.→4p, 2.→3p, 3.→2p, 4.→1p
+// Eşli: galip çifte 1'er puan
+function getSetPointsForGame(game, roundIdx) {
+  // roundIdx: 0-bazlı oyun numarası
+  // Oyunun toplam puanlarına göre sıralama puanı döner: {pid: setPoints}
+  var s = game.settings;
+  var result = {};
+  game.playerIds.forEach(function(id) { result[id] = 0; });
+
+  if (s.playMode === 'esli') {
+    // Eşli: sadece eş çiftinin ceza toplamı karşılaştırılır
+    var pids = game.playerIds;
+    // Takım A: indeks 0 ve 2, Takım B: indeks 1 ve 3
+    var roundTotals = calcRoundTotals(game, roundIdx);
+    var teamA = [pids[0], pids[2]];
+    var teamB = [pids[1], pids[3]];
+    var sumA = (roundTotals[pids[0]]||0) + (roundTotals[pids[2]]||0);
+    var sumB = (roundTotals[pids[1]]||0) + (roundTotals[pids[3]]||0);
+    var winners = sumA < sumB ? teamA : (sumB < sumA ? teamB : null);
+    if (winners) {
+      winners.forEach(function(id) { result[id] = 1; });
+    }
+  } else {
+    // Tekli: sıralama puanları
+    var roundTotals2 = calcRoundTotals(game, roundIdx);
+    var sorted = Object.keys(roundTotals2).sort(function(a,b) { return roundTotals2[a] - roundTotals2[b]; });
+    var pts = [4,3,2,1];
+    sorted.forEach(function(id, i) { result[id] = pts[i] || 1; });
+  }
+  return result;
+}
+
+// Belirli bir oyuna (set) ait el puanlarının toplamı
+function calcRoundTotals(game, setIdx) {
+  var result = {};
+  game.playerIds.forEach(function(id) { result[id] = 0; });
+  game.rounds.forEach(function(r) {
+    if (r.setIdx === setIdx) {
+      r.scores.forEach(function(s) { result[s.pid] = (result[s.pid]||0) + s.final; });
+    }
+  });
+  return result;
+}
+
+// Oyunun kaçıncı setin içinde olduğunu döner (0-bazlı)
+function currentSetIdx(game) {
+  return game.sets ? game.sets.length : 0;
+}
+
+// Tüm setler boyunca biriken SET puanları {pid: totalSetPts}
+function calcSetTotals(game) {
+  var result = {};
+  game.playerIds.forEach(function(id) { result[id] = 0; });
+  if (!game.sets) return result;
+  game.sets.forEach(function(setResult) {
+    Object.keys(setResult.points).forEach(function(pid) {
+      result[pid] = (result[pid]||0) + (setResult.points[pid]||0);
+    });
+  });
+  return result;
+}
+
+// Mevcut setin el toplamları
+function calcCurrentSetTotals(game) {
+  var si = currentSetIdx(game);
+  return calcRoundTotals(game, si);
+}
+
+// Eşli oyunda mevcut sette galip çifti kimler?
+function getEsliWinner(game, setIdx) {
+  var pids = game.playerIds;
+  var tot = calcRoundTotals(game, setIdx);
+  var sumA = (tot[pids[0]]||0) + (tot[pids[2]]||0);
+  var sumB = (tot[pids[1]]||0) + (tot[pids[3]]||0);
+  if (sumA < sumB) return [pids[0], pids[2]];
+  if (sumB < sumA) return [pids[1], pids[3]];
+  return null; // berabere
+}
+
+// Bir oyunun (setin) bitip bitmediğini kontrol et
+function isSetOver(game) {
+  var s = game.settings;
+  var si = currentSetIdx(game);
+  if (s.endCond === 'set_count') {
+    // 7 oyunsa ve 4. ile sonraki sıralama değişmeyecekse erken bitiş
+    var curTotals = calcRoundTotals(game, si);
+    var roundsPlayed = game.rounds.filter(function(r) { return r.setIdx === si; }).length;
+    if (s.playMode === 'esli') {
+      // Eşli: 3 oyundan önce erken bitiş yok. Ama 2. oyunda aynı takım kazandıysa bitir
+      // Her set 7 el; eşli modda aslında setler değil direkt her oyun 1 set
+      // Burada "set" = tek oyun demek
+      return roundsPlayed >= 7 || isEarlyFinish(game, si);
+    } else {
+      return roundsPlayed >= 7 || isEarlyFinish(game, si);
+    }
+  }
+  return false;
+}
+
+// Erken bitiş: Tekli oyunda sıralama kesinleştiyse
+// Yani kalan el sayısında bile en alttaki 2 kişi yer değiştiremeyecekse
+function isEarlyFinish(game, setIdx) {
+  var si = setIdx !== undefined ? setIdx : currentSetIdx(game);
+  var s = game.settings;
+  var roundsPlayed = game.rounds.filter(function(r) { return r.setIdx === si; }).length;
+  if (roundsPlayed < 2) return false; // En az 2 el oynansın
+
+  if (s.playMode === 'esli') {
+    // Eşli: 2. oyun sonunda aynı çift yine galipse 3. gerek yok (oyun 3 setlik ise)
+    if (s.setCnt <= 2) return false;
+    if (!game.sets || game.sets.length < 2) return false;
+    // Son 2 sette aynı takım kazandıysa oyun biter
+    var lastTwo = game.sets.slice(-2);
+    var winA0 = lastTwo[0].winTeam;
+    var winA1 = lastTwo[1].winTeam;
+    if (winA0 && winA1 && winA0 === winA1) {
+      // Bir takım zaten 2 set kazandı, kalan setlerde değişmez mi?
+      var aWins = game.sets.filter(function(st) { return st.winTeam === 'A'; }).length;
+      var bWins = game.sets.filter(function(st) { return st.winTeam === 'B'; }).length;
+      var remaining = s.setCnt - game.sets.length;
+      if (aWins > bWins + remaining || bWins > aWins + remaining) return true;
+    }
+    return false;
+  } else {
+    // Tekli: sıralama erken kesinleştiyse
+    var curTotals = calcRoundTotals(game, si);
+    var sorted = Object.keys(curTotals).sort(function(a,b) { return curTotals[a] - curTotals[b]; });
+    var n = sorted.length;
+    if (n < 2) return false;
+    // 3. ve 4. oyuncu arasında fark, kalan elde bile kapanmaz mı?
+    // En yüksek 1 elde kazanılabilecek puan farkı: yaklaşık barajın %70'i
+    var maxSwing = game.settings.baraj * 0.5;
+    var remaining2 = 7 - roundsPlayed;
+    if (remaining2 <= 0) return true;
+    // 3. ve 4. sıradaki oyuncular (en az ceza alan 3. - en çok ceza alan 4.)
+    // Eğer 3. ile 4. arasındaki fark kalan elde kapanmıyorsa erken bitir
+    if (n >= 3) {
+      var third = curTotals[sorted[n-3]] || 0;
+      var fourth = curTotals[sorted[n-2]] || 0;
+      // Bunlar arasında yeterince büyük bir fark varsa sıralama değişmez
+      // Burada basit: fark > maxSwing * remaining ise erken bitir
+      if (Math.abs(fourth - third) > maxSwing * remaining2) return true;
+    }
+    return false;
+  }
+}
+
 function isGameOver(game) {
   var totals = calcTotals(game);
   var s = game.settings;
-  if (s.endCond === 'set_count') return game.rounds.length >= s.setCnt;
   if (s.endCond === 'penalty_limit') {
     return Object.values(totals).some(function(v) { return v >= s.penLimit; });
   }
-  return false;
+  // Set bazlı: tamamlanan set sayısı kontrol
+  if (!game.sets) return false;
+  return game.sets.length >= s.setCnt;
 }
 
 // ─── PLAYER STATS ─────────────────────────────────────────────
@@ -795,6 +980,16 @@ function renderHome() {
 function renderSetup() {
   renderSetupList();
   updateSetupCnt();
+  // Mod UI sıfırla
+  document.getElementById('m-tekli').classList.toggle('on', SS.playMode === 'tekli');
+  document.getElementById('m-esli').classList.toggle('on', SS.playMode === 'esli');
+  document.getElementById('esli-cfg').style.display = SS.playMode === 'esli' ? 'block' : 'none';
+  updateEsliPreview();
+  // Set sayısı UI sıfırla
+  [2,3,5,7,'oz'].forEach(function(x) {
+    var el = document.getElementById('s-' + x);
+    if (el) el.classList.toggle('on', x === SS.setCnt);
+  });
 }
 function renderSetupList() {
   var el = document.getElementById('setup-plist');
@@ -822,6 +1017,20 @@ function toggleSelPlayer(id) {
   else SS.selPlayers.push(id);
   renderSetupList();
   updateSetupCnt();
+  updateEsliPreview();
+}
+function updateEsliPreview() {
+  var el = document.getElementById('esli-preview');
+  if (!el) return;
+  var sel = SS.selPlayers;
+  if (SS.playMode !== 'esli') return;
+  if (sel.length !== 4) {
+    el.textContent = '4 oyuncu seçilince çiftler gösterilir (şu an: ' + sel.length + ')';
+    return;
+  }
+  var p0 = gp(sel[0]), p1 = gp(sel[1]), p2 = gp(sel[2]), p3 = gp(sel[3]);
+  var n = function(p) { return p ? p.name : '?'; };
+  el.innerHTML = '🟢 <b>' + n(p0) + '</b> & <b>' + n(p2) + '</b> (1. ve 3.)<br>🔵 <b>' + n(p1) + '</b> & <b>' + n(p3) + '</b> (2. ve 4.)';
 }
 function updateSetupCnt() {
   var n = SS.selPlayers.length;
@@ -849,11 +1058,18 @@ function setEndCond(v) {
 }
 function setSetCnt(v) {
   SS.setCnt = v;
-  [5,7,11,'ozel'].forEach(function(x) {
+  [2,3,5,7,'ozel'].forEach(function(x) {
     var el = document.getElementById('s-' + x);
-    if (el) el.classList.toggle('on', x === v || (v === 5 && x === 5) || (v === 7 && x === 7) || (v === 11 && x === 11));
+    if (el) el.classList.toggle('on', x === v);
   });
   document.getElementById('s-oz-wrap').style.display = v === 'ozel' ? 'block' : 'none';
+}
+function setPlayMode(m) {
+  SS.playMode = m;
+  document.getElementById('m-tekli').classList.toggle('on', m === 'tekli');
+  document.getElementById('m-esli').classList.toggle('on', m === 'esli');
+  document.getElementById('esli-cfg').style.display = m === 'esli' ? 'block' : 'none';
+  updateEsliPreview();
 }
 function toggleBill() {
   SS.bill = !SS.bill;
@@ -863,6 +1079,7 @@ function startGame() {
   var errEl = document.getElementById('setup-err');
   errEl.style.display = 'none';
   if (SS.selPlayers.length < 2) { errEl.textContent = 'En az 2 oyuncu seçin!'; errEl.style.display = 'block'; return; }
+  if (SS.playMode === 'esli' && SS.selPlayers.length !== 4) { errEl.textContent = 'Eşli oyun için tam 4 oyuncu seçin!'; errEl.style.display = 'block'; return; }
   var baraj = SS.baraj;
   if (baraj === 'ozel') {
     baraj = parseInt(document.getElementById('b-ozel-val').value);
@@ -879,8 +1096,9 @@ function startGame() {
     createdAt: new Date().toISOString(),
     status: 'active',
     playerIds: SS.selPlayers.slice(),
-    settings: { gameType: SS.gameType, baraj: baraj, endCond: SS.endCond, setCnt: setCnt, penLimit: penLimit, bill: SS.bill },
-    rounds: []
+    settings: { gameType: SS.gameType, baraj: baraj, endCond: SS.endCond, setCnt: setCnt, penLimit: penLimit, bill: SS.bill, playMode: SS.playMode },
+    rounds: [],
+    sets: []   // Her setin sonuç puanları burada
   };
   db.games.push(game);
   saveDB(game.id);
@@ -897,15 +1115,24 @@ function renderLive() {
   var ranks = getRankings(totals);
   var n = game.rounds.length;
   var s = game.settings;
-  var sub = s.endCond === 'set_count' ? (n + '/' + s.setCnt + ' el') : (n + '. el');
+  var si = currentSetIdx(game);
+  var roundsInSet = game.rounds.filter(function(r) { return r.setIdx === si; }).length;
+  var setsPlayed = game.sets ? game.sets.length : 0;
+  var modeLabel = s.playMode === 'esli' ? 'Eşli' : 'Tekli';
+  var sub = '';
+  if (s.endCond === 'set_count') {
+    sub = 'Set ' + (si+1) + '/' + s.setCnt + ' · El ' + roundsInSet + '/7 · ' + modeLabel;
+  } else {
+    sub = n + '. el · ' + modeLabel;
+  }
   sub += ' · ' + (s.gameType === 'katlamali' ? 'Katlamalı' : 'Katlamasız');
   document.getElementById('live-sub').textContent = sub;
-  document.getElementById('lv-el').textContent = n;
+  document.getElementById('lv-el').textContent = roundsInSet;
   document.getElementById('lv-baraj').textContent = s.baraj;
   if (s.endCond === 'set_count') {
-    document.getElementById('lv-kalan').textContent = Math.max(0, s.setCnt - n);
-    document.getElementById('lv-kalan-lbl').textContent = 'Kalan El';
-    var pct = Math.min(100, n / s.setCnt * 100);
+    document.getElementById('lv-kalan').textContent = Math.max(0, s.setCnt - setsPlayed);
+    document.getElementById('lv-kalan-lbl').textContent = 'Kalan Set';
+    var pct = Math.min(100, setsPlayed / s.setCnt * 100);
     document.getElementById('lv-prog').style.width = pct + '%';
     document.getElementById('lv-prog').classList.toggle('dng', pct > 80);
   } else {
@@ -917,6 +1144,12 @@ function renderLive() {
     document.getElementById('lv-prog').classList.toggle('dng', pct2 > 75);
   }
   document.getElementById('undo-btn').style.display = n > 0 ? 'flex' : 'none';
+  // "Seti Bitir" butonu: set_count modunda ve en az 1 el oynandıysa göster
+  var finSetBtn = document.getElementById('lv-finish-set-btn');
+  if (finSetBtn) {
+    var showFinSet = s.endCond === 'set_count' && roundsInSet > 0;
+    finSetBtn.style.display = showFinSet ? 'flex' : 'none';
+  }
   buildTable(game, totals, ranks);
   updateIdChip();
   applyLiveTab();
@@ -927,61 +1160,153 @@ function buildTable(game, totals, ranks) {
   var rounds = game.rounds;
   var players = game.playerIds;
   var s = game.settings;
-  var html = '<div style="overflow-x:auto;padding:8px 16px">';
-  html += '<table class="stbl" style="min-width:' + Math.max(300, 90 + rounds.length * 44 + 56) + 'px">';
-  html += '<thead><tr><th style="min-width:90px;text-align:left">OYUNCU</th>';
-  for (var i = 0; i < rounds.length; i++) { html += '<th>E' + (i+1) + '</th>'; }
-  html += '<th style="min-width:56px">TOP</th></tr></thead><tbody>';
-  players.forEach(function(pid, pi) {
-    var p = gp(pid);
-    var total = totals[pid] || 0;
-    var rankIdx = ranks.indexOf(pid);
-    var isLeader = rankIdx === 0;
-    var isDanger = s.endCond === 'penalty_limit' && total >= s.penLimit * 0.85;
-    var trCls = isLeader ? 'ldr' : (isDanger ? 'dng' : '');
-    html += '<tr class="' + trCls + '">';
-    html += '<td><div style="display:flex;align-items:center;gap:6px">';
-    html += '<div class="av ' + avc(pi) + '" style="width:28px;height:28px;font-size:10px">' + ini(p ? p.name : '?') + '</div>';
-    html += '<div><div style="font-size:12px;font-weight:700;line-height:1.2">' + (p ? p.name : '?') + '</div>';
-    html += '<div style="font-size:9px;color:var(--text3)">' + (rankIdx === 0 ? '🥇' : rankIdx === players.length-1 ? '⚠️' : '') + '</div>';
-    html += '</div></div></td>';
-    rounds.forEach(function(r) {
-      var sc = r.scores.find(function(x) { return x.pid === pid; });
-      var v = sc ? sc.final : '-';
-      var cls = '';
-      if (typeof v === 'number') { cls = v < 0 ? 'neg' : v > 50 ? 'hi' : ''; }
-      var disp = v;
-      if (r.finId === pid) {
-        disp = (typeof v === 'number' && v === 0) ? '✓' : v;
-      }
-      html += '<td class="' + cls + '" style="font-size:11px">' + disp + '</td>';
+  var sets = game.sets || [];
+  var si = currentSetIdx(game);
+  var curSetRounds = rounds.filter(function(r) { return r.setIdx === si; });
+  var setTotals = calcSetTotals(game);
+
+  var html = '';
+
+  // ── SET PUAN TABLOSU (tamamlanan setler varsa) ──
+  if (s.endCond === 'set_count' && sets.length > 0) {
+    html += '<div style="padding:8px 16px 0"><div class="sec" style="padding:0 0 6px">Set Puanları</div>';
+    html += '<div style="overflow-x:auto"><table class="stbl" style="min-width:' + Math.max(260, 90 + sets.length * 52 + 56) + 'px">';
+    html += '<thead><tr><th style="min-width:90px;text-align:left">OYUNCU</th>';
+    sets.forEach(function(st, i) { html += '<th>Set ' + (i+1) + '</th>'; });
+    html += '<th style="min-width:56px">TOP</th></tr></thead><tbody>';
+
+    // Sıralamayı set puanına göre belirle (çok puan = iyi)
+    var setRanks = Object.keys(setTotals).sort(function(a,b) { return setTotals[b] - setTotals[a]; });
+
+    players.forEach(function(pid, pi) {
+      var stTotal = setTotals[pid] || 0;
+      var rankIdx = setRanks.indexOf(pid);
+      var isLeader = rankIdx === 0;
+      var trCls = isLeader ? 'ldr' : '';
+      html += '<tr class="' + trCls + '">';
+      html += '<td><div style="display:flex;align-items:center;gap:6px">';
+      html += '<div class="av ' + avc(pi) + '" style="width:24px;height:24px;font-size:9px">' + ini(gp(pid) ? gp(pid).name : '?') + '</div>';
+      html += '<span style="font-size:12px;font-weight:700">' + (gp(pid) ? gp(pid).name : '?') + '</span></div></td>';
+      sets.forEach(function(st) {
+        var pt = st.points[pid] !== undefined ? st.points[pid] : '-';
+        var ptCls = pt > 0 ? 'neg' : '';
+        html += '<td class="' + ptCls + '" style="font-size:13px;font-weight:700">' + (typeof pt === 'number' && pt > 0 ? '+' + pt : pt) + '</td>';
+      });
+      html += '<td class="tcell" style="color:var(--green)">' + stTotal + '</td>';
+      html += '</tr>';
     });
-    var tcls = total < 0 ? 'neg' : '';
-    html += '<td class="tcell ' + tcls + '">' + total + '</td>';
-    html += '</tr>';
-  });
-  html += '</tbody></table></div>';
-  // Açış durumu bandı
-  var currentOpener = getGameCurrentOpener(game);
-  if (currentOpener) {
-    var opP = gp(currentOpener.pid);
-    var opIdx = players.indexOf(currentOpener.pid);
-    html += '<div style="margin:4px 16px 8px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:8px 12px;font-size:12px;color:var(--amber);display:flex;align-items:center;gap:8px">';
-    html += '<div class="av ' + avc(opIdx<0?0:opIdx) + '" style="width:22px;height:22px;font-size:8px;flex-shrink:0">' + ini(opP?opP.name:'?') + '</div>';
-    if (s.gameType === 'katlamali') {
-      html += '🔓 <b>' + (opP?opP.name:'?') + '</b> ' + currentOpener.score + ' ile açıkta &mdash; katlamalı geçiş için >' + currentOpener.score + ' gerekli';
-    } else {
-      html += '🔓 <b>' + (opP?opP.name:'?') + '</b> ' + currentOpener.score + ' ile açtı';
+    html += '</tbody></table></div></div>';
+
+    // Eşli oyunda takım skoru
+    if (s.playMode === 'esli') {
+      var pids = players;
+      var aWins = sets.filter(function(st) { return st.winTeam === 'A'; }).length;
+      var bWins = sets.filter(function(st) { return st.winTeam === 'B'; }).length;
+      var p0 = gp(pids[0]), p2 = gp(pids[2]), p1 = gp(pids[1]), p3 = gp(pids[3]);
+      var n0 = p0?p0.name:'?', n2 = p2?p2.name:'?', n1 = p1?p1.name:'?', n3 = p3?p3.name:'?';
+      html += '<div style="margin:6px 16px;display:flex;gap:8px">';
+      html += '<div style="flex:1;background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rsm);padding:8px 10px;text-align:center">';
+      html += '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">' + n0 + ' & ' + n2 + '</div>';
+      html += '<div style="font-size:22px;font-weight:900;color:var(--green)">' + aWins + '</div></div>';
+      html += '<div style="display:flex;align-items:center;padding:0 4px;font-size:14px;font-weight:800;color:var(--text3)">vs</div>';
+      html += '<div style="flex:1;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--rsm);padding:8px 10px;text-align:center">';
+      html += '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">' + n1 + ' & ' + n3 + '</div>';
+      html += '<div style="font-size:22px;font-weight:900;color:var(--blue)">' + bWins + '</div></div>';
+      html += '</div>';
     }
+  }
+
+  // ── MEVCUT SET EL TABLOSU ──
+  if (curSetRounds.length > 0 || sets.length === 0) {
+    var curSetTotals = calcCurrentSetTotals(game);
+    var curRanks = Object.keys(curSetTotals).sort(function(a,b) { return curSetTotals[a] - curSetTotals[b]; });
+
+    html += '<div style="padding:8px 16px 0">';
+    if (s.endCond === 'set_count') {
+      html += '<div class="sec" style="padding:0 0 6px">Set ' + (si+1) + ' · Mevcut El Puanları</div>';
+    }
+    html += '<div style="overflow-x:auto"><table class="stbl" style="min-width:' + Math.max(280, 90 + curSetRounds.length * 44 + 56) + 'px">';
+    html += '<thead><tr><th style="min-width:90px;text-align:left">OYUNCU</th>';
+    for (var i = 0; i < curSetRounds.length; i++) { html += '<th>E' + (i+1) + '</th>'; }
+    html += '<th style="min-width:56px">TOP</th></tr></thead><tbody>';
+
+    players.forEach(function(pid, pi) {
+      var setTotal = curSetTotals[pid] || 0;
+      var rankIdx = curRanks.indexOf(pid);
+      var isLeader = rankIdx === 0;
+      var isDanger = s.endCond === 'penalty_limit' && (totals[pid]||0) >= s.penLimit * 0.85;
+      var trCls = isLeader ? 'ldr' : (isDanger ? 'dng' : '');
+      html += '<tr class="' + trCls + '">';
+      html += '<td><div style="display:flex;align-items:center;gap:6px">';
+      html += '<div class="av ' + avc(pi) + '" style="width:28px;height:28px;font-size:10px">' + ini(gp(pid) ? gp(pid).name : '?') + '</div>';
+      html += '<div><div style="font-size:12px;font-weight:700;line-height:1.2">' + (gp(pid) ? gp(pid).name : '?') + '</div>';
+      html += '<div style="font-size:9px;color:var(--text3)">' + (rankIdx === 0 ? '🥇' : rankIdx === players.length-1 ? '⚠️' : '') + '</div>';
+      html += '</div></div></td>';
+      curSetRounds.forEach(function(r) {
+        var sc = r.scores.find(function(x) { return x.pid === pid; });
+        var v = sc ? sc.final : '-';
+        var cls = '';
+        if (typeof v === 'number') { cls = v < 0 ? 'neg' : v > 50 ? 'hi' : ''; }
+        var opNote = '';
+        if (r.openers && r.openers.length > 0) {
+          var mo = r.openers.find(function(o) { return o.pid === pid; });
+          if (mo) opNote = '<div style="font-size:9px;color:var(--amber);font-weight:700;line-height:1.2;margin-top:2px">✋' + mo.points + '</div>';
+        }
+        html += '<td class="' + cls + '" style="font-size:11px;vertical-align:top;padding-top:5px">' + v + opNote + '</td>';
+      });
+      var tcls = setTotal < 0 ? 'neg' : '';
+      html += '<td class="tcell ' + tcls + '">' + setTotal + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+
+    // Eşli oyunda mevcut set takım toplamları
+    if (s.playMode === 'esli' && curSetRounds.length > 0) {
+      var pids2 = players;
+      var sumA2 = (curSetTotals[pids2[0]]||0) + (curSetTotals[pids2[2]]||0);
+      var sumB2 = (curSetTotals[pids2[1]]||0) + (curSetTotals[pids2[3]]||0);
+      var p0b = gp(pids2[0]), p2b = gp(pids2[2]), p1b = gp(pids2[1]), p3b = gp(pids2[3]);
+      html += '<div style="margin:6px 16px;display:flex;gap:8px">';
+      html += '<div style="flex:1;background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rsm);padding:8px 10px;text-align:center">';
+      html += '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">' + (p0b?p0b.name:'?') + ' & ' + (p2b?p2b.name:'?') + '</div>';
+      html += '<div style="font-size:20px;font-weight:900;' + (sumA2 < sumB2 ? 'color:var(--green)' : 'color:var(--text)') + '">' + sumA2 + '</div></div>';
+      html += '<div style="display:flex;align-items:center;padding:0 4px;font-size:12px;color:var(--text3)">ceza</div>';
+      html += '<div style="flex:1;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--rsm);padding:8px 10px;text-align:center">';
+      html += '<div style="font-size:10px;color:var(--text3);margin-bottom:2px">' + (p1b?p1b.name:'?') + ' & ' + (p3b?p3b.name:'?') + '</div>';
+      html += '<div style="font-size:20px;font-weight:900;' + (sumB2 < sumA2 ? 'color:var(--green)' : 'color:var(--text)') + '">' + sumB2 + '</div></div>';
+      html += '</div>';
+    }
+  }
+
+  // Baraj uyarısı (ceza limitli modda)
+  if (s.endCond === 'penalty_limit') {
+    var maxTotal = Math.max.apply(null, [0].concat(Object.values(totals)));
+    if (maxTotal >= s.baraj * 0.8 && maxTotal < s.baraj) {
+      var dngNames = players.filter(function(id) { return (totals[id]||0) >= s.baraj * 0.8; })
+        .map(function(id) { return gp(id) ? gp(id).name : '?'; }).join(', ');
+      html += '<div style="margin:8px 16px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:13px;color:var(--amber)">⚠️ <b>' + dngNames + '</b> baraja yaklaşıyor!</div>';
+    }
+  }
+
+  // El açan özeti (bu setteki)
+  var setOpenerRounds = curSetRounds.filter(function(r) { return r.openers && r.openers.length > 0; });
+  if (setOpenerRounds.length > 0) {
+    html += '<div style="margin:6px 16px 4px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:8px 12px">';
+    html += '<div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">✋ El Açanlar</div>';
+    setOpenerRounds.forEach(function(r) {
+      var ri = curSetRounds.indexOf(r);
+      html += '<div style="font-size:12px;color:var(--text2);padding:2px 0">';
+      html += '<span style="color:var(--text3);font-size:11px">' + (ri+1) + '. El: </span>';
+      r.openers.forEach(function(o, oi) {
+        var op = gp(o.pid);
+        html += (oi > 0 ? ' · ' : '') + '<b style="color:var(--text)">' + (op ? op.name : '?') + '</b>';
+        if (o.points) html += ' <span style="color:var(--amber);font-family:var(--mono);font-weight:700">' + o.points + '</span>';
+      });
+      html += '</div>';
+    });
     html += '</div>';
   }
-  // Uyarı
-  var maxTotal = Math.max.apply(null, [0].concat(Object.values(totals)));
-  if (maxTotal >= s.baraj * 0.8 && maxTotal < s.baraj) {
-    var dngNames = players.filter(function(id) { return (totals[id]||0) >= s.baraj * 0.8; })
-      .map(function(id) { return gp(id) ? gp(id).name : '?'; }).join(', ');
-    html += '<div style="margin:8px 16px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:13px;color:var(--amber)">⚠️ <b>' + dngNames + '</b> baraja yaklaşıyor!</div>';
-  }
+
   document.getElementById('lv-table').innerHTML = html;
 }
 
@@ -989,119 +1314,126 @@ function buildTable(game, totals, ranks) {
 function openRoundModal() {
   var game = activeGame();
   if (!game) return;
-  RS = { finId: null, openerId: null, openerScore: null };
-  document.getElementById('m-round-title').textContent = (game.rounds.length + 1) + '. El Girişi';
-  buildFinList(game);
-  buildOpenList(game);
+  var s = game.settings;
+  var si = currentSetIdx(game);
+  var roundsInSet = game.rounds.filter(function(r) { return r.setIdx === si; }).length;
+  var title = s.endCond === 'set_count'
+    ? 'Set ' + (si+1) + ' · ' + (roundsInSet+1) + '. El'
+    : (game.rounds.length + 1) + '. El Girişi';
+  document.getElementById('m-round-title').textContent = title;
   buildRiList(game);
+  buildOpenerList(game);
   openModal('m-round');
 }
 
-function buildFinList(game) {
-  var html = '<div style="padding:6px 0 2px;font-size:12px;color:var(--text3)">Seçilmezse el "açılmamış" sayılır.</div>';
-  game.playerIds.forEach(function(pid, i) {
-    var p = gp(pid);
-    var isOn = RS.finId === pid;
-    var chkCls = isOn ? 'chkbox on' : 'chkbox';
-    html += '<div class="psrow" style="cursor:pointer" onclick="selFin(\'' + pid + '\')">';
-    html += '<div class="' + chkCls + '" id="fc-' + pid + '">';
-    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20,6 9,17 4,12"/></svg>';
-    html += '</div>';
-    html += '<div class="av ' + avc(i) + '" style="width:28px;height:28px;font-size:10px">' + ini(p ? p.name : '?') + '</div>';
-    html += '<span style="font-size:14px;font-weight:600">' + (p ? p.name : '?') + '</span>';
-    html += '</div>';
-  });
-  document.getElementById('fin-list').innerHTML = html;
+// ─── EL AÇAN ─────────────────────────────────────────────────
+var OPENER_ROWS = []; // [{pid, points}]
+
+function buildOpenerList(game) {
+  OPENER_ROWS = [];
+  renderOpenerList(game);
 }
 
-function selFin(pid) {
-  RS.finId = (RS.finId === pid) ? null : pid; // toggle
-  document.querySelectorAll('[id^="fc-"]').forEach(function(el) { el.classList.remove('on'); });
-  if (RS.finId) {
-    var fc = document.getElementById('fc-' + RS.finId);
-    if (fc) fc.classList.add('on');
-  }
+function renderOpenerList(game) {
+  var el = document.getElementById('opener-list');
+  if (!el) return;
+  if (OPENER_ROWS.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0 6px">Henüz el açan eklenmedi</div>'; return; }
+  var html = '';
+  OPENER_ROWS.forEach(function(row, idx) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    // Oyuncu seçimi
+    html += '<select id="opener-pid-' + idx + '" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+    game.playerIds.forEach(function(pid) {
+      var p = gp(pid);
+      html += '<option value="' + pid + '"' + (row.pid === pid ? ' selected' : '') + '>' + (p ? p.name : '?') + '</option>';
+    });
+    html += '</select>';
+    // Puan girişi
+    html += '<input type="number" id="opener-pts-' + idx + '" value="' + (row.points || '') + '" placeholder="Puan" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:15px;font-weight:700;padding:9px 8px;outline:none;text-align:center" min="0">';
+    // Sil
+    html += '<button onclick="removeOpener(' + idx + ')" style="width:32px;height:32px;border-radius:var(--rsm);border:1px solid var(--red-bd);background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function addOpener() {
   var game = activeGame();
-  if (game) { buildRiList(game); checkWarn(game); }
+  if (!game || game.playerIds.length === 0) return;
+  OPENER_ROWS.push({ pid: game.playerIds[0], points: '' });
+  renderOpenerList(game);
 }
 
-function buildOpenList(game) {
-  var currentOpener = getGameCurrentOpener(game);
-  var html = '';
-  if (currentOpener) {
-    var cp = gp(currentOpener.pid);
-    var ci = game.playerIds.indexOf(currentOpener.pid);
-    html += '<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rsm);padding:8px 12px;font-size:12px;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:8px">';
-    html += '<div class="av ' + avc(ci<0?0:ci) + '" style="width:22px;height:22px;font-size:8px">' + ini(cp?cp.name:'?') + '</div>';
-    html += '✓ Açık: <b>' + (cp?cp.name:'?') + '</b> ' + currentOpener.score + ' puan ile açıkta</div>';
-  } else {
-    html += '<div style="font-size:12px;color:var(--text3);padding:2px 0 6px">Bu oyunda henüz kimse açmadı.</div>';
-  }
-  // Select opener
-  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
-  game.playerIds.forEach(function(pid, i) {
-    var p = gp(pid);
-    var isOn = RS.openerId === pid;
-    html += '<div style="padding:7px 14px;border-radius:20px;border:1px solid '+(isOn?'var(--amber-bd)':'var(--border2)')+';background:'+(isOn?'var(--amber-bg)':'var(--bg3)')+';font-size:13px;font-weight:700;color:'+(isOn?'var(--amber)':'var(--text2)')+';cursor:pointer" onclick="selOpener(\'' + pid + '\')">' + (p?p.name:'?') + '</div>';
+function removeOpener(idx) {
+  OPENER_ROWS.splice(idx, 1);
+  renderOpenerList(activeGame());
+}
+
+function collectOpeners() {
+  var result = [];
+  OPENER_ROWS.forEach(function(row, idx) {
+    var pidEl = document.getElementById('opener-pid-' + idx);
+    var ptsEl = document.getElementById('opener-pts-' + idx);
+    if (!pidEl) return;
+    var pid = pidEl.value;
+    var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+    if (pid) result.push({ pid: pid, points: pts });
   });
-  html += '</div>';
-  if (RS.openerId) {
-    var op = gp(RS.openerId);
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-top:4px">';
-    html += '<span style="font-size:13px;color:var(--text2)">' + (op?op.name:'?') + ' açış puanı:</span>';
-    html += '<input class="riinp" type="number" inputmode="numeric" id="opener-score" placeholder="0" value="' + (RS.openerScore||'') + '" oninput="RS.openerScore=parseInt(this.value)||null" style="width:80px">';
-    html += '</div>';
-  }
-  document.getElementById('open-list').innerHTML = html;
+  return result;
 }
 
-function selOpener(pid) {
-  RS.openerId = (RS.openerId === pid) ? null : pid;
-  RS.openerScore = null;
-  buildOpenList(activeGame());
-}
-
-function getGameCurrentOpener(game) {
-  // Son kaydedilmiş açış bilgisini bul
-  for (var i = game.rounds.length - 1; i >= 0; i--) {
-    if (game.rounds[i].opener) return game.rounds[i].opener;
-  }
-  return null;
-}
 function buildRiList(game) {
-  var finId = RS.finId;
+  var lbl = document.getElementById('ri-lbl');
+  if (lbl) lbl.textContent = 'Puanlar (negatif de girilebilir)';
   var totals = calcTotals(game);
-  document.getElementById('ri-lbl').textContent = 'Ceza Puanları';
   var html = '';
-  game.playerIds.forEach(function(pid, i) {
-    var p = gp(pid);
-    var cur = totals[pid] || 0;
-    var isFinisher = pid === finId;
-    var disabled = isFinisher ? 'disabled' : '';
-    var val = isFinisher ? '0' : '';
-    var hint = isFinisher ? '0 (eli bitirdi)' : '';
-    html += '<div class="rirow">';
-    html += '<div class="av ' + avc(i) + '" style="width:30px;height:30px;font-size:10px">' + ini(p ? p.name : '?') + '</div>';
-    html += '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + (p ? p.name : '?') + '</div>';
-    if (hint) html += '<div style="font-size:10px;color:var(--green)">' + hint + '</div>';
-    html += '</div>';
-    html += '<input class="riinp" type="number" inputmode="numeric" id="ri-' + pid + '" value="' + val + '" placeholder="0" ' + disabled + ' oninput="previewRi(\'' + pid + '\',' + cur + ')">';
-    html += '<div class="riprev" id="rp-' + pid + '">' + cur + '</div>';
-    html += '</div>';
-  });
+
+  if (game.settings.playMode === 'esli') {
+    var pids = game.playerIds;
+    var teams = [
+      { label: '🟢 Takım A', members: [pids[0], pids[2]], bg: 'var(--green-bg)', bd: 'var(--green-bd)' },
+      { label: '🔵 Takım B', members: [pids[1], pids[3]], bg: 'var(--blue-bg)', bd: 'var(--blue-bd)' }
+    ];
+    teams.forEach(function(team) {
+      html += '<div style="margin:0 18px 10px;padding:10px;background:' + team.bg + ';border:1px solid ' + team.bd + ';border-radius:var(--rsm)">';
+      html += '<div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">' + team.label + '</div>';
+      team.members.forEach(function(pid) {
+        var p = gp(pid);
+        var idx = pids.indexOf(pid);
+        var cur = totals[pid] || 0;
+        html += '<div class="rirow" style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)">';
+        html += '<div class="av ' + avc(idx) + '" style="width:26px;height:26px;font-size:9px">' + ini(p ? p.name : '?') + '</div>';
+        html += '<div style="flex:1;font-size:13px;font-weight:700">' + (p ? p.name : '?') + '</div>';
+        html += '<input class="riinp" type="number" id="ri-' + pid + '" value="" placeholder="0" oninput="previewRi(\''  + pid + '\',' + cur + ')">';
+        html += '<div class="riprev" id="rp-' + pid + '">' + cur + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+  } else {
+    game.playerIds.forEach(function(pid, i) {
+      var p = gp(pid);
+      var cur = totals[pid] || 0;
+      html += '<div class="rirow">';
+      html += '<div class="av ' + avc(i) + '" style="width:30px;height:30px;font-size:10px">' + ini(p ? p.name : '?') + '</div>';
+      html += '<div style="flex:1;font-size:13px;font-weight:700">' + (p ? p.name : '?') + '</div>';
+      html += '<input class="riinp" type="number" id="ri-' + pid + '" value="" placeholder="0" oninput="previewRi(\''  + pid + '\',' + cur + ')">';
+      html += '<div class="riprev" id="rp-' + pid + '">' + cur + '</div>';
+      html += '</div>';
+    });
+  }
+
   document.getElementById('ri-list').innerHTML = html;
 }
 
 function previewRi(pid, cur) {
   var v = parseInt(document.getElementById('ri-' + pid).value) || 0;
-  var fp = (pid === RS.finId) ? 0 : v;
-  var newT = cur + fp;
+  var newT = cur + v;
   var rp = document.getElementById('rp-' + pid);
   if (rp) {
     rp.textContent = newT;
     rp.style.color = newT < 0 ? 'var(--green)' : newT > 80 ? 'var(--red)' : 'var(--text3)';
   }
-  checkWarn(activeGame());
 }
 
 function checkWarn(game) {
@@ -1109,53 +1441,161 @@ function checkWarn(game) {
   if (!wEl || !game) return;
   var totals = calcTotals(game);
   var msgs = [];
+  var s = game.settings;
   game.playerIds.forEach(function(pid) {
     var inp = document.getElementById('ri-' + pid);
-    var raw = inp ? (parseInt(inp.value) || 0) : 0;
-    var fp = (pid === RS.finId) ? 0 : raw;
-    var newT = (totals[pid] || 0) + fp;
+    var v = inp ? (parseInt(inp.value) || 0) : 0;
+    var newT = (totals[pid] || 0) + v;
     var p = gp(pid);
-    var nm = p ? p.name : '?';
-    var s = game.settings;
     if (s.endCond === 'penalty_limit' && newT >= s.penLimit) {
-      msgs.push(nm + ' ' + s.penLimit + ' limitini aşıyor (' + newT + ')');
+      msgs.push((p ? p.name : '?') + ' ' + s.penLimit + ' limitini aşıyor (' + newT + ')');
     } else if (newT >= s.baraj) {
-      msgs.push(nm + ' ' + s.baraj + ' barajını geçiyor (' + newT + ')');
+      msgs.push((p ? p.name : '?') + ' ' + s.baraj + ' barajını geçiyor (' + newT + ')');
     }
   });
   if (msgs.length > 0) { wEl.innerHTML = '⚠️ ' + msgs.join('<br>'); wEl.style.display = 'block'; }
   else { wEl.style.display = 'none'; }
 }
 
+// ─── SET BİTİR MODAL ──────────────────────────────────────────
+function openFinishSetModal() {
+  var game = activeGame();
+  if (!game) return;
+  var s = game.settings;
+  var si = currentSetIdx(game);
+  var roundsInSet = game.rounds.filter(function(r) { return r.setIdx === si; }).length;
+  if (roundsInSet === 0) { toast('Bu sette henüz el oynanmadı!'); return; }
+
+  document.getElementById('m-finset-title').textContent = 'Set ' + (si+1) + ' Özeti';
+
+  var curTotals = calcRoundTotals(game, si);
+  var html = '';
+
+  if (s.playMode === 'esli') {
+    var pids = game.playerIds;
+    var sumA = (curTotals[pids[0]]||0) + (curTotals[pids[2]]||0);
+    var sumB = (curTotals[pids[1]]||0) + (curTotals[pids[3]]||0);
+    var p0 = gp(pids[0]), p2 = gp(pids[2]), p1 = gp(pids[1]), p3 = gp(pids[3]);
+    var winnerTeam = sumA < sumB ? 'A' : (sumB < sumA ? 'B' : 'draw');
+    html += '<div style="margin-bottom:16px">';
+    html += '<div style="display:flex;gap:8px;margin-bottom:12px">';
+    // Takım A kutusu
+    html += '<div style="flex:1;background:' + (winnerTeam==='A'?'var(--green-bg)':'var(--surface)') + ';border:2px solid ' + (winnerTeam==='A'?'var(--green-bd)':'var(--border)') + ';border-radius:var(--rsm);padding:12px;text-align:center">';
+    html += '<div style="font-size:10px;color:var(--text3);margin-bottom:4px">' + (p0?p0.name:'?') + ' & ' + (p2?p2.name:'?') + '</div>';
+    html += '<div style="font-size:28px;font-weight:900;color:' + (winnerTeam==='A'?'var(--green)':'var(--text)') + '">' + sumA + '</div>';
+    html += '<div style="font-size:10px;color:var(--text3)">ceza puan</div>';
+    if (winnerTeam==='A') html += '<div style="font-size:11px;font-weight:700;color:var(--green);margin-top:4px">🏆 Galip</div>';
+    html += '</div>';
+    // vs
+    html += '<div style="display:flex;align-items:center;font-size:14px;font-weight:800;color:var(--text3)">vs</div>';
+    // Takım B kutusu
+    html += '<div style="flex:1;background:' + (winnerTeam==='B'?'var(--blue-bg)':'var(--surface)') + ';border:2px solid ' + (winnerTeam==='B'?'var(--blue-bd)':'var(--border)') + ';border-radius:var(--rsm);padding:12px;text-align:center">';
+    html += '<div style="font-size:10px;color:var(--text3);margin-bottom:4px">' + (p1?p1.name:'?') + ' & ' + (p3?p3.name:'?') + '</div>';
+    html += '<div style="font-size:28px;font-weight:900;color:' + (winnerTeam==='B'?'var(--blue)':'var(--text)') + '">' + sumB + '</div>';
+    html += '<div style="font-size:10px;color:var(--text3)">ceza puan</div>';
+    if (winnerTeam==='B') html += '<div style="font-size:11px;font-weight:700;color:var(--blue);margin-top:4px">🏆 Galip</div>';
+    html += '</div>';
+    html += '</div>';
+    if (winnerTeam === 'draw') {
+      html += '<div style="text-align:center;font-size:13px;color:var(--amber);padding:8px">🤝 Berabere — bu set puan verilmez</div>';
+    }
+    html += '</div>';
+  } else {
+    // Tekli: sıralama göster
+    var sorted = Object.keys(curTotals).sort(function(a,b) { return curTotals[a] - curTotals[b]; });
+    var setPointMap = [4,3,2,1];
+    var icons = ['🥇','🥈','🥉','4️⃣'];
+    html += '<div style="margin-bottom:16px">';
+    html += '<div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Bu Set Sonuçları</div>';
+    sorted.forEach(function(pid, i) {
+      var p = gp(pid);
+      var tot = curTotals[pid] || 0;
+      var pts = setPointMap[i] || 1;
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">';
+      html += '<span style="font-size:18px">' + (icons[i]||'·') + '</span>';
+      html += '<div style="flex:1;font-size:14px;font-weight:700">' + (p?p.name:'?') + '</div>';
+      html += '<div style="font-size:11px;color:var(--text3);margin-right:8px">' + tot + ' ceza</div>';
+      html += '<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:8px;padding:3px 10px;font-size:13px;font-weight:800;color:var(--green)">+' + pts + ' pt</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5">⚠️ Seti bitirince puanlar kaydedilir ve bir sonraki set başlar. Geri alınamaz.</div>';
+  html += '<div style="display:flex;gap:10px">';
+  html += '<button class="btn btn-s" style="flex:1" onclick="closeModal(\'m-finset\')">İptal</button>';
+  html += '<button class="btn btn-g" style="flex:2" onclick="confirmFinishSet()">Seti Bitir ✓</button>';
+  html += '</div>';
+
+  document.getElementById('m-finset-content').innerHTML = html;
+  openModal('m-finset');
+}
+
+function confirmFinishSet() {
+  var game = activeGame();
+  if (!game) return;
+  var s = game.settings;
+  var si = currentSetIdx(game);
+  if (!game.sets) game.sets = [];
+
+  var setPoints = getSetPointsForGame(game, si);
+  var winTeam = null;
+  if (s.playMode === 'esli') {
+    var pids = game.playerIds;
+    var tot = calcRoundTotals(game, si);
+    var sumA = (tot[pids[0]]||0) + (tot[pids[2]]||0);
+    var sumB = (tot[pids[1]]||0) + (tot[pids[3]]||0);
+    winTeam = sumA < sumB ? 'A' : (sumB < sumA ? 'B' : 'draw');
+  }
+  game.sets.push({ setNumber: si+1, points: setPoints, winTeam: winTeam });
+
+  closeModal('m-finset');
+
+  if (isGameOver(game)) {
+    endGame(game);
+    return;
+  }
+
+  saveDB(game.id);
+  renderLive();
+  toast('Set ' + (si+1) + ' tamamlandı! Sıradaki set başlıyor 🎯');
+}
+
 function submitRound() {
   var game = activeGame();
   if (!game) return;
-  var rawScores = game.playerIds.map(function(pid) {
+  var s = game.settings;
+  var si = currentSetIdx(game);
+
+  // Her oyuncudan girilen puanı al (negatif de olabilir)
+  var scores = game.playerIds.map(function(pid) {
     var inp = document.getElementById('ri-' + pid);
-    var raw = inp ? (parseInt(inp.value) || 0) : 0;
-    if (pid === RS.finId) raw = 0;
-    return {pid: pid, raw: raw};
+    var v = inp ? (parseInt(inp.value) || 0) : 0;
+    return { pid: pid, raw: v, final: v };
   });
-  var scores = calcPenalties(rawScores, RS.finId);
-  // Açış bilgisi: eğer bu elde birisi açtıysa kaydet
-  var openerData = null;
-  if (RS.openerId && RS.openerScore) {
-    var prevOpener = getGameCurrentOpener(game);
-    // Katlamalı kontrol: yeni açış mevcut açıştan yüksekse geçer
-    var passes = !prevOpener || (game.settings.gameType === 'katlamali' && RS.openerScore > prevOpener.score);
-    if (passes || !prevOpener) {
-      var op = gp(RS.openerId);
-      openerData = { pid: RS.openerId, score: RS.openerScore, name: op ? op.name : '?' };
-    }
-  }
-  var round = { id: uid(), roundNumber: game.rounds.length + 1, finId: RS.finId || null, scores: scores, ts: new Date().toISOString() };
-  if (openerData) round.opener = openerData;
+
+  // El açanları topla
+  var openers = collectOpeners();
+
+  var round = {
+    id: uid(),
+    roundNumber: game.rounds.length + 1,
+    setIdx: si,
+    ft: 'normal',
+    finId: null,
+    scores: scores,
+    openers: openers,
+    ts: new Date().toISOString()
+  };
   game.rounds.push(round);
-  if (isGameOver(game)) {
+
+  // Ceza limiti modunda otomatik bitiş
+  if (s.endCond === 'penalty_limit' && isGameOver(game)) {
     closeModal('m-round');
     endGame(game);
     return;
   }
+
   saveDB(game.id);
   closeModal('m-round');
   renderLive();
@@ -1165,7 +1605,15 @@ function submitRound() {
 // ─── GAME OVER ────────────────────────────────────────────────
 function endGame(game) {
   var totals = calcTotals(game);
-  var ranks = getRankings(totals);
+  var s = game.settings;
+  var ranks;
+  if (s.endCond === 'set_count') {
+    // Set bazlı: set puanına göre sırala (fazla puan = iyi → ters sırala)
+    var setTotals = calcSetTotals(game);
+    ranks = Object.keys(setTotals).sort(function(a,b) { return setTotals[b] - setTotals[a]; });
+  } else {
+    ranks = getRankings(totals);
+  }
   game.status = 'finished';
   game.finishedAt = new Date().toISOString();
   game.rankings = ranks;
@@ -1177,19 +1625,48 @@ function endGame(game) {
 
 function showGameOverModal(game, totals, ranks) {
   var winner = gp(game.winnerId);
+  var s = game.settings;
   var icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  var setTotals = calcSetTotals(game);
   var html = '<div style="text-align:center;padding:20px 0 16px">';
   html += '<div style="font-size:44px;margin-bottom:8px">🏆</div>';
-  html += '<div style="font-size:22px;font-weight:900">' + (winner ? winner.name : '?') + ' Kazandı!</div>';
-  html += '<div style="font-size:13px;color:var(--text2);margin-top:4px">Tebrikler!</div></div>';
+  if (s.playMode === 'esli') {
+    var pids = game.playerIds;
+    var aWins = (game.sets||[]).filter(function(st) { return st.winTeam === 'A'; }).length;
+    var bWins = (game.sets||[]).filter(function(st) { return st.winTeam === 'B'; }).length;
+    var p0 = gp(pids[0]), p2 = gp(pids[2]), p1 = gp(pids[1]), p3 = gp(pids[3]);
+    var winTeamName = aWins >= bWins ? (p0?p0.name:'?') + ' & ' + (p2?p2.name:'?') : (p1?p1.name:'?') + ' & ' + (p3?p3.name:'?');
+    html += '<div style="font-size:20px;font-weight:900">' + winTeamName + '</div>';
+    html += '<div style="font-size:13px;color:var(--text2);margin-top:4px">' + aWins + ' - ' + bWins + ' Kazandı! Tebrikler! 🎉</div></div>';
+    // Takım skorları
+    html += '<div style="display:flex;gap:10px;margin-bottom:12px">';
+    html += '<div style="flex:1;background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--rsm);padding:10px;text-align:center">';
+    html += '<div style="font-size:11px;color:var(--text3)">' + (p0?p0.name:'?') + ' & ' + (p2?p2.name:'?') + '</div>';
+    html += '<div style="font-size:26px;font-weight:900;color:var(--green)">' + aWins + '</div><div style="font-size:10px;color:var(--text3)">set</div></div>';
+    html += '<div style="flex:1;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--rsm);padding:10px;text-align:center">';
+    html += '<div style="font-size:11px;color:var(--text3)">' + (p1?p1.name:'?') + ' & ' + (p3?p3.name:'?') + '</div>';
+    html += '<div style="font-size:26px;font-weight:900;color:var(--blue)">' + bWins + '</div><div style="font-size:10px;color:var(--text3)">set</div></div>';
+    html += '</div>';
+  } else {
+    html += '<div style="font-size:22px;font-weight:900">' + (winner ? winner.name : '?') + ' Kazandı!</div>';
+    html += '<div style="font-size:13px;color:var(--text2);margin-top:4px">Tebrikler! 🎉</div></div>';
+  }
   ranks.forEach(function(pid, i) {
     var p = gp(pid);
     var tot = totals[pid] || 0;
-    var tcol = tot < 0 ? 'var(--green)' : i === ranks.length-1 ? 'var(--red)' : 'var(--text)';
+    var setPts = setTotals[pid] || 0;
+    var tcol = (i === 0) ? 'var(--green)' : i === ranks.length-1 ? 'var(--red)' : 'var(--text)';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">';
     html += '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">' + (icons[i]||'·') + '</span>';
-    html += '<span style="font-size:15px;font-weight:700">' + (p ? p.name : '?') + '</span></div>';
-    html += '<span style="font-family:var(--mono);font-weight:700;color:' + tcol + '">' + tot + ' puan</span></div>';
+    html += '<div><span style="font-size:15px;font-weight:700">' + (p ? p.name : '?') + '</span>';
+    if (s.endCond === 'set_count') html += '<div style="font-size:11px;color:var(--text3)">' + tot + ' ceza puan</div>';
+    html += '</div></div>';
+    if (s.endCond === 'set_count') {
+      html += '<span style="font-family:var(--mono);font-weight:800;font-size:18px;color:' + tcol + '">' + setPts + ' puan</span>';
+    } else {
+      html += '<span style="font-family:var(--mono);font-weight:700;color:' + tcol + '">' + tot + ' puan</span>';
+    }
+    html += '</div>';
   });
   html += '<button class="btn btn-g" style="margin-top:16px" onclick="closeModal(\'m-gameover\');go(\'s-history\')">Tamam 👍</button>';
   document.getElementById('m-gameover-content').innerHTML = html;
@@ -1205,7 +1682,7 @@ function showBillModal(game, totals, ranks) {
     html += '<div style="font-size:36px">🏆</div>';
     html += '<div style="font-size:18px;font-weight:900;margin:6px 0">' + (winner ? winner.name : '?') + ' Kazandı!</div></div>';
     html += '<div class="igrp"><div class="ilbl">Toplam Hesap (₺)</div>';
-    html += '<input class="nilg" type="number" inputmode="numeric" id="bill-amt" placeholder="0.00" min="0" oninput="updateBillPrev()"></div>';
+    html += '<input class="nilg" type="number" id="bill-amt" placeholder="0.00" min="0" oninput="updateBillPrev()"></div>';
     html += '<div class="ilbl" style="margin-bottom:8px">Ödeme Tipi</div>';
     html += '<div class="pills" style="margin-bottom:16px">';
     html += '<div class="pill ' + (selType==='loser_pays'?'on':'') + '" id="bpt-l" onclick="setBillType(\'loser_pays\')">Kaybeden Öder</div>';
@@ -1290,8 +1767,16 @@ function calcSplit(amt, type, ranks, totals) {
 function undoRound() {
   var game = activeGame();
   if (!game || game.rounds.length === 0) return;
-  confirm2('Son eli geri al?', 'Son girilen el silinecek.', function() {
+  confirm2('Son eli geri al?', 'Son girilen el silinecek. Tamamlanan set varsa o da geri alınır.', function() {
+    var lastRound = game.rounds[game.rounds.length - 1];
     game.rounds.pop();
+    // Eğer bu elin seti zaten kaydedilmişse seti de geri al
+    if (game.sets && game.sets.length > 0) {
+      var lastSet = game.sets[game.sets.length - 1];
+      if (lastSet.setNumber === (lastRound.setIdx + 1)) {
+        game.sets.pop();
+      }
+    }
     saveDB(game.id);
     renderLive();
     toast('Son el geri alındı.');
@@ -1465,15 +1950,21 @@ function gameCard(g, compact) {
   html += '<div class="hplayers">' + pnames + '</div>';
   html += '<div class="hmeta">';
   if (winner) html += '<span class="bdg bdg-g">🥇 ' + winner.name + '</span>';
-  html += '<span class="bdg bdg-b">' + g.rounds.length + ' el</span>';
+  var modeLabel2 = (g.settings && g.settings.playMode === 'esli') ? '👥 Eşli' : '👤 Tekli';
+  var setsLabel = (g.sets && g.sets.length > 0) ? g.sets.length + ' set · ' : '';
+  html += '<span class="bdg bdg-b">' + modeLabel2 + ' · ' + setsLabel + g.rounds.length + ' el</span>';
   html += billHtml;
   html += '</div>';
   if (!compact) {
     html += '<div style="margin-top:8px;font-size:11px;color:var(--text3)">';
     var icons3 = ['🥇','🥈','🥉','·','·'];
-    ranks.forEach(function(pid, i) {
+    var setTotals2 = calcSetTotals(g);
+    var useSetPts = g.settings && g.settings.endCond === 'set_count' && g.sets && g.sets.length > 0;
+    var dispRanks = useSetPts ? Object.keys(setTotals2).sort(function(a,b){return setTotals2[b]-setTotals2[a];}) : ranks;
+    dispRanks.forEach(function(pid, i) {
       var p3 = gp(pid);
-      html += (icons3[i]||'·') + ' ' + (p3 ? p3.name : '?') + ' (' + totals[pid] + ')  ';
+      var scoreVal = useSetPts ? (setTotals2[pid] || 0) + 'pt' : totals[pid];
+      html += (icons3[i]||'·') + ' ' + (p3 ? p3.name : '?') + ' (' + scoreVal + ')  ';
     });
     html += '</div>';
   }
@@ -1484,88 +1975,198 @@ function gameCard(g, compact) {
 function showGDetail(gid) {
   var game = db.games.find(function(g) { return g.id === gid; });
   if (!game) return;
+  var s = game.settings;
+  var pids = game.playerIds;
   var totals = calcTotals(game);
-  var ranks = getRankings(totals);
+  var setTotals = calcSetTotals(game);
+  var sets = game.sets || [];
   var winner = gp(game.winnerId);
-  var icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  var icons = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'];
+  var isSetMode = s.endCond === 'set_count';
+  var isEsli = s.playMode === 'esli';
+
+  // Sıralama: set modunda set puanına göre, ceza limitinde ceza puanına göre
+  var ranks;
+  if (isSetMode && sets.length > 0) {
+    ranks = pids.slice().sort(function(a,b) { return (setTotals[b]||0) - (setTotals[a]||0); });
+  } else {
+    ranks = pids.slice().sort(function(a,b) { return (totals[a]||0) - (totals[b]||0); });
+  }
+
   var html = '<div style="padding:16px">';
+
+  // ── BANNER ──
   html += '<div class="gobanner">';
-  html += '<div style="font-size:32px;margin-bottom:6px">🏆</div>';
-  html += '<h2>' + (winner ? winner.name : '?') + ' Kazandı</h2>';
+  if (isEsli && sets.length > 0) {
+    var aWins = sets.filter(function(st) { return st.winTeam === 'A'; }).length;
+    var bWins = sets.filter(function(st) { return st.winTeam === 'B'; }).length;
+    var p0 = gp(pids[0]), p2 = gp(pids[2]), p1 = gp(pids[1]), p3 = gp(pids[3]);
+    var winName = aWins >= bWins ? (p0?p0.name:'?') + ' & ' + (p2?p2.name:'?') : (p1?p1.name:'?') + ' & ' + (p3?p3.name:'?');
+    html += '<div style="font-size:32px;margin-bottom:6px">🏆</div>';
+    html += '<h2>' + winName + '</h2>';
+    html += '<div style="font-size:13px;color:var(--text2);margin-top:2px">' + aWins + ' - ' + bWins + ' set</div>';
+  } else {
+    html += '<div style="font-size:32px;margin-bottom:6px">🏆</div>';
+    html += '<h2>' + (winner ? winner.name : '?') + ' Kazandı</h2>';
+  }
   html += '<div style="font-size:12px;color:var(--text2);margin-top:4px">' + fmtDate(game.createdAt) + '</div>';
   html += '</div></div>';
-  html += '<div class="sec">Sıralama</div>';
+
+  // ── ÖZET SIRALAMA ──
+  html += '<div class="sec">Genel Sıralama</div>';
   ranks.forEach(function(pid, i) {
     var p = gp(pid);
-    var tot = totals[pid] || 0;
-    var tcol = tot < 0 ? 'var(--green)' : i === ranks.length-1 ? 'var(--red)' : 'var(--text)';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border)">';
-    html += '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">' + (icons[i]||'') + '</span>';
+    var setPts = setTotals[pid] || 0;
+    var penPts = totals[pid] || 0;
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border)">';
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<span style="font-size:20px">' + (icons[i]||'') + '</span>';
     html += '<span style="font-size:15px;font-weight:700">' + (p ? p.name : '?') + '</span></div>';
-    html += '<span style="font-family:var(--mono);font-size:16px;font-weight:700;color:' + tcol + '">' + tot + '</span>';
-    html += '</div>';
+    html += '<div style="text-align:right">';
+    if (isSetMode) {
+      html += '<div style="font-family:var(--mono);font-size:17px;font-weight:800;color:var(--green)">' + setPts + ' pt</div>';
+      html += '<div style="font-size:10px;color:var(--text3)">' + penPts + ' ceza toplamı</div>';
+    } else {
+      var col = penPts < 0 ? 'var(--green)' : i === ranks.length-1 ? 'var(--red)' : 'var(--text)';
+      html += '<div style="font-family:var(--mono);font-size:17px;font-weight:800;color:' + col + '">' + penPts + '</div>';
+    }
+    html += '</div></div>';
   });
+
+  // ── SET DETAYLARI ──
+  // Kaç farklı setIdx var?
+  var setIdxSet = {};
+  game.rounds.forEach(function(r) { setIdxSet[r.setIdx !== undefined ? r.setIdx : 0] = true; });
+  var setIdxList = Object.keys(setIdxSet).map(Number).sort(function(a,b){return a-b;});
+
+  if (setIdxList.length === 0) {
+    html += '<div class="sec">El Detayları</div>';
+    html += buildRoundTable(game, pids, game.rounds, totals, isEsli);
+  } else {
+    setIdxList.forEach(function(si) {
+      var setRounds = game.rounds.filter(function(r) { return (r.setIdx !== undefined ? r.setIdx : 0) === si; });
+      var savedSet = sets[si];
+      var setLabel = 'Set ' + (si+1);
+      if (isEsli && savedSet) {
+        setLabel += savedSet.winTeam === 'A'
+          ? ' · 🟢 ' + (gp(pids[0])?gp(pids[0]).name:'?') + ' & ' + (gp(pids[2])?gp(pids[2]).name:'?') + ' kazandı'
+          : savedSet.winTeam === 'B'
+            ? ' · 🔵 ' + (gp(pids[1])?gp(pids[1]).name:'?') + ' & ' + (gp(pids[3])?gp(pids[3]).name:'?') + ' kazandı'
+            : ' · 🤝 Berabere';
+      }
+      html += '<div class="sec">' + setLabel + '</div>';
+
+      // Set içi ceza toplamları
+      var setRunTotals = {};
+      pids.forEach(function(pid) { setRunTotals[pid] = 0; });
+
+      // Tablo
+      html += '<div style="overflow-x:auto;padding:0 16px 4px">';
+      var minW = Math.max(300, 80 + setRounds.length * 46 + 60);
+      html += '<table class="stbl" style="min-width:' + minW + 'px">';
+
+      // Başlık
+      html += '<thead><tr><th style="text-align:left;min-width:72px">OYUNCU</th>';
+      setRounds.forEach(function(r, ri) {
+        html += '<th style="min-width:42px">' + (ri+1) + '. El</th>';
+      });
+      html += '<th style="min-width:52px">TOP</th>';
+      if (isSetMode && savedSet) html += '<th style="min-width:44px;color:var(--green)">PT</th>';
+      html += '</tr></thead><tbody>';
+
+      // Her oyuncu satırı
+      pids.forEach(function(pid, pi) {
+        var p = gp(pid);
+        var setSum = 0;
+        var row = '<tr>';
+        row += '<td><div style="display:flex;align-items:center;gap:6px">';
+        row += '<div class="av ' + avc(pi) + '" style="width:24px;height:24px;font-size:9px">' + ini(p?p.name:'?') + '</div>';
+        row += '<span style="font-size:12px;font-weight:700">' + (p?p.name:'?') + '</span></div></td>';
+
+        setRounds.forEach(function(r) {
+          var sc = r.scores.find(function(x) { return x.pid === pid; });
+          var v = sc ? sc.final : 0;
+          setSum += v;
+          var cls = v < 0 ? 'neg' : v > 50 ? 'hi' : '';
+          // El açan bilgisi bu hücrede mi?
+          var openerNote = '';
+          if (r.openers && r.openers.length > 0) {
+            var myOpen = r.openers.find(function(o) { return o.pid === pid; });
+            if (myOpen) openerNote = '<div style="font-size:9px;color:var(--amber);line-height:1;margin-top:1px">✋' + myOpen.points + '</div>';
+          }
+          row += '<td class="' + cls + '" style="font-size:12px;vertical-align:top;padding-top:6px">' + (v !== 0 ? v : '–') + openerNote + '</td>';
+        });
+
+        var sumCls = setSum < 0 ? 'neg' : '';
+        row += '<td class="tcell ' + sumCls + '" style="font-size:13px">' + setSum + '</td>';
+
+        if (isSetMode && savedSet) {
+          var pt = savedSet.points[pid] || 0;
+          row += '<td style="font-size:13px;font-weight:800;color:var(--green);text-align:center">' + (pt > 0 ? '+' + pt : '–') + '</td>';
+        }
+        row += '</tr>';
+        html += row;
+      });
+
+      // Eşli toplamı
+      if (isEsli && setRounds.length > 0) {
+        var setTotMap = {};
+        pids.forEach(function(pid) { setTotMap[pid] = 0; });
+        setRounds.forEach(function(r) {
+          r.scores.forEach(function(sc) { setTotMap[sc.pid] = (setTotMap[sc.pid]||0) + sc.final; });
+        });
+        var sumA = (setTotMap[pids[0]]||0) + (setTotMap[pids[2]]||0);
+        var sumB = (setTotMap[pids[1]]||0) + (setTotMap[pids[3]]||0);
+        html += '<tr style="border-top:1px solid var(--border2)">';
+        html += '<td style="font-size:10px;font-weight:700;color:var(--text3);text-align:left">TAKIM</td>';
+        setRounds.forEach(function() { html += '<td></td>'; });
+        // Takım A toplamı rengi
+        var colA = sumA < sumB ? 'var(--green)' : 'var(--text2)';
+        var colB = sumB < sumA ? 'var(--green)' : 'var(--text2)';
+        html += '<td colspan="2" style="font-size:11px;text-align:center">';
+        html += '<span style="color:' + colA + ';font-weight:800">A:' + sumA + '</span>';
+        html += '<span style="color:var(--text3);margin:0 4px">·</span>';
+        html += '<span style="color:' + colB + ';font-weight:800">B:' + sumB + '</span>';
+        html += '</td></tr>';
+      }
+
+      // ── EL AÇAN ÖZET SATIRI ──
+      var hasOpeners = setRounds.some(function(r) { return r.openers && r.openers.length > 0; });
+      if (hasOpeners) {
+        html += '<div style="margin:4px 16px 8px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:8px 12px">';
+        html += '<div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">✋ El Açanlar</div>';
+        setRounds.forEach(function(r, ri) {
+          if (!r.openers || r.openers.length === 0) return;
+          html += '<div style="font-size:12px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(245,158,11,.15)">';
+          html += '<span style="color:var(--text3);font-size:11px">' + (ri+1) + '. El: </span>';
+          r.openers.forEach(function(o, oi) {
+            var op = gp(o.pid);
+            html += (oi > 0 ? ' · ' : '') + '<b style="color:var(--text)">' + (op ? op.name : '?') + '</b>';
+            if (o.points) html += ' <span style="color:var(--amber);font-family:var(--mono);font-weight:700">' + o.points + '</span>';
+          });
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+    });
+  }
+
+  // ── HESAP ──
   if (game.bill) {
     html += '<div class="sec">Hesap</div><div class="card">';
     html += sRow('Toplam Hesap', '₺' + Math.round(game.bill.totalAmount), '');
     Object.keys(game.bill.splitAmounts).forEach(function(pid) {
       var v = game.bill.splitAmounts[pid];
-      if (v > 0) {
-        var p4 = gp(pid);
-        html += sRow((p4 ? p4.name : '?') + ' ödedi', '₺' + Math.round(v), 'var(--red)');
-      }
+      if (v > 0) { var pb = gp(pid); html += sRow((pb?pb.name:'?') + ' ödedi', '₺' + Math.round(v), 'var(--red)'); }
     });
     html += '</div>';
   }
-  // Açış geçmişi
-  var openerHistory = game.rounds.filter(function(r){return r.opener;});
-  if (openerHistory.length > 0) {
-    html += '<div class="sec">Açış Geçmişi</div><div class="card" style="margin:0 16px 12px">';
-    openerHistory.forEach(function(r) {
-      var op = r.opener;
-      var opP = gp(op.pid);
-      var opIdx = game.playerIds.indexOf(op.pid);
-      html += '<div class="srow"><div style="display:flex;align-items:center;gap:8px"><div class="av ' + avc(opIdx<0?0:opIdx) + '" style="width:22px;height:22px;font-size:8px">' + ini(opP?opP.name:'?') + '</div><span class="slbl">' + r.roundNumber + '. elde: ' + (opP?opP.name:'?') + '</span></div><span class="sval" style="color:var(--amber)">' + op.score + ' puan</span></div>';
-    });
-    html += '</div>';
-  }
-  html += '<div class="sec">El Detayları</div>';
-  html += '<div style="overflow-x:auto;padding:0 16px 16px">';
-  var minW = Math.max(300, 80 + game.rounds.length * 40 + 50);
-  html += '<table class="stbl" style="min-width:' + minW + 'px">';
-  html += '<thead><tr><th style="text-align:left">EL</th>';
-  game.playerIds.forEach(function(pid) {
-    var p5 = gp(pid);
-    html += '<th>' + (p5 ? p5.name.split(' ')[0] : '?') + '</th>';
-  });
-  html += '</tr></thead><tbody>';
-  game.rounds.forEach(function(r) {
-    var ftIcon = r.finId ? '✓' : '';
-    html += '<tr><td style="text-align:left;font-size:11px">' + r.roundNumber + ftIcon + '</td>';
-    game.playerIds.forEach(function(pid) {
-      var sc = r.scores.find(function(x) { return x.pid === pid; });
-      var v = sc ? sc.final : '-';
-      var cls = '';
-      if (typeof v === 'number') cls = v < 0 ? 'neg' : v > 50 ? 'hi' : '';
-      html += '<td class="' + cls + '" style="font-size:11px">' + v + '</td>';
-    });
-    html += '</tr>';
-  });
-  html += '<tr style="border-top:2px solid var(--border2)">';
-  html += '<td style="font-weight:700;font-size:11px;text-align:left">TOP</td>';
-  game.playerIds.forEach(function(pid) {
-    var tot = totals[pid] || 0;
-    html += '<td class="tcell ' + (tot<0?'neg':'') + '">' + tot + '</td>';
-  });
-  html += '</tr></tbody></table></div>';
-  html += '<div style="height:20px"></div>';
+
+  html += '<div style="height:24px"></div>';
   document.getElementById('gd-content').innerHTML = html;
-  // Back button based on context
-  document.getElementById('gd-back').onclick = function() {
-    var prev = document.querySelector('.screen.active');
-    if (prev && prev.id === 's-pdetail') go('s-pdetail');
-    else go('s-history');
-  };
+  document.getElementById('gd-back').onclick = function() { go('s-history'); };
   go('s-gdetail');
 }
 
@@ -1675,40 +2276,12 @@ function refreshActive(){
   var roundOpen=document.getElementById('m-round').classList.contains('open');
   var playerOpen=document.getElementById('m-player').classList.contains('open');
   if(id==='s-home') renderHome();
-  else if(id==='s-live'){
-    // Canlı ekranda tablo her zaman güncellenir; el modal açıksa sadece tablo güncellenir (form korunur)
-    var game=activeGame();
-    if(game){
-      var totals=calcTotals(game), ranks=getRankings(totals);
-      buildTable(game,totals,ranks);
-      // Header stats güncelle
-      renderLiveHeader(game,totals,ranks);
-    }
-    if(!roundOpen) renderLive();
-  }
+  else if(id==='s-live'){ if(!roundOpen) renderLive(); }
   else if(id==='s-history') renderHistory();
   else if(id==='s-players'){ if(!playerOpen) renderPlayers(); }
   else if(id==='s-settings') renderSettings();
   else if(id==='s-sync') renderSync();
   document.getElementById('n-live').style.display = activeGame()? 'flex':'none';
-}
-
-function renderLiveHeader(game, totals, ranks){
-  var n=game.rounds.length, s=game.settings;
-  var sub=s.endCond==='set_count'?(n+'/'+s.setCnt+' el'):(n+'. el');
-  sub+=' · '+(s.gameType==='katlamali'?'Katlamalı':'Katlamasız');
-  var lsub=document.getElementById('live-sub'); if(lsub) lsub.textContent=sub;
-  var lel=document.getElementById('lv-el'); if(lel) lel.textContent=n;
-  if(s.endCond==='set_count'){
-    var lk=document.getElementById('lv-kalan'); if(lk) lk.textContent=Math.max(0,s.setCnt-n);
-    var pct=Math.min(100,n/s.setCnt*100);
-    var lp=document.getElementById('lv-prog'); if(lp){lp.style.width=pct+'%';lp.classList.toggle('dng',pct>80);}
-  } else {
-    var mx=Math.max.apply(null,[0].concat(Object.values(totals)));
-    var lk2=document.getElementById('lv-kalan'); if(lk2) lk2.textContent=Math.max(0,s.penLimit-mx);
-    var pct2=Math.min(100,mx/s.penLimit*100);
-    var lp2=document.getElementById('lv-prog'); if(lp2){lp2.style.width=pct2+'%';lp2.classList.toggle('dng',pct2>75);}
-  }
 }
 function markSyncUI(){
   var dot=document.getElementById('topbar-syncdot');
