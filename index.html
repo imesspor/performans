@@ -672,7 +672,7 @@ var db = loadDB();
 var SYNC = { cfg:{"apiKey":"AIzaSyDrX7yN4QmwEwZ1G8NTH8z67zmJnqSfkOo","authDomain":"matik-53354.firebaseapp.com","databaseURL":"https://matik-53354-default-rtdb.firebaseio.com","projectId":"matik-53354","storageBucket":"matik-53354.firebasestorage.app","messagingSenderId":"1024538403845","appId":"1:1024538403845:web:d7f37402dd2055a55e286c","measurementId":"G-MWESW5GQPS"}, room:'', status:'off', fbRef:null, app:null, lastPush:0, pushTimer:null };
 var APPLYING_REMOTE = false;
 function loadSyncCfg() {
-  try { var s = JSON.parse(localStorage.getItem(SYNCKEY)); if (s && s.room) { SYNC.cfg = s.cfg; SYNC.room = s.room; } } catch(e) {}
+  try { var s = JSON.parse(localStorage.getItem(SYNCKEY)); if (s && s.room) { SYNC.cfg = s.cfg || SYNC.cfg; SYNC.room = s.room; } } catch(e) {}
 }
 function saveSyncCfg() {
   try { localStorage.setItem(SYNCKEY, JSON.stringify({cfg:SYNC.cfg, room:SYNC.room})); } catch(e) {}
@@ -2768,25 +2768,12 @@ function syncConnectedView(){
 }
 function syncSetupView(){
   var h='<div style="padding:16px">';
-  h+='<div class="hero" style="margin:0 0 16px"><h2 style="font-size:18px;font-weight:900;margin-bottom:4px">☁️ Canlı Takip</h2><p style="font-size:13px;color:var(--text2);line-height:1.5">Tüm telefonlar aynı oyunu canlı görsün. Biri el girince hepsinde anında görünür. Ücretsiz Firebase ile çalışır.</p></div>';
-  if(SYNC.status==='error') h+='<div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:14px;line-height:1.5">Bağlanılamadı. Config veya Realtime Database kuralları yanlış olabilir; adımları kontrol et.</div>';
-  h+='<div class="ilbl">1 · Firebase Config</div>';
-  h+='<p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Firebase projenden aldığın config nesnesini yapıştır (apiKey, databaseURL içeren süslü parantezli kısım).</p>';
-  h+='<textarea class="inp" id="sync-cfg" rows="7" placeholder=\'{ "apiKey": "...", "databaseURL": "https://...firebaseio.com", "projectId": "..." }\' style="font-family:var(--mono);font-size:12px;resize:vertical"></textarea>';
-  h+='<div class="ilbl" style="margin-top:14px">2 · Oda Kodu</div>';
+  h+='<div class="hero" style="margin:0 0 16px"><h2 style="font-size:18px;font-weight:900;margin-bottom:4px">☁️ Canlı Takip</h2><p style="font-size:13px;color:var(--text2);line-height:1.5">Tüm telefonlar aynı oyunu canlı görsün. Biri el girince hepsinde anında görünür.</p></div>';
+  if(SYNC.status==='error') h+='<div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:14px;line-height:1.5">Bağlanılamadı. Realtime Database test mode açık mı kontrol et.</div>';
+  h+='<div class="ilbl">Oda Kodu</div>';
   h+='<p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Arkadaşlarınla aynı kodu kullanın. Aynı oda = aynı veri.</p>';
   h+='<input class="inp" id="sync-room" placeholder="kanka-okey" autocomplete="off" autocapitalize="off">';
   h+='<button class="btn btn-g" style="margin-top:16px" onclick="doConnect()">Bağlan ve Senkronla</button>';
-  h+='<div class="sec" style="padding:20px 0 8px">Firebase nasıl kurulur? (tek seferlik ~3 dk)</div>';
-  h+='<div class="card" style="margin:0"><div class="steplist">';
-  h+=step('<b>console.firebase.google.com</b> adresine gir, Google hesabınla giriş yap.');
-  h+=step('<b>Add project</b> → isim ver → oluştur (Analytics\'i kapatabilirsin).');
-  h+=step('Sol menü <b>Build → Realtime Database</b> → <b>Create Database</b> → bölge seç → <b>Test mode</b> ile başlat.');
-  h+=step('Sol üst <b>⚙️ Project settings</b> → <b>Your apps</b> → <b>Web (&lt;/&gt;)</b> simgesine bas, uygulama ekle.');
-  h+=step('Çıkan koddaki <b>firebaseConfig = { ... }</b> süslü parantezli nesneyi kopyala, yukarı yapıştır.');
-  h+=step('Oda kodu yaz, <b>Bağlan</b>\'a bas; sonra <b>Davet Linki</b>\'ni arkadaşlarına gönder.');
-  h+='</div></div>';
-  h+='<div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:11px;color:var(--amber);margin-top:14px;line-height:1.5">⚠️ Test mode 30 gün açıktır. Uzun süreli kullanım için Realtime Database → Rules kısmından kuralları düzenle.</div>';
   h+='</div>';
   return h;
 }
@@ -2799,17 +2786,17 @@ function parseFirebaseConfig(raw){
   return null;
 }
 window.doConnect=function(){
-  var raw=document.getElementById('sync-cfg').value.trim();
-  var room=document.getElementById('sync-room').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'-').replace(/^-+|-+$/g,'');
-  if(!raw){ toast('Firebase config yapıştır.'); return; }
-  if(!room){ toast('Oda kodu gir.'); return; }
-  var cfg=parseFirebaseConfig(raw);
-  if(!cfg){ toast('Config okunamadı. Süslü parantezli nesneyi yapıştır.'); return; }
-  if(!cfg.databaseURL){ toast('Config\'de databaseURL yok — Realtime Database oluşturdun mu?'); return; }
-  if(!fbReady()){ toast('Firebase yüklenemedi. İnternet bağlantını kontrol et.'); return; }
+  var cfgEl=document.getElementById("sync-cfg");
+  var raw=cfgEl ? cfgEl.value.trim() : "";
+  var room=document.getElementById("sync-room").value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,"-").replace(/^-+|-+$/g,"");
+  if(!room){ toast("Oda kodu gir."); return; }
+  var cfg=raw ? parseFirebaseConfig(raw) : SYNC.cfg;
+  if(!cfg){ toast("Config bulunamadı."); return; }
+  if(!cfg.databaseURL){ toast("Config'de databaseURL yok — Realtime Database oluşturdun mu?"); return; }
+  if(!fbReady()){ toast("Firebase yüklenemedi. İnternet bağlantını kontrol et."); return; }
   SYNC.cfg=cfg; SYNC.room=room; saveSyncCfg();
   if(SYNC.app){ try{ SYNC.app.delete(); }catch(e){} SYNC.app=null; }
-  connectSync(); toast('Bağlanıyor…');
+  connectSync(); toast("Bağlanıyor…");
   setTimeout(renderSync, 500);
 };
 window.askDisconnect=function(){ confirm2('Senkronu kapat?', 'Bu cihaz buluttan ayrılır; veriler cihazda kalır.', function(){ disconnectSync(); toast('Senkron kapatıldı.'); renderSync(); }); };
