@@ -23,6 +23,12 @@
   --font:'Nunito',sans-serif; --mono:'Roboto Mono',monospace;
   --sbt:env(safe-area-inset-bottom,0px); --stt:env(safe-area-inset-top,0px);
 }
+html.theme-light {
+  --bg:#f4f6fa; --bg2:#ffffff; --bg3:#e9edf3;
+  --surface:#ffffff; --surface2:#eef1f6;
+  --border:rgba(15,23,42,0.09); --border2:rgba(15,23,42,0.16);
+  --text:#0f172a; --text2:#475569; --text3:#94a3b8;
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
 #app{width:100%;height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
@@ -277,7 +283,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="scr-scroll">
     <div class="ssec">
       <div class="sec" style="padding:0 0 10px">Oyuncular <span id="setup-cnt" style="color:var(--green)"></span></div>
-      <div id="setup-plist"></div>
+      <div id="setup-plist-wrap">
+        <div id="setup-plist"></div>
+      </div>
       <div style="margin-top:10px">
         <button class="btn btn-s btn-sm" onclick="openPlayerModal(null)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -291,9 +299,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="pill on" id="m-tekli" onclick="setPlayMode('tekli')">👤 Bireysel</div>
         <div class="pill" id="m-esli" onclick="setPlayMode('esli')">👥 Eşli</div>
       </div>
-      <div id="esli-cfg" style="display:none;margin-top:12px">
-        <div class="ilbl" style="margin-bottom:6px">Eş Çiftleri (1-3 vs 2-4)</div>
-        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.7" id="esli-preview">4 oyuncu seçilince çiftler gösterilir</div>
+      <div id="esli-cfg" style="display:none;margin-top:14px">
+        <div class="ilbl" style="margin-bottom:6px">🟢 1. Takım</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <select id="team-a-0" onchange="onTeamSlotChange()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:10px;outline:none"></select>
+          <select id="team-a-1" onchange="onTeamSlotChange()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:10px;outline:none"></select>
+        </div>
+        <div class="ilbl" style="margin-bottom:6px">🔵 2. Takım</div>
+        <div style="display:flex;gap:8px">
+          <select id="team-b-0" onchange="onTeamSlotChange()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:10px;outline:none"></select>
+          <select id="team-b-1" onchange="onTeamSlotChange()" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:10px;outline:none"></select>
+        </div>
+        <div id="team-warn" style="font-size:11px;color:var(--red);margin-top:8px;display:none">⚠️ Her takıma tam 2 oyuncu seçin</div>
       </div>
     </div>
     <div class="ssec">
@@ -455,6 +472,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div style="width:38px"></div>
   </div>
   <div class="scr-scroll">
+    <div class="sec">Görünüm</div>
+    <div class="pills" style="padding:0 16px 16px">
+      <div class="pill" id="theme-dark-btn" onclick="setTheme('dark')">🌙 Koyu</div>
+      <div class="pill" id="theme-light-btn" onclick="setTheme('light')">☀️ Açık</div>
+    </div>
+
     <div class="sec">Kimlik</div>
     <div class="setrow" onclick="openIdentity()">
       <div class="si" style="background:var(--green-bg)">👤</div>
@@ -585,6 +608,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div id="opener-list"></div>
       <button class="btn btn-s btn-sm" style="margin-top:8px;margin-bottom:4px" onclick="addOpener()">+ El Açan Ekle</button>
     </div>
+    <div style="padding:12px 18px 0">
+      <div class="ilbl" style="margin-bottom:6px">⚠️ Ceza Gir <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px">(opsiyonel — puan otomatik tabloya yazılır)</span></div>
+      <div id="penalty-list"></div>
+      <button class="btn btn-s btn-sm" style="margin-top:8px;margin-bottom:4px" onclick="addPenalty()">+ Ceza Ekle</button>
+    </div>
+    <div style="padding:12px 18px 0">
+      <div class="ilbl" style="margin-bottom:6px">🏁 Eli Bitir <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px">(opsiyonel)</span></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:8px;cursor:pointer">
+        <input type="checkbox" id="fin-enable" onchange="toggleFinishBox()"> Bu eli biten kişiyi işaretle
+      </label>
+      <div id="finish-fields" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="fin-pid" onchange="syncFinishToScore()" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none"></select>
+          <select id="fin-type" onchange="syncFinishToScore()" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">
+            <option value="elden_bitti">✋ Elden Bitti</option>
+            <option value="isleyerek_bitti">🔀 İşleyerek Bitti</option>
+          </select>
+        </div>
+        <input type="number" id="fin-points" placeholder="Puan (+/-)" oninput="syncFinishToScore()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:15px;font-weight:700;padding:10px 12px;outline:none;text-align:center;box-sizing:border-box">
+      </div>
+    </div>
     <div style="padding:12px 18px">
       <div id="ri-warn" style="display:none;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:10px 12px;font-size:12px;color:var(--amber);margin-bottom:12px;line-height:1.5"></div>
       <div style="display:flex;gap:10px">
@@ -668,6 +712,26 @@ function saveDB(touchedId) {
 }
 var db = loadDB();
 
+// ─── TEMA (AÇIK/KOYU) ───────────────────────────────────────────
+var THEME_KEY = 'okey_theme_pref';
+function loadTheme() {
+  var t = 'dark';
+  try { t = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e) {}
+  document.documentElement.classList.toggle('theme-light', t === 'light');
+}
+function setTheme(mode) {
+  document.documentElement.classList.toggle('theme-light', mode === 'light');
+  try { localStorage.setItem(THEME_KEY, mode); } catch(e) {}
+  updateThemeUI();
+}
+function updateThemeUI() {
+  var isLight = document.documentElement.classList.contains('theme-light');
+  var d = document.getElementById('theme-dark-btn'), l = document.getElementById('theme-light-btn');
+  if (d) d.classList.toggle('on', !isLight);
+  if (l) l.classList.toggle('on', isLight);
+}
+loadTheme();
+
 // ─── SENKRON DURUMU ───────────────────────────────────────────
 var SYNC = { cfg:{"apiKey":"AIzaSyDrX7yN4QmwEwZ1G8NTH8z67zmJnqSfkOo","authDomain":"matik-53354.firebaseapp.com","databaseURL":"https://matik-53354-default-rtdb.firebaseio.com","projectId":"matik-53354","storageBucket":"matik-53354.firebasestorage.app","messagingSenderId":"1024538403845","appId":"1:1024538403845:web:d7f37402dd2055a55e286c","measurementId":"G-MWESW5GQPS"}, room:'', status:'off', fbRef:null, app:null, lastPush:0, pushTimer:null };
 var APPLYING_REMOTE = false;
@@ -688,7 +752,9 @@ var SS = {
   penLimit: 101,
   bill: false,
   playMode: 'tekli',  // 'tekli' veya 'esli'
-  whoPlays: null  // pid veya null (herkes)
+  whoPlays: null,  // pid veya null (herkes)
+  teamA: [null, null],  // esli modda 1. Takım
+  teamB: [null, null]   // esli modda 2. Takım
 };
 
 // ─── ROUND MODAL STATE ────────────────────────────────────────
@@ -933,7 +999,8 @@ function isGameOver(game) {
 function calcStats(pid) {
   var finished = db.games.filter(function(g) { return g.status === 'finished' && g.playerIds.indexOf(pid) > -1; });
   var st = {games:finished.length, wins:0, totalPen:0, rounds:0, maxRound:0, maxGame:0,
-            okeyThrow:0, dblOpen:0, handFin:0, wrongOpen:0, billsPaid:0, totalPaid:0};
+            eldenBitti:0, isleyerekBitti:0, okeyAt:0, islekAt:0, elActirdi:0, billsPaid:0, totalPaid:0,
+            openCount:0, openPts:0};
   finished.forEach(function(g) {
     var totals = calcTotals(g);
     var ranks = getRankings(totals);
@@ -947,11 +1014,21 @@ function calcStats(pid) {
         st.rounds++;
         if (sc.final > st.maxRound) st.maxRound = sc.final;
         if (r.finId === pid) {
-          if (r.ft === 'okey_throw') st.okeyThrow++;
-          else if (r.ft === 'double_open') st.dblOpen++;
-          else if (r.ft === 'hand_finish') st.handFin++;
-          else if (r.ft === 'wrong_open') st.wrongOpen++;
+          if (r.ft === 'elden_bitti') st.eldenBitti++;
+          else if (r.ft === 'isleyerek_bitti') st.isleyerekBitti++;
         }
+      }
+      if (r.penalties && r.penalties.length > 0) {
+        r.penalties.forEach(function(pn) {
+          if (pn.pid !== pid) return;
+          if (pn.type === 'okey_at') st.okeyAt++;
+          else if (pn.type === 'islek_at') st.islekAt++;
+          else if (pn.type === 'el_actirdi') st.elActirdi++;
+        });
+      }
+      if (r.openers && r.openers.length > 0) {
+        var myOpen = r.openers.find(function(o) { return o.pid === pid; });
+        if (myOpen) { st.openCount++; st.openPts += (myOpen.points || 0); }
       }
     });
     if (g.bill && g.bill.payerIds && g.bill.payerIds.indexOf(pid) > -1) {
@@ -1015,7 +1092,9 @@ function renderSetup() {
   document.getElementById('m-tekli').classList.toggle('on', SS.playMode === 'tekli');
   document.getElementById('m-esli').classList.toggle('on', SS.playMode === 'esli');
   document.getElementById('esli-cfg').style.display = SS.playMode === 'esli' ? 'block' : 'none';
-  updateEsliPreview();
+  var plistWrap = document.getElementById('setup-plist-wrap');
+  if (plistWrap) plistWrap.style.display = SS.playMode === 'esli' ? 'none' : 'block';
+  renderTeamPickers();
   // Set sayısı UI sıfırla
   [2,3,5,7,'oz'].forEach(function(x) {
     var el = document.getElementById('s-' + x);
@@ -1048,14 +1127,14 @@ function toggleSelPlayer(id) {
   else SS.selPlayers.push(id);
   renderSetupList();
   updateSetupCnt();
-  updateEsliPreview();
   renderWhoPlaysOptions();
 }
 function renderWhoPlaysOptions() {
   var el = document.getElementById('setup-whoplays');
   if (!el) return;
+  var pool = SS.playMode === 'esli' ? [SS.teamA[0], SS.teamA[1], SS.teamB[0], SS.teamB[1]].filter(Boolean) : SS.selPlayers;
   var html = '';
-  SS.selPlayers.forEach(function(pid) {
+  pool.forEach(function(pid) {
     var p = gp(pid);
     var on = SS.whoPlays === pid;
     html += '<div class="pill' + (on ? ' on' : '') + '" onclick="setWhoPlays(\'' + pid + '\')">' + (p ? p.name : '?') + '</div>';
@@ -1068,18 +1147,36 @@ function setWhoPlays(pid) {
   SS.whoPlays = pid;
   renderWhoPlaysOptions();
 }
-function updateEsliPreview() {
-  var el = document.getElementById('esli-preview');
-  if (!el) return;
-  var sel = SS.selPlayers;
+function renderTeamPickers() {
   if (SS.playMode !== 'esli') return;
-  if (sel.length !== 4) {
-    el.textContent = '4 oyuncu seçilince çiftler gösterilir (şu an: ' + sel.length + ')';
-    return;
-  }
-  var p0 = gp(sel[0]), p1 = gp(sel[1]), p2 = gp(sel[2]), p3 = gp(sel[3]);
-  var n = function(p) { return p ? p.name : '?'; };
-  el.innerHTML = '🟢 <b>' + n(p0) + '</b> & <b>' + n(p2) + '</b> (1. ve 3.)<br>🔵 <b>' + n(p1) + '</b> & <b>' + n(p3) + '</b> (2. ve 4.)';
+  var used = [SS.teamA[0], SS.teamA[1], SS.teamB[0], SS.teamB[1]];
+  var slots = [
+    { id: 'team-a-0', val: SS.teamA[0] },
+    { id: 'team-a-1', val: SS.teamA[1] },
+    { id: 'team-b-0', val: SS.teamB[0] },
+    { id: 'team-b-1', val: SS.teamB[1] }
+  ];
+  slots.forEach(function(slot) {
+    var el = document.getElementById(slot.id);
+    if (!el) return;
+    var html = '<option value="">— Seç —</option>';
+    db.players.forEach(function(p) {
+      var takenElsewhere = used.indexOf(p.id) > -1 && p.id !== slot.val;
+      if (takenElsewhere) return;
+      html += '<option value="' + p.id + '"' + (slot.val === p.id ? ' selected' : '') + '>' + p.name + '</option>';
+    });
+    el.innerHTML = html;
+    el.value = slot.val || '';
+  });
+  var complete = SS.teamA[0] && SS.teamA[1] && SS.teamB[0] && SS.teamB[1];
+  var warnEl = document.getElementById('team-warn');
+  if (warnEl) warnEl.style.display = complete ? 'none' : 'block';
+}
+function onTeamSlotChange() {
+  SS.teamA = [document.getElementById('team-a-0').value || null, document.getElementById('team-a-1').value || null];
+  SS.teamB = [document.getElementById('team-b-0').value || null, document.getElementById('team-b-1').value || null];
+  renderTeamPickers();
+  renderWhoPlaysOptions();
 }
 function updateSetupCnt() {
   var n = SS.selPlayers.length;
@@ -1118,7 +1215,15 @@ function setPlayMode(m) {
   document.getElementById('m-tekli').classList.toggle('on', m === 'tekli');
   document.getElementById('m-esli').classList.toggle('on', m === 'esli');
   document.getElementById('esli-cfg').style.display = m === 'esli' ? 'block' : 'none';
-  updateEsliPreview();
+  var plistWrap = document.getElementById('setup-plist-wrap');
+  if (plistWrap) plistWrap.style.display = m === 'esli' ? 'none' : 'block';
+  SS.whoPlays = null;
+  if (m === 'esli') {
+    SS.teamA = [null, null];
+    SS.teamB = [null, null];
+    renderTeamPickers();
+  }
+  renderWhoPlaysOptions();
 }
 function toggleBill() {
   SS.bill = !SS.bill;
@@ -1127,8 +1232,14 @@ function toggleBill() {
 function startGame() {
   var errEl = document.getElementById('setup-err');
   errEl.style.display = 'none';
-  if (SS.selPlayers.length < 2) { errEl.textContent = 'En az 2 oyuncu seçin!'; errEl.style.display = 'block'; return; }
-  if (SS.playMode === 'esli' && SS.selPlayers.length !== 4) { errEl.textContent = 'Eşli oyun için tam 4 oyuncu seçin!'; errEl.style.display = 'block'; return; }
+  var finalPids;
+  if (SS.playMode === 'esli') {
+    if (!SS.teamA[0] || !SS.teamA[1] || !SS.teamB[0] || !SS.teamB[1]) { errEl.textContent = 'Eşli oyun için her takıma tam 2 oyuncu seçin!'; errEl.style.display = 'block'; return; }
+    finalPids = [SS.teamA[0], SS.teamB[0], SS.teamA[1], SS.teamB[1]];
+  } else {
+    if (SS.selPlayers.length < 2) { errEl.textContent = 'En az 2 oyuncu seçin!'; errEl.style.display = 'block'; return; }
+    finalPids = SS.selPlayers.slice();
+  }
   var baraj = SS.baraj;
   if (baraj === 'ozel') {
     baraj = parseInt(document.getElementById('b-ozel-val').value);
@@ -1144,7 +1255,7 @@ function startGame() {
     id: uid(),
     createdAt: new Date().toISOString(),
     status: 'active',
-    playerIds: SS.selPlayers.slice(),
+    playerIds: finalPids,
     settings: { gameType: SS.gameType, baraj: baraj, endCond: SS.endCond, setCnt: setCnt, penLimit: penLimit, bill: SS.bill, playMode: SS.playMode, whoPlays: SS.whoPlays },
     rounds: [],
     sets: []   // Her setin sonuç puanları burada
@@ -1157,6 +1268,8 @@ function startGame() {
   }
   SS.selPlayers = [];
   SS.whoPlays = null;
+  SS.teamA = [null, null];
+  SS.teamB = [null, null];
   toast('Oyun başladı! 🎮');
   go('s-live');
 }
@@ -1406,6 +1519,8 @@ function openRoundModal() {
   document.getElementById('m-round-title').textContent = title;
   buildRiList(game);
   buildOpenerList(game);
+  buildPenaltyList(game);
+  resetFinishBox(game);
   openModal('m-round');
 }
 
@@ -1463,6 +1578,124 @@ function collectOpeners() {
     if (pid) result.push({ pid: pid, points: pts });
   });
   return result;
+}
+
+// ─── CEZA GİR (Okey Attı / İşlek Attı / El Açtırdı) ───────────
+var PENALTY_TYPES = [
+  { key: 'okey_at', label: '🎯 Okey Attı' },
+  { key: 'islek_at', label: '🔀 İşlek Attı' },
+  { key: 'el_actirdi', label: '✋ El Açtırdı' }
+];
+var PENALTY_ROWS = []; // [{pid, type, points}]
+
+function buildPenaltyList(game) {
+  PENALTY_ROWS = [];
+  renderPenaltyList(game);
+}
+function renderPenaltyList(game) {
+  var el = document.getElementById('penalty-list');
+  if (!el) return;
+  if (PENALTY_ROWS.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0 6px">Henüz ceza eklenmedi</div>'; return; }
+  var html = '';
+  PENALTY_ROWS.forEach(function(row, idx) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    html += '<select id="pen-pid-' + idx + '" onchange="applyPenaltyRow(' + idx + ')" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+    game.playerIds.forEach(function(pid) {
+      var p = gp(pid);
+      html += '<option value="' + pid + '"' + (row.pid === pid ? ' selected' : '') + '>' + (p ? p.name : '?') + '</option>';
+    });
+    html += '</select>';
+    html += '<select id="pen-type-' + idx + '" onchange="applyPenaltyRow(' + idx + ')" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+    PENALTY_TYPES.forEach(function(t) {
+      html += '<option value="' + t.key + '"' + (row.type === t.key ? ' selected' : '') + '>' + t.label + '</option>';
+    });
+    html += '</select>';
+    html += '<input type="number" id="pen-pts-' + idx + '" value="' + (row.points !== '' && row.points !== undefined ? row.points : '') + '" placeholder="Puan" oninput="applyPenaltyRow(' + idx + ')" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:15px;font-weight:700;padding:9px 8px;outline:none;text-align:center">';
+    html += '<button onclick="removePenalty(' + idx + ')" style="width:32px;height:32px;border-radius:var(--rsm);border:1px solid var(--red-bd);background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+function addPenalty() {
+  var game = activeGame();
+  if (!game || game.playerIds.length === 0) return;
+  PENALTY_ROWS.push({ pid: game.playerIds[0], type: 'okey_at', points: '' });
+  renderPenaltyList(game);
+}
+function removePenalty(idx) {
+  PENALTY_ROWS.splice(idx, 1);
+  renderPenaltyList(activeGame());
+}
+// Ceza satırındaki puanı ilgili oyuncunun ana puan tablosuna otomatik yazar
+function applyPenaltyRow(idx) {
+  var pidEl = document.getElementById('pen-pid-' + idx);
+  var typeEl = document.getElementById('pen-type-' + idx);
+  var ptsEl = document.getElementById('pen-pts-' + idx);
+  if (!pidEl) return;
+  PENALTY_ROWS[idx] = { pid: pidEl.value, type: typeEl ? typeEl.value : 'okey_at', points: ptsEl ? ptsEl.value : '' };
+  var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+  var scoreInp = document.getElementById('ri-' + pidEl.value);
+  if (scoreInp) { scoreInp.value = pts; scoreInp.dispatchEvent(new Event('input')); }
+}
+function collectPenalties() {
+  var result = [];
+  PENALTY_ROWS.forEach(function(row, idx) {
+    var pidEl = document.getElementById('pen-pid-' + idx);
+    var typeEl = document.getElementById('pen-type-' + idx);
+    var ptsEl = document.getElementById('pen-pts-' + idx);
+    if (!pidEl) return;
+    var pid = pidEl.value;
+    var type = typeEl ? typeEl.value : 'okey_at';
+    var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+    if (pid) result.push({ pid: pid, type: type, points: pts });
+  });
+  return result;
+}
+
+// ─── ELİ BİTİR (Elden Bitti / İşleyerek Bitti) ────────────────
+function resetFinishBox(game) {
+  var chk = document.getElementById('fin-enable');
+  var fields = document.getElementById('finish-fields');
+  var pidSel = document.getElementById('fin-pid');
+  var ptsInp = document.getElementById('fin-points');
+  if (chk) chk.checked = false;
+  if (fields) fields.style.display = 'none';
+  if (ptsInp) ptsInp.value = '';
+  if (pidSel && game) {
+    var html = '';
+    game.playerIds.forEach(function(pid) {
+      var p = gp(pid);
+      html += '<option value="' + pid + '">' + (p ? p.name : '?') + '</option>';
+    });
+    pidSel.innerHTML = html;
+  }
+}
+function toggleFinishBox() {
+  var chk = document.getElementById('fin-enable');
+  var fields = document.getElementById('finish-fields');
+  if (!chk || !fields) return;
+  fields.style.display = chk.checked ? 'block' : 'none';
+  if (chk.checked) syncFinishToScore();
+}
+// Bitiren kişinin puanını ana puan tablosuna otomatik yazar
+function syncFinishToScore() {
+  var chk = document.getElementById('fin-enable');
+  if (!chk || !chk.checked) return;
+  var pidEl = document.getElementById('fin-pid');
+  var ptsEl = document.getElementById('fin-points');
+  if (!pidEl) return;
+  var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+  var scoreInp = document.getElementById('ri-' + pidEl.value);
+  if (scoreInp) { scoreInp.value = pts; scoreInp.dispatchEvent(new Event('input')); }
+}
+function collectFinish() {
+  var chk = document.getElementById('fin-enable');
+  if (!chk || !chk.checked) return null;
+  var pidEl = document.getElementById('fin-pid');
+  var typeEl = document.getElementById('fin-type');
+  var ptsEl = document.getElementById('fin-points');
+  if (!pidEl) return null;
+  return { pid: pidEl.value, type: typeEl ? typeEl.value : 'elden_bitti', points: ptsEl ? (parseInt(ptsEl.value) || 0) : 0 };
 }
 
 function buildRiList(game) {
@@ -1659,15 +1892,20 @@ function submitRound() {
 
   // El açanları topla
   var openers = collectOpeners();
+  // Cezaları topla (Okey Attı / İşlek Attı / El Açtırdı)
+  var penalties = collectPenalties();
+  // Eli bitiren kişi (Elden Bitti / İşleyerek Bitti)
+  var finish = collectFinish();
 
   var round = {
     id: uid(),
     roundNumber: game.rounds.length + 1,
     setIdx: si,
-    ft: 'normal',
-    finId: null,
+    ft: finish ? finish.type : null,
+    finId: finish ? finish.pid : null,
     scores: scores,
     openers: openers,
+    penalties: penalties,
     ts: new Date().toISOString()
   };
   game.rounds.push(round);
@@ -1691,6 +1929,8 @@ var EDIT_ROUND = { gameId: null, roundId: null };
 // ─── EL DÜZENLE ───────────────────────────────────────────────
 var EDIT_ROUND = { gameId: null, roundId: null };
 var EDIT_OPENERS = []; // [{pid, points}]
+var EDIT_PENALTIES = []; // [{pid, type, points}]
+var EDIT_FINISH = null; // {pid, type, points} veya null
 
 function openEditRound(gameId, roundId) {
   var game = db.games.find(function(g) { return g.id === gameId; });
@@ -1699,6 +1939,8 @@ function openEditRound(gameId, roundId) {
   if (!round) return;
   EDIT_ROUND = { gameId: gameId, roundId: roundId };
   EDIT_OPENERS = (round.openers || []).map(function(o) { return { pid: o.pid, points: o.points }; });
+  EDIT_PENALTIES = (round.penalties || []).map(function(pn) { return { pid: pn.pid, type: pn.type, points: pn.points }; });
+  EDIT_FINISH = round.finId ? { pid: round.finId, type: round.ft || 'elden_bitti', points: (round.scores.find(function(s){return s.pid===round.finId;})||{}).final || 0 } : null;
 
   var si = round.setIdx !== undefined ? round.setIdx : 0;
   var roundsInSet = game.rounds.filter(function(r) { return (r.setIdx||0) === si; });
@@ -1737,6 +1979,33 @@ function openEditRound(gameId, roundId) {
   html += '<button class="btn btn-s btn-sm" style="margin-top:6px" onclick="addEditOpener()">+ El Açan Ekle</button>';
   html += '</div>';
 
+  // Ceza bölümü
+  html += '<div style="padding:0 18px 10px">';
+  html += '<div class="ilbl" style="margin-bottom:8px">⚠️ Cezalar <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px">(opsiyonel)</span></div>';
+  html += '<div id="edit-penalty-list"></div>';
+  html += '<button class="btn btn-s btn-sm" style="margin-top:6px" onclick="addEditPenalty()">+ Ceza Ekle</button>';
+  html += '</div>';
+
+  // Eli bitir bölümü
+  html += '<div style="padding:0 18px 10px">';
+  html += '<div class="ilbl" style="margin-bottom:8px">🏁 Eli Bitir <span style="font-weight:400;color:var(--text3);text-transform:none;font-size:11px">(opsiyonel)</span></div>';
+  html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:8px;cursor:pointer">';
+  html += '<input type="checkbox" id="efin-enable"' + (EDIT_FINISH ? ' checked' : '') + ' onchange="toggleEditFinishBox()"> Bu eli biten kişiyi işaretle</label>';
+  html += '<div id="edit-finish-fields" style="display:' + (EDIT_FINISH ? 'block' : 'none') + '">';
+  html += '<div style="display:flex;gap:8px;margin-bottom:8px">';
+  html += '<select id="efin-pid" onchange="syncEditFinishToScore()" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+  game.playerIds.forEach(function(pid) {
+    var p = gp(pid);
+    html += '<option value="' + pid + '"' + (EDIT_FINISH && EDIT_FINISH.pid === pid ? ' selected' : '') + '>' + (p ? p.name : '?') + '</option>';
+  });
+  html += '</select>';
+  html += '<select id="efin-type" onchange="syncEditFinishToScore()" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+  html += '<option value="elden_bitti"' + (EDIT_FINISH && EDIT_FINISH.type === 'elden_bitti' ? ' selected' : '') + '>✋ Elden Bitti</option>';
+  html += '<option value="isleyerek_bitti"' + (EDIT_FINISH && EDIT_FINISH.type === 'isleyerek_bitti' ? ' selected' : '') + '>🔀 İşleyerek Bitti</option>';
+  html += '</select></div>';
+  html += '<input type="number" id="efin-points" value="' + (EDIT_FINISH ? EDIT_FINISH.points : '') + '" placeholder="Puan (+/-)" oninput="syncEditFinishToScore()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:15px;font-weight:700;padding:10px 12px;outline:none;text-align:center;box-sizing:border-box">';
+  html += '</div></div>';
+
   html += '<div style="padding:0 18px 16px;display:flex;gap:8px">';
   html += '<button class="btn" style="flex:1;background:var(--red-bg);border-color:var(--red-bd);color:var(--red);font-size:13px" onclick="deleteRound()">🗑 Sil</button>';
   html += '<button class="btn btn-s" style="flex:1;font-size:13px" onclick="closeModal(\'m-editround\')">İptal</button>';
@@ -1745,6 +2014,7 @@ function openEditRound(gameId, roundId) {
 
   document.getElementById('m-editround-body').innerHTML = html;
   renderEditOpenerList(game);
+  renderEditPenaltyList(game);
   openModal('m-editround');
 }
 
@@ -1785,6 +2055,96 @@ function removeEditOpener(idx) {
   renderEditOpenerList(game);
 }
 
+function renderEditPenaltyList(game) {
+  if (!game) game = db.games.find(function(g) { return g.id === EDIT_ROUND.gameId; });
+  var el = document.getElementById('edit-penalty-list');
+  if (!el) return;
+  if (EDIT_PENALTIES.length === 0) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:2px 0 6px">Henüz ceza eklenmedi</div>';
+    return;
+  }
+  var html = '';
+  EDIT_PENALTIES.forEach(function(row, idx) {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    html += '<select id="ep-pid-' + idx + '" onchange="applyEditPenaltyRow(' + idx + ')" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+    game.playerIds.forEach(function(pid) {
+      var p = gp(pid);
+      html += '<option value="' + pid + '"' + (row.pid === pid ? ' selected' : '') + '>' + (p ? p.name : '?') + '</option>';
+    });
+    html += '</select>';
+    html += '<select id="ep-type-' + idx + '" onchange="applyEditPenaltyRow(' + idx + ')" style="flex:2;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-size:13px;padding:9px 10px;outline:none">';
+    PENALTY_TYPES.forEach(function(t) {
+      html += '<option value="' + t.key + '"' + (row.type === t.key ? ' selected' : '') + '>' + t.label + '</option>';
+    });
+    html += '</select>';
+    html += '<input type="number" id="ep-pts-' + idx + '" value="' + (row.points !== '' && row.points !== undefined ? row.points : '') + '" placeholder="Puan" oninput="applyEditPenaltyRow(' + idx + ')" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:15px;font-weight:700;padding:9px 8px;outline:none;text-align:center">';
+    html += '<button onclick="removeEditPenalty(' + idx + ')" style="width:32px;height:32px;border-radius:var(--rsm);border:1px solid var(--red-bd);background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+function addEditPenalty() {
+  var game = db.games.find(function(g) { return g.id === EDIT_ROUND.gameId; });
+  if (!game) return;
+  EDIT_PENALTIES.push({ pid: game.playerIds[0], type: 'okey_at', points: '' });
+  renderEditPenaltyList(game);
+}
+function removeEditPenalty(idx) {
+  EDIT_PENALTIES.splice(idx, 1);
+  renderEditPenaltyList(db.games.find(function(g) { return g.id === EDIT_ROUND.gameId; }));
+}
+function applyEditPenaltyRow(idx) {
+  var pidEl = document.getElementById('ep-pid-' + idx);
+  var typeEl = document.getElementById('ep-type-' + idx);
+  var ptsEl = document.getElementById('ep-pts-' + idx);
+  if (!pidEl) return;
+  EDIT_PENALTIES[idx] = { pid: pidEl.value, type: typeEl ? typeEl.value : 'okey_at', points: ptsEl ? ptsEl.value : '' };
+  var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+  var scoreInp = document.getElementById('er-' + pidEl.value);
+  if (scoreInp) { scoreInp.value = pts; scoreInp.dispatchEvent(new Event('input')); }
+}
+function collectEditPenalties() {
+  var result = [];
+  EDIT_PENALTIES.forEach(function(row, idx) {
+    var pidEl = document.getElementById('ep-pid-' + idx);
+    var typeEl = document.getElementById('ep-type-' + idx);
+    var ptsEl = document.getElementById('ep-pts-' + idx);
+    if (!pidEl) return;
+    var pid = pidEl.value;
+    var type = typeEl ? typeEl.value : 'okey_at';
+    var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+    if (pid) result.push({ pid: pid, type: type, points: pts });
+  });
+  return result;
+}
+
+function toggleEditFinishBox() {
+  var chk = document.getElementById('efin-enable');
+  var fields = document.getElementById('edit-finish-fields');
+  if (!chk || !fields) return;
+  fields.style.display = chk.checked ? 'block' : 'none';
+  if (chk.checked) syncEditFinishToScore();
+}
+function syncEditFinishToScore() {
+  var chk = document.getElementById('efin-enable');
+  if (!chk || !chk.checked) return;
+  var pidEl = document.getElementById('efin-pid');
+  var ptsEl = document.getElementById('efin-points');
+  if (!pidEl) return;
+  var pts = ptsEl ? (parseInt(ptsEl.value) || 0) : 0;
+  var scoreInp = document.getElementById('er-' + pidEl.value);
+  if (scoreInp) { scoreInp.value = pts; scoreInp.dispatchEvent(new Event('input')); }
+}
+function collectEditFinish() {
+  var chk = document.getElementById('efin-enable');
+  if (!chk || !chk.checked) return null;
+  var pidEl = document.getElementById('efin-pid');
+  var typeEl = document.getElementById('efin-type');
+  var ptsEl = document.getElementById('efin-points');
+  if (!pidEl) return null;
+  return { pid: pidEl.value, type: typeEl ? typeEl.value : 'elden_bitti', points: ptsEl ? (parseInt(ptsEl.value) || 0) : 0 };
+}
+
 function collectEditOpeners() {
   var result = [];
   EDIT_OPENERS.forEach(function(row, idx) {
@@ -1823,6 +2183,10 @@ function saveEditRound() {
   });
 
   round.openers = collectEditOpeners();
+  round.penalties = collectEditPenalties();
+  var finish = collectEditFinish();
+  round.finId = finish ? finish.pid : null;
+  round.ft = finish ? finish.type : null;
 
   saveDB(game.id);
   closeModal('m-editround');
@@ -1852,6 +2216,57 @@ function deleteRound() {
 
 
 // ─── ANALİZ EKRANI ────────────────────────────────────────────
+// ─── LİDERLİK TABLOSU ───────────────────────────────────────────
+var LB_STAT = 'winRate';
+var LB_DEFS = [
+  {key:'winRate',       label:'Kazanma %',        icon:'🏆', better:'high', fmt:function(v){ return v + '%'; }},
+  {key:'wins',          label:'Galibiyet',        icon:'🥇', better:'high', fmt:function(v){ return String(v); }},
+  {key:'games',         label:'Oyun Sayısı',      icon:'🎮', better:'high', fmt:function(v){ return String(v); }},
+  {key:'avgPen',        label:'Ort. Ceza/El',     icon:'📉', better:'low',  fmt:function(v){ return String(v); }},
+  {key:'openCount',     label:'El Açma',          icon:'✋', better:'high', fmt:function(v){ return String(v); }},
+  {key:'eldenBitti',    label:'Elden Bitirme',    icon:'🏁', better:'high', fmt:function(v){ return String(v); }},
+  {key:'isleyerekBitti',label:'İşleyerek Bitirme',icon:'🔀', better:'high', fmt:function(v){ return String(v); }},
+  {key:'okeyAt',        label:'Okey Atma',        icon:'🎯', better:'high', fmt:function(v){ return String(v); }},
+  {key:'islekAt',       label:'İşlek Atma',       icon:'🔀', better:'high', fmt:function(v){ return String(v); }},
+  {key:'elActirdi',     label:'El Açtırdı',       icon:'⚠️', better:'high', fmt:function(v){ return String(v); }},
+  {key:'maxRound',      label:'En Yüksek El',     icon:'📈', better:'high', fmt:function(v){ return String(v); }}
+];
+function setLbStat(key) { LB_STAT = key; renderStats(); }
+function renderLeaderboard() {
+  var def = LB_DEFS.find(function(d) { return d.key === LB_STAT; }) || LB_DEFS[0];
+  var rows = db.players.map(function(p, i) { return {p:p, i:i, st:calcStats(p.id)}; })
+    .filter(function(r) { return r.st.games > 0; });
+  rows.sort(function(a, b) {
+    var av = parseFloat(a.st[def.key]) || 0, bv = parseFloat(b.st[def.key]) || 0;
+    return def.better === 'high' ? bv - av : av - bv;
+  });
+  var html = '<div class="sec">🏆 Liderlik Tablosu</div>';
+  html += '<div class="pills" style="padding:0 18px 12px">';
+  LB_DEFS.forEach(function(d) {
+    html += '<div class="pill' + (d.key === LB_STAT ? ' on' : '') + '" onclick="setLbStat(\'' + d.key + '\')">' + d.icon + ' ' + d.label + '</div>';
+  });
+  html += '</div>';
+  if (rows.length === 0) {
+    html += '<div style="padding:4px 18px 16px;color:var(--text3);font-size:13px">Bu istatistik için henüz yeterli veri yok.</div>';
+    return html;
+  }
+  var medals = ['🥇','🥈','🥉'];
+  rows.forEach(function(r, ri) {
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)">';
+    html += '<div style="width:20px;text-align:center;font-size:14px;font-weight:800;color:var(--text3)">' + (medals[ri] || (ri + 1)) + '</div>';
+    html += '<div class="av ' + avc(r.i % 8) + '" style="width:38px;height:38px;font-size:13px;flex-shrink:0">' + ini(r.p.name) + '</div>';
+    html += '<div style="flex:1">';
+    html += '<div style="font-size:15px;font-weight:800">' + r.p.name + '</div>';
+    html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + r.st.games + ' oyun · %' + r.st.winRate + ' kazanma</div>';
+    html += '</div>';
+    html += '<div style="text-align:right">';
+    html += '<div style="font-size:20px;font-weight:900;color:var(--green)">' + def.fmt(r.st[def.key]) + '</div>';
+    html += '<div style="font-size:10px;color:var(--text3)">' + def.label + '</div>';
+    html += '</div></div>';
+  });
+  return html;
+}
+
 function renderStats() {
   var el = document.getElementById('stats-scroll');
   if (!el) return;
@@ -1873,47 +2288,9 @@ function renderStats() {
     return;
   }
 
-  // Oyuncu bazlı özet
+  // Liderlik tablosu (sıralanabilir)
   if (db.players.length > 0 && allGames.length > 0) {
-    html += '<div class="sec">Oyuncu Özeti</div>';
-    db.players.forEach(function(player) {
-      var pid = player.id;
-      var played = allGames.filter(function(g) { return g.playerIds.indexOf(pid) > -1; }).length;
-      if (played === 0) return;
-      var wins = 0, totalSetPts = 0, totalPen = 0, totalRounds = 0;
-      allGames.forEach(function(g) {
-        if (g.playerIds.indexOf(pid) === -1) return;
-        var s = g.settings;
-        if (s.endCond === 'set_count' && g.sets && g.sets.length > 0) {
-          var st = calcSetTotals(g);
-          totalSetPts += st[pid] || 0;
-          var maxPts = Math.max.apply(null, Object.values(st));
-          if ((st[pid] || 0) === maxPts) wins++;
-        } else {
-          var tot = calcTotals(g);
-          var minPen = Math.min.apply(null, g.playerIds.map(function(id) { return tot[id] || 0; }));
-          if ((tot[pid] || 0) === minPen) wins++;
-        }
-        totalPen += calcTotals(g)[pid] || 0;
-        totalRounds += g.rounds.filter(function(r) {
-          var sc = r.scores.find(function(s) { return s.pid === pid; });
-          return !!sc;
-        }).length;
-      });
-      var winRate = played > 0 ? Math.round(wins / played * 100) : 0;
-      var avgPen = totalRounds > 0 ? Math.round(totalPen / totalRounds) : 0;
-      var pi = db.players.indexOf(player);
-      html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)">';
-      html += '<div class="av ' + avc(pi % 8) + '" style="width:38px;height:38px;font-size:13px;flex-shrink:0">' + ini(player.name) + '</div>';
-      html += '<div style="flex:1">';
-      html += '<div style="font-size:15px;font-weight:800">' + player.name + '</div>';
-      html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + played + ' oyun · ' + wins + ' galibiyet · El başı ort. ' + avgPen + ' ceza</div>';
-      html += '</div>';
-      html += '<div style="text-align:right">';
-      html += '<div style="font-size:20px;font-weight:900;color:' + (winRate >= 50 ? 'var(--green)' : 'var(--text2)') + '">' + winRate + '%</div>';
-      html += '<div style="font-size:10px;color:var(--text3)">galibiyet</div>';
-      html += '</div></div>';
-    });
+    html += renderLeaderboard();
   }
 
   // Son oyunlar
@@ -2322,10 +2699,11 @@ function showPDetail(pid) {
   html += statBox(String(st.maxGame), 'En Yüksek Oyun', 'var(--red)');
   html += '</div>';
   html += '<div class="sec">Özel Hamleler</div><div class="card">';
-  html += sRow('🎯 Okey Atarak Bitirme', String(st.okeyThrow), 'var(--green)');
-  html += sRow('✌️ Çift Açarak Bitirme', String(st.dblOpen), 'var(--blue)');
-  html += sRow('✋ Elden Bitirme', String(st.handFin), 'var(--amber)');
-  html += sRow('❌ Yanlış Açma Cezası', String(st.wrongOpen), 'var(--red)');
+  html += sRow('✋ Elden Bitirme', String(st.eldenBitti), 'var(--green)');
+  html += sRow('🔀 İşleyerek Bitirme', String(st.isleyerekBitti), 'var(--blue)');
+  html += sRow('🎯 Okey Attı', String(st.okeyAt), 'var(--amber)');
+  html += sRow('🔀 İşlek Attı', String(st.islekAt), 'var(--blue)');
+  html += sRow('✋ El Açtırdı', String(st.elActirdi), 'var(--red)');
   html += '</div>';
   html += '<div class="sec">Hesap İstatistikleri</div><div class="card">';
   html += sRow('Hesap Ödeme Sayısı', String(st.billsPaid), '');
@@ -2409,6 +2787,118 @@ function gameCard(g, compact) {
     html += '</div>';
   }
   html += '</div>';
+  return html;
+}
+
+var FT_LABELS = {
+  elden_bitti: '✋ Elden bitirdi',
+  isleyerek_bitti: '🔀 İşleyerek bitirdi'
+};
+var PENALTY_LABELS = {
+  okey_at: '🎯 Okey attı',
+  islek_at: '🔀 İşlek attı',
+  el_actirdi: '✋ El açtırdı'
+};
+
+// Bir el (round) grubu için "kim açmış / kim bitirmiş / ne olmuş" detay panelini üretir
+function roundEventsPanel(rounds) {
+  var html = '<div style="margin:4px 16px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:8px 12px">';
+  html += '<div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">📋 El Bazlı Detay</div>';
+  rounds.forEach(function(r, ri) {
+    html += '<div style="font-size:12px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border)">';
+    html += '<span style="color:var(--text3);font-size:11px">' + (ri+1) + '. El: </span>';
+    if (r.finId) {
+      var finP = gp(r.finId);
+      var ftLabel = FT_LABELS[r.ft] || 'Bitirdi';
+      html += '<b style="color:var(--text)">🏁 ' + (finP ? finP.name : '?') + '</b>';
+      html += ' <span style="color:var(--text3)">— ' + ftLabel + '</span>';
+    } else {
+      html += '<span style="color:var(--text3)">Bitiren işaretlenmedi</span>';
+    }
+    if (r.penalties && r.penalties.length > 0) {
+      html += '<div style="font-size:11px;color:var(--red);margin-top:2px">⚠️ ';
+      html += r.penalties.map(function(pn) {
+        var pp = gp(pn.pid);
+        var label = PENALTY_LABELS[pn.type] || 'Ceza';
+        return label + ': ' + (pp ? pp.name : '?') + (pn.points ? ' (' + pn.points + ')' : '');
+      }).join(' · ');
+      html += '</div>';
+    }
+    if (r.openers && r.openers.length > 0) {
+      html += '<div style="font-size:11px;color:var(--amber);margin-top:2px">✋ Açan: ';
+      html += r.openers.map(function(o) {
+        var op = gp(o.pid);
+        return (op ? op.name : '?') + (o.points ? ' (' + o.points + ')' : '');
+      }).join(' · ');
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+// Set kullanılmayan (ceza limitli / setsiz) oyunlar için el-el skor tablosu
+function buildRoundTable(game, pids, rounds, totals, isEsli) {
+  var html = '<div style="overflow-x:auto;padding:0 16px 4px">';
+  var minW = Math.max(300, 80 + rounds.length * 46 + 60);
+  html += '<table class="stbl" style="min-width:' + minW + 'px">';
+  html += '<thead><tr><th style="text-align:left;min-width:72px">OYUNCU</th>';
+  rounds.forEach(function(r, ri) {
+    html += '<th style="min-width:42px;cursor:pointer;opacity:.85" onclick="openEditRound(\'' + game.id + '\',\'' + r.id + '\')" title="Düzenle">' + (ri+1) + ' ✏️</th>';
+  });
+  html += '<th style="min-width:52px">TOP</th></tr></thead><tbody>';
+
+  pids.forEach(function(pid, pi) {
+    var p = gp(pid);
+    var sum = 0;
+    var row = '<tr>';
+    row += '<td><div style="display:flex;align-items:center;gap:6px">';
+    row += '<div class="av ' + avc(pi) + '" style="width:24px;height:24px;font-size:9px">' + ini(p?p.name:'?') + '</div>';
+    row += '<span style="font-size:12px;font-weight:700">' + (p?p.name:'?') + '</span></div></td>';
+
+    rounds.forEach(function(r) {
+      var sc = r.scores.find(function(x) { return x.pid === pid; });
+      var v = sc ? sc.final : 0;
+      sum += v;
+      var cls = v < 0 ? 'neg' : v > 50 ? 'hi' : '';
+      var note = '';
+      if (r.finId === pid) note += '<div style="font-size:9px;color:var(--green);line-height:1;margin-top:1px">🏁</div>';
+      if (r.openers && r.openers.length > 0) {
+        var myOpen = r.openers.find(function(o) { return o.pid === pid; });
+        if (myOpen) note += '<div style="font-size:9px;color:var(--amber);line-height:1;margin-top:1px">✋' + myOpen.points + '</div>';
+      }
+      row += '<td class="' + cls + '" style="font-size:12px;vertical-align:top;padding-top:6px">' + (v !== 0 ? v : '–') + note + '</td>';
+    });
+
+    var sumCls = sum < 0 ? 'neg' : '';
+    row += '<td class="tcell ' + sumCls + '" style="font-size:13px">' + sum + '</td>';
+    row += '</tr>';
+    html += row;
+  });
+
+  if (isEsli && rounds.length > 0 && pids.length >= 4) {
+    var totMap = {};
+    pids.forEach(function(pid) { totMap[pid] = 0; });
+    rounds.forEach(function(r) {
+      r.scores.forEach(function(sc) { totMap[sc.pid] = (totMap[sc.pid]||0) + sc.final; });
+    });
+    var sumA = (totMap[pids[0]]||0) + (totMap[pids[2]]||0);
+    var sumB = (totMap[pids[1]]||0) + (totMap[pids[3]]||0);
+    html += '<tr style="border-top:1px solid var(--border2)">';
+    html += '<td style="font-size:10px;font-weight:700;color:var(--text3);text-align:left">TAKIM</td>';
+    rounds.forEach(function() { html += '<td></td>'; });
+    var colA = sumA < sumB ? 'var(--green)' : 'var(--text2)';
+    var colB = sumB < sumA ? 'var(--green)' : 'var(--text2)';
+    html += '<td style="font-size:11px;text-align:center">';
+    html += '<span style="color:' + colA + ';font-weight:800">A:' + sumA + '</span>';
+    html += '<span style="color:var(--text3);margin:0 4px">·</span>';
+    html += '<span style="color:' + colB + ';font-weight:800">B:' + sumB + '</span>';
+    html += '</td></tr>';
+  }
+
+  html += '</tbody></table></div>';
+  html += roundEventsPanel(rounds);
   return html;
 }
 
@@ -2508,7 +2998,7 @@ function showGDetail(gid) {
       // Başlık
       html += '<thead><tr><th style="text-align:left;min-width:72px">OYUNCU</th>';
       setRounds.forEach(function(r, ri) {
-        html += '<th style="min-width:42px;cursor:pointer;opacity:.85" onclick="openEditRound(\'' + g.id + '\',\'' + r.id + '\')" title="Düzenle">' + (ri+1) + ' ✏️</th>';
+        html += '<th style="min-width:42px;cursor:pointer;opacity:.85" onclick="openEditRound(\'' + game.id + '\',\'' + r.id + '\')" title="Düzenle">' + (ri+1) + ' ✏️</th>';
       });
       html += '<th style="min-width:52px">TOP</th>';
       if (isSetMode && savedSet) html += '<th style="min-width:44px;color:var(--green)">PT</th>';
@@ -2530,9 +3020,10 @@ function showGDetail(gid) {
           var cls = v < 0 ? 'neg' : v > 50 ? 'hi' : '';
           // El açan bilgisi bu hücrede mi?
           var openerNote = '';
+          if (r.finId === pid) openerNote += '<div style="font-size:9px;color:var(--green);line-height:1;margin-top:1px">🏁</div>';
           if (r.openers && r.openers.length > 0) {
             var myOpen = r.openers.find(function(o) { return o.pid === pid; });
-            if (myOpen) openerNote = '<div style="font-size:9px;color:var(--amber);line-height:1;margin-top:1px">✋' + myOpen.points + '</div>';
+            if (myOpen) openerNote += '<div style="font-size:9px;color:var(--amber);line-height:1;margin-top:1px">✋' + myOpen.points + '</div>';
           }
           row += '<td class="' + cls + '" style="font-size:12px;vertical-align:top;padding-top:6px">' + (v !== 0 ? v : '–') + openerNote + '</td>';
         });
@@ -2570,24 +3061,8 @@ function showGDetail(gid) {
         html += '</td></tr>';
       }
 
-      // ── EL AÇAN ÖZET SATIRI ──
-      var hasOpeners = setRounds.some(function(r) { return r.openers && r.openers.length > 0; });
-      if (hasOpeners) {
-        html += '<div style="margin:4px 16px 8px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--rsm);padding:8px 12px">';
-        html += '<div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">✋ El Açanlar</div>';
-        setRounds.forEach(function(r, ri) {
-          if (!r.openers || r.openers.length === 0) return;
-          html += '<div style="font-size:12px;color:var(--text2);padding:3px 0;border-bottom:1px solid rgba(245,158,11,.15)">';
-          html += '<span style="color:var(--text3);font-size:11px">' + (ri+1) + '. El: </span>';
-          r.openers.forEach(function(o, oi) {
-            var op = gp(o.pid);
-            html += (oi > 0 ? ' · ' : '') + '<b style="color:var(--text)">' + (op ? op.name : '?') + '</b>';
-            if (o.points) html += ' <span style="color:var(--amber);font-family:var(--mono);font-weight:700">' + o.points + '</span>';
-          });
-          html += '</div>';
-        });
-        html += '</div>';
-      }
+      // ── EL BAZLI DETAY (kim açmış, kim bitirmiş, ne olmuş) ──
+      html += roundEventsPanel(setRounds);
 
       html += '</div>';
     });
@@ -3075,6 +3550,7 @@ function renderSettings(){
   document.getElementById('set-id-sub').textContent = p? p.name : 'Henüz seçilmedi';
   markSyncUI();
   renderDataInfo();
+  updateThemeUI();
 }
 function renderDataInfo(){
   var finished=db.games.filter(function(g){return g.status==='finished';}).length;
