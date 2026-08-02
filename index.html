@@ -9,24 +9,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Tangerine:wght@700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --olive-deep:#2f2e1e;
-    --olive:#4c4a30;
-    --khaki:#8c8557;
-    --khaki-soft:#a79c72;
-    --cream:#f4ecd9;
-    --cream-2:#efe4cb;
-    --burgundy:#6e1423;
-    --burgundy-2:#8a2233;
+    --olive-deep:#0d2f2c;
+    --olive:#134d47;
+    --khaki:#3f6d66;
+    --khaki-soft:#6fa89f;
+    --cream:#f4ecd4;
+    --cream-2:#ecdfb8;
+    --burgundy:#0e6b63;
+    --burgundy-2:#0a544d;
     --gold:#c9a769;
-    --gold-soft:#dcc48f;
-    --ink:#3a3623;
+    --gold-soft:#7ecfc7;
+    --ink:#2c4842;
     --ease-tide: cubic-bezier(.22,.68,.24,1);
-    /* coastal palette — used only in the entrance scene */
+    /* coastal palette — used throughout the whole invitation now */
     --sand:#e6d6b3; --sand-2:#d9c294;
     --driftwood:#cdb78f; --driftwood-dark:#a3835a; --driftwood-shadow:#8a6c45;
     --linen:#f8f2e6;
     --seaglass:#93ab9c; --seaglass-deep:#5f7d72;
     --dusk-sky:#f3d2a6; --dusk-sky-2:#eab98b;
+    --turquoise:#2fa9a3; --turquoise-light:#7ecfc7; --coral:#e8927a;
   }
 
   *{box-sizing:border-box;}
@@ -34,7 +35,7 @@
   html,body{margin:0;padding:0;}
 
   body{
-    background:radial-gradient(ellipse at top, #46442c 0%, var(--olive-deep) 55%, #211f14 100%);
+    background:radial-gradient(ellipse at top, #144a45 0%, var(--olive-deep) 55%, #071e1c 100%);
     background-size:140% 140%;
     animation:tideDrift 26s ease-in-out infinite;
     min-height:100vh;
@@ -59,7 +60,7 @@
   #cover{
     position:fixed; inset:0; z-index:30;
     display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(ellipse at 50% 30%, #55532f 0%, var(--olive-deep) 60%, #1c1a10 100%);
+    background:radial-gradient(ellipse at 50% 30%, #1c5a54 0%, var(--olive-deep) 60%, #061917 100%);
     transition:opacity 1.1s var(--ease-tide), visibility 1.1s var(--ease-tide), filter 1.1s var(--ease-tide);
     overflow:hidden;
   }
@@ -85,7 +86,7 @@
   /* ---- Scene behind the door: a breezy seaside sunset, bride & groom walking to an embrace ---- */
   .scene{
     position:absolute; inset:0;
-    background:linear-gradient(180deg, var(--dusk-sky) 0%, var(--dusk-sky-2) 26%, var(--seaglass) 52%, var(--seaglass-deep) 66%, var(--sand-2) 66%, var(--sand) 100%);
+    background:linear-gradient(180deg, var(--dusk-sky) 0%, var(--dusk-sky-2) 26%, var(--turquoise-light) 50%, var(--turquoise) 66%, var(--sand-2) 66%, var(--sand) 100%);
     z-index:1;
   }
   .scene::before{ /* sun glow */
@@ -94,7 +95,18 @@
     background:radial-gradient(circle, rgba(255,246,224,.9) 0%, rgba(255,222,163,.5) 40%, transparent 72%);
   }
   .scene::after{
-    content:""; position:absolute; left:0; right:0; bottom:34%; height:1px; background:rgba(255,255,255,.35);
+    content:""; position:absolute; left:0; right:0; bottom:34%; height:1px; background:rgba(255,255,255,.4);
+  }
+  .sand-mote{
+    position:absolute; bottom:8%; width:4px; height:4px; border-radius:50%;
+    background:var(--sand); opacity:0;
+  }
+  .arch-wrap.open .sand-mote{ animation:driftSand 5.5s ease-in-out infinite; }
+  @keyframes driftSand{
+    0%{ opacity:0; transform:translate(0,0); }
+    15%{ opacity:.8; }
+    85%{ opacity:.6; }
+    100%{ opacity:0; transform:translate(55px,-14px); }
   }
 
   .figure{ position:absolute; bottom:26%; width:42px; opacity:0; transition:transform 1.8s var(--ease-tide), opacity .8s ease; }
@@ -157,10 +169,15 @@
     background:radial-gradient(circle at 35% 30%, var(--linen), var(--sand-2) 65%, var(--driftwood) 100%);
     box-shadow:inset 0 0 0 1px rgba(163,131,90,.35);
   }
+  .bloom.mirror{ transform:scaleX(-1); }
   .bloom.accent{
-    background:radial-gradient(circle at 35% 30%, #e8927a, #c96a4d 75%); width:9px; height:9px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--coral), #c96a4d 75%); width:9px; height:9px; border-radius:50%;
+  }
+  .bloom.accent.turquoise{
+    background:radial-gradient(circle at 35% 30%, var(--turquoise-light), var(--turquoise) 75%);
   }
   .bloom.leaf{ background:var(--driftwood-dark); border-radius:50% 10% 50% 10%; width:14px; height:6px; opacity:.8; }
+  .ribbon-bow{ position:absolute; z-index:5; width:26px; height:20px; }
 
   .burst{
     position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
@@ -206,13 +223,9 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:64px 24px;
     position:relative;
-    filter:blur(16px);
-    opacity:0;
-    transform:translateY(46px) scale(.975);
-    transition:filter 1.3s var(--ease-tide), opacity 1.3s var(--ease-tide), transform 1.3s var(--ease-tide);
+    will-change:opacity, filter, transform;
     scroll-snap-align:center;
   }
-  section.visible{ filter:blur(0); opacity:1; transform:translateY(0) scale(1); }
 
   .panel{
     width:100%;
@@ -347,7 +360,7 @@
 
 <!-- Ambient tide marker — a quiet constant motion, always present -->
 <svg class="tide-marker" viewBox="0 0 40 24" fill="none">
-  <path d="M2 14 C8 4, 14 20, 20 12 C26 4, 32 20, 38 12" stroke="#dcc48f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M2 14 C8 4, 14 20, 20 12 C26 4, 32 20, 38 12" stroke="#2fa9a3" stroke-width="1.6" stroke-linecap="round"/>
 </svg>
 
 <!-- ===================== COVER — FLORAL ARCH ===================== -->
@@ -373,15 +386,15 @@
               <path d="M11,10 C11,3 15,0 20,0 C25,0 29,3 29,10 C29,7 26,6 20,6 C14,6 11,7 11,10 Z" fill="#4a3826"/>
               <circle cx="20" cy="10" r="6.4" fill="url(#skin1)"/>
               <path d="M13,18 C7,22 5,28 8,36 C3,56 1,79 6,98 L34,98 C39,79 37,56 32,36 C35,28 33,22 27,18 C24,16 16,16 13,18 Z" fill="url(#brideGown)" stroke="#dcc48f" stroke-width=".6"/>
-              <line x1="9" y1="48" x2="31" y2="48" stroke="#c9a769" stroke-width=".6" opacity=".7"/>
+              <line x1="9" y1="48" x2="31" y2="48" stroke="#2fa9a3" stroke-width=".6" opacity=".7"/>
             </svg>
           </div>
           <div class="figure groom">
             <svg viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="groomSuit" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#7a1c2d"/>
-                  <stop offset="100%" stop-color="#5c0f1c"/>
+                  <stop offset="0%" stop-color="#1c5a54"/>
+                  <stop offset="100%" stop-color="#0d332f"/>
                 </linearGradient>
                 <radialGradient id="skin2" cx="35%" cy="30%" r="75%">
                   <stop offset="0%" stop-color="#e8c19c"/>
@@ -418,11 +431,11 @@
   <section id="s1">
     <div class="panel">
       <svg class="floral" viewBox="0 0 200 60" fill="none">
-        <path d="M20 45 C40 20, 70 15, 100 30 C130 15, 160 20, 180 45" stroke="#8c8557" stroke-width="1.2"/>
-        <circle cx="45" cy="30" r="5" fill="#c9a769" opacity=".8"/>
-        <circle cx="60" cy="22" r="4" fill="#6e1423" opacity=".7"/>
-        <circle cx="140" cy="22" r="4" fill="#6e1423" opacity=".7"/>
-        <circle cx="155" cy="30" r="5" fill="#c9a769" opacity=".8"/>
+        <path d="M20 45 C40 20, 70 15, 100 30 C130 15, 160 20, 180 45" stroke="#a3835a" stroke-width="1.2"/>
+        <circle cx="45" cy="30" r="5" fill="#2fa9a3" opacity=".8"/>
+        <circle cx="60" cy="22" r="4" fill="#e8927a" opacity=".7"/>
+        <circle cx="140" cy="22" r="4" fill="#e8927a" opacity=".7"/>
+        <circle cx="155" cy="30" r="5" fill="#2fa9a3" opacity=".8"/>
       </svg>
       <div class="eyebrow">Mutlu Sona Değil, Sonsuz Mutluluğumuzun İlk Adımına</div>
       <h1 class="names">Ece <span class="amp">&amp;</span> Mehmetcan</h1>
@@ -435,7 +448,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Kına ===== -->
   <section id="s2">
@@ -452,7 +465,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Hikayemiz ===== -->
   <section id="s3">
@@ -463,7 +476,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Sesli Mesaj ===== -->
   <section id="s4">
@@ -477,7 +490,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Location ===== -->
   <section id="s5">
@@ -489,7 +502,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Menu ===== -->
   <section id="s6">
@@ -507,7 +520,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Ailelerimiz ===== -->
   <section id="s7">
@@ -526,7 +539,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== RSVP ===== -->
   <section id="s8">
@@ -542,7 +555,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Mutluluğumuza Ortak Olun ===== -->
   <section id="s9">
@@ -568,7 +581,7 @@
     </div>
   </section>
 
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#c9a769" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
 
   <!-- ===== Dijital Takı ===== -->
   <section id="s10">
@@ -588,31 +601,60 @@
 </div>
 
 <script>
-  /* ---- Build floral wreath around the arch frame (250x370 wrap, 168x280 frame) ---- */
+  /* ---- Build rope & shell wreath, precisely matched to the door's own arch curvature ---- */
+  /* Door arch: center (125,174), radius 84 (from the frame's 168px width / border-radius) */
   const wreath = document.getElementById('wreath');
-  const cx = 125, cy = 178, rx = 122, ry = 200;
-  const total = 38;
+  const ARC_CX = 125, ARC_CY = 174, ARC_R = 112; // wreath radius = door radius (84) + 28px halo
+  const total = 30;
   for(let i=0;i<=total;i++){
-    const t = Math.PI * (1 - i/total);
-    const x = cx + rx * Math.cos(t);
-    const y = (cy - ry * Math.sin(t)) - 4;
-    if(y > 180) continue;
-    const kind = i % 5 === 0 ? 'accent' : (i % 3 === 0 ? 'leaf' : '');
+    const t = Math.PI * (1 - i/total); // PI (left) -> 0 (right), sweeping the top half only
+    const x = ARC_CX + ARC_R * Math.cos(t);
+    const y = ARC_CY - ARC_R * Math.sin(t);
+    const isRight = x > ARC_CX;
+    let kind = '';
+    if(i % 6 === 0) kind = 'accent' + (i % 12 === 0 ? ' turquoise' : '');
+    else if(i % 3 === 0) kind = 'leaf';
     const el = document.createElement('div');
-    el.className = 'bloom ' + kind;
+    el.className = 'bloom ' + kind + (isRight && kind === 'leaf' ? ' mirror' : '');
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     wreath.appendChild(el);
   }
-  for(let j=0;j<7;j++){
+  // side stems continuing straight down from where the arc meets the door posts
+  const STEM_START = ARC_CY; // y where arc ends on each side
+  const STEM_GAP = 25;
+  const STEM_COUNT = 8;
+  const STEM_X = ARC_CX - ARC_R; // distance from center = same on both sides
+  for(let j=0;j<STEM_COUNT;j++){
     ['left','right'].forEach(side=>{
+      const kind = j % 2 === 0 ? 'accent' + (j % 4 === 0 ? ' turquoise' : '') : 'leaf';
       const el = document.createElement('div');
-      const kind = j % 2 === 0 ? 'accent' : 'leaf';
-      el.className = 'bloom ' + kind;
-      el.style.top = (180 + j*24) + 'px';
-      el.style[side] = '30px';
+      el.className = 'bloom ' + kind + (side === 'right' && kind === 'leaf' ? ' mirror' : '');
+      el.style.top = (STEM_START + j * STEM_GAP) + 'px';
+      el.style[side] = STEM_X + 'px';
       wreath.appendChild(el);
     });
+  }
+  // a small turquoise ribbon bow crowning the top of the arch
+  const bow = document.createElement('div');
+  bow.className = 'ribbon-bow';
+  bow.style.left = (ARC_CX - 13) + 'px';
+  bow.style.top = (ARC_CY - ARC_R - 6) + 'px';
+  bow.innerHTML = `<svg viewBox="0 0 26 20" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13,10 L2,2 C0,7 1,13 5,16 Z" fill="#2fa9a3"/>
+      <path d="M13,10 L24,2 C26,7 25,13 21,16 Z" fill="#3bbdb6"/>
+      <circle cx="13" cy="10" r="3.4" fill="#dcc48f" stroke="#a3835a" stroke-width=".6"/>
+    </svg>`;
+  wreath.appendChild(bow);
+
+  // gentle drifting sand motes across the seaside scene
+  const scene0 = document.getElementById('scene');
+  for(let k=0;k<5;k++){
+    const m = document.createElement('div');
+    m.className = 'sand-mote';
+    m.style.left = (6 + k*9) + '%';
+    m.style.animationDelay = (k*1.1) + 's';
+    scene0.appendChild(m);
   }
 
   /* ---- Cover open — slow double-door reveal, bride & groom walk to an embrace ---- */
@@ -629,14 +671,47 @@
     setTimeout(() => cover.classList.add('hidden'), 1300 + 2000 + 1400); // ~4.7s — hold the embrace, then flow into the invitation
   });
 
-  /* ---- Scroll reveal: soft blurred tide-like entrance ---- */
+  /* ---- Continuous tide fade: each section drifts in from transparent as it
+     approaches the center of the screen, holds clear, then dissolves back to
+     transparent as it drifts away — like water rising and receding. ---- */
   const sections = document.querySelectorAll('section');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if(e.isIntersecting) e.target.classList.add('visible');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ticking = false;
+
+  function applyTideFade(){
+    const vh = window.innerHeight;
+    const vCenter = vh / 2;
+    sections.forEach(sec => {
+      const r = sec.getBoundingClientRect();
+      const secCenter = r.top + r.height / 2;
+      const dist = Math.abs(secCenter - vCenter);
+      const maxDist = vh / 2 + r.height / 2;
+      let progress = 1 - Math.min(dist / maxDist, 1);
+      progress = Math.max(progress, 0);
+      // ease the envelope so the middle holds clear a little longer
+      const eased = progress * progress * (3 - 2 * progress); // smoothstep
+      sec.style.opacity = eased;
+      sec.style.filter = `blur(${(1 - eased) * 15}px)`;
+      const dir = secCenter < vCenter ? -1 : 1;
+      sec.style.transform = `translateY(${(1 - eased) * 38 * dir}px) scale(${0.97 + eased * 0.03})`;
     });
-  }, {threshold:.22});
-  sections.forEach(s => io.observe(s));
+    ticking = false;
+  }
+
+  function onScroll(){
+    if(!ticking){
+      requestAnimationFrame(applyTideFade);
+      ticking = true;
+    }
+  }
+
+  if(reduceMotion){
+    sections.forEach(sec => { sec.style.opacity = 1; sec.style.filter = 'none'; sec.style.transform = 'none'; });
+  } else {
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    applyTideFade();
+  }
 
   /* ---- Countdown ---- */
   const weddingDate = new Date('2027-10-21T19:15:00+03:00').getTime();
