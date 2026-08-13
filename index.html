@@ -1,773 +1,529 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Ece & Mehmetcan | Düğün Davetiyesi</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Tangerine:wght@700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --olive-deep:#0d2f2c;
-    --olive:#134d47;
-    --khaki:#3f6d66;
-    --khaki-soft:#6fa89f;
-    --cream:#f4ecd4;
-    --cream-2:#ecdfb8;
-    --burgundy:#0e6b63;
-    --burgundy-2:#0a544d;
-    --gold:#c9a769;
-    --gold-soft:#7ecfc7;
-    --ink:#2c4842;
-    --ease-tide: cubic-bezier(.22,.68,.24,1);
-    /* coastal palette — used throughout the whole invitation now */
-    --sand:#e6d6b3; --sand-2:#d9c294;
-    --driftwood:#cdb78f; --driftwood-dark:#a3835a; --driftwood-shadow:#8a6c45;
-    --linen:#f8f2e6;
-    --seaglass:#93ab9c; --seaglass-deep:#5f7d72;
-    --dusk-sky:#f3d2a6; --dusk-sky-2:#eab98b;
-    --turquoise:#2fa9a3; --turquoise-light:#7ecfc7; --coral:#e8927a;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İMES SPOR - Güvenli Teknik Takip</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        #auth-wrapper { max-width: 900px; margin: 40px auto; padding: 20px; }
+        .auth-card { background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; height: 100%; }
+        .auth-divider { border-left: 1px solid #dee2e6; height: 100%; }
+        #app-content { display: none; width: 100%; }
+        .main-container { flex: 1; display: flex; overflow-x: auto; padding: 15px; gap: 15px; -webkit-overflow-scrolling: touch; width: 100%; }
+        .column { flex: 1; min-width: 320px; display: flex; flex-direction: column; background: #ebedef; border-radius: 12px; padding: 10px; height: calc(100vh - 180px); }
+        .column-header { font-weight: 800; font-size: 0.85rem; padding: 10px; border-radius: 8px; text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .scroll-area { flex: 1; overflow-y: auto; }
+        .card { border-radius: 10px; border: none; margin-bottom: 12px; border-top: 5px solid #dee2e6; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: relative; }
+        .card-bekleyen { background-color: #fffdec; border-top-color: #ffc107; }
+        .card-sevk { background-color: #f0faff; border-top-color: #0dcaf0; }
+        .card-tamam { background-color: #f6fff9; border-top-color: #198754; }
+        .header-bekleyen { background: #fff3cd; color: #856404; border-bottom: 3px solid #ffc107; }
+        .header-sevk { background: #cff4fc; color: #055160; border-bottom: 3px solid #0dcaf0; }
+        .header-tamam { background: #d1e7dd; color: #0f5132; border-bottom: 3px solid #198754; }
+        .user-badge { font-size: 0.65rem; color: #6c757d; border-top: 1px solid #eee; margin-top: 8px; padding-top: 4px; line-height: 1.3; }
+        .status-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
+        .status-badge:hover { opacity: 0.8; transform: scale(1.05); }
+        
+        @keyframes blink-red { 
+            0% { transform: scale(1); box-shadow: 0 0 0px rgba(220, 53, 69, 0); } 
+            50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(220, 53, 69, 1); } 
+            100% { transform: scale(1); box-shadow: 0 0 0px rgba(220, 53, 69, 0); } 
+        }
+        
+        .badge-ready { background: #198754 !important; color: white !important; }
+        .badge-wait { background: #6c757d; color: white; }
+        .has-note-blink { animation: blink-red 1.5s infinite; color: #0d6efd !important; font-weight: 900 !important; font-size: 0.95rem !important; }
+        
+        .hidden { display: none !important; }
+        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .modal-box { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btn-undo { font-size: 0.65rem; padding: 0 5px; text-decoration: none; color: #dc3545; font-weight: bold; }
+        .btn-delete { font-size: 0.65rem; color: #dc3545; cursor: pointer; border: 1px solid #dc3545; border-radius: 4px; padding: 1px 4px; transition: 0.2s; }
+        .btn-delete:hover { background: #dc3545; color: white; }
+        
+        .date-input-mini { border: 1px solid #ced4da; border-radius: 4px; font-size: 0.85rem; padding: 2px 4px; width: 125px; font-weight: bold; color: #333; height: 28px; }
 
-  *{box-sizing:border-box;}
-  html{ scroll-behavior:smooth; }
-  html,body{margin:0;padding:0;}
-
-  body{
-    background:radial-gradient(ellipse at top, #144a45 0%, var(--olive-deep) 55%, #071e1c 100%);
-    background-size:140% 140%;
-    animation:tideDrift 26s ease-in-out infinite;
-    min-height:100vh;
-    font-family:'EB Garamond', serif;
-    color:var(--ink);
-    display:flex; align-items:flex-start; justify-content:center;
-    overflow-x:hidden;
-  }
-  @keyframes tideDrift{
-    0%,100%{ background-position:50% 0%; }
-    50%{ background-position:50% 30%; }
-  }
-
-  .stage{ width:100%; max-width:460px; min-height:100vh; position:relative; }
-
-  .grain{
-    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.05; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* ================= COVER — FLORAL ARCH DOOR ================= */
-  #cover{
-    position:fixed; inset:0; z-index:30;
-    display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(ellipse at 50% 30%, #1c5a54 0%, var(--olive-deep) 60%, #061917 100%);
-    transition:opacity 1.1s var(--ease-tide), visibility 1.1s var(--ease-tide), filter 1.1s var(--ease-tide);
-    overflow:hidden;
-  }
-  #cover.hidden{ opacity:0; visibility:hidden; filter:blur(18px); pointer-events:none; }
-
-  .cover-inner{ text-align:center; padding:0 20px; color:var(--cream); position:relative; z-index:2; }
-
-  .cover-eyebrow{
-    font-family:'Cormorant Garamond', serif; letter-spacing:.35em; font-size:12px;
-    color:var(--gold-soft); text-transform:uppercase; margin-bottom:20px;
-  }
-
-  .arch-wrap{ width:250px; height:370px; margin:0 auto; position:relative; cursor:pointer; }
-
-  /* ---- The doorway opening: masks whatever is behind it into an arch shape ---- */
-  .arch-frame{
-    position:absolute; left:50%; bottom:0; transform:translateX(-50%);
-    width:168px; height:280px; border-radius:84px 84px 6px 6px; overflow:hidden;
-    box-shadow:0 14px 34px rgba(0,0,0,.5);
-    perspective:900px;
-  }
-
-  /* ---- Scene behind the door: a breezy seaside sunset, bride & groom walking to an embrace ---- */
-  .scene{
-    position:absolute; inset:0;
-    background:linear-gradient(180deg, var(--dusk-sky) 0%, var(--dusk-sky-2) 26%, var(--turquoise-light) 50%, var(--turquoise) 66%, var(--sand-2) 66%, var(--sand) 100%);
-    z-index:1;
-  }
-  .scene::before{ /* sun glow */
-    content:""; position:absolute; left:50%; top:22%; transform:translate(-50%,-50%);
-    width:70px; height:70px; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,246,224,.9) 0%, rgba(255,222,163,.5) 40%, transparent 72%);
-  }
-  .scene::after{
-    content:""; position:absolute; left:0; right:0; bottom:34%; height:1px; background:rgba(255,255,255,.4);
-  }
-  .sand-mote{
-    position:absolute; bottom:8%; width:4px; height:4px; border-radius:50%;
-    background:var(--sand); opacity:0;
-  }
-  .arch-wrap.open .sand-mote{ animation:driftSand 5.5s ease-in-out infinite; }
-  @keyframes driftSand{
-    0%{ opacity:0; transform:translate(0,0); }
-    15%{ opacity:.8; }
-    85%{ opacity:.6; }
-    100%{ opacity:0; transform:translate(55px,-14px); }
-  }
-
-  .figure{ position:absolute; bottom:26%; width:42px; opacity:0; transition:transform 1.8s var(--ease-tide), opacity .8s ease; }
-  .figure svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 4px 6px rgba(0,0,0,.22)); }
-  .figure.bride{ left:6px; transform:translateX(-6px); }
-  .figure.groom{ right:6px; transform:translateX(6px); }
-
-  .scene.walk .figure{ opacity:1; }
-  .scene.walk .figure.bride{ transform:translateX(46px); }
-  .scene.walk .figure.groom{ transform:translateX(-46px); }
-  .scene.hug .figure.bride{ transform:translateX(54px) scale(1.04); }
-  .scene.hug .figure.groom{ transform:translateX(-54px) scale(1.04); }
-
-  /* ---- Linen curtains that sway in a sea breeze once the doors part ---- */
-  .curtain{
-    position:absolute; top:-4%; width:38%; height:70%;
-    background:linear-gradient(180deg, var(--linen) 0%, rgba(248,242,230,.75) 85%, rgba(248,242,230,.4) 100%);
-    opacity:0; z-index:3; pointer-events:none;
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.12));
-    transition:opacity 1.2s ease;
-  }
-  .curtain-left{ left:2%; border-radius:0 0 40% 8%; transform-origin:top center; }
-  .curtain-right{ right:2%; border-radius:0 0 8% 40%; transform-origin:top center; }
-  .arch-wrap.open .curtain{ opacity:.85; animation:breeze 4.5s ease-in-out infinite; }
-  .arch-wrap.open .curtain-right{ animation-delay:.4s; }
-  @keyframes breeze{
-    0%,100%{ transform:rotateZ(-3deg) translateX(-1px); }
-    50%{ transform:rotateZ(4deg) translateX(2px); }
-  }
-
-  /* ---- Double doors: sun-bleached driftwood planks, opening slowly outward ---- */
-  .door-left, .door-right{
-    position:absolute; top:0; bottom:0; width:50%;
-    background:repeating-linear-gradient(90deg, var(--driftwood) 0px, var(--driftwood) 13px, var(--driftwood-dark) 13px, var(--driftwood-dark) 15px);
-    box-shadow:inset 0 0 26px rgba(70,50,20,.25);
-    transition:transform 1.7s var(--ease-tide);
-    transform-style:preserve-3d; backface-visibility:hidden;
-    z-index:2;
-  }
-  .door-left{ left:0; border-right:1px solid var(--driftwood-shadow); border-radius:84px 0 0 0; transform-origin:left center; }
-  .door-right{ right:0; border-left:1px solid var(--driftwood-shadow); border-radius:0 84px 0 0; transform-origin:right center; }
-  .door-left::before, .door-right::before{
-    content:""; position:absolute; inset:6px; border:1px solid rgba(255,252,240,.55); border-radius:78px 78px 2px 2px; opacity:.8;
-  }
-  .door-right::before{ border-radius:2px 78px 78px 2px; }
-  .door-left::after{
-    content:""; position:absolute; right:12px; top:50%; transform:translateY(-50%);
-    width:16px; height:5px; border-radius:3px; background:var(--gold-soft); box-shadow:0 0 0 1px rgba(0,0,0,.15);
-  }
-  .door-right::after{
-    content:""; position:absolute; left:12px; top:50%; transform:translateY(-50%);
-    width:16px; height:5px; border-radius:3px; background:var(--gold-soft); box-shadow:0 0 0 1px rgba(0,0,0,.15);
-  }
-  .arch-wrap.open .door-left{ transform:rotateY(-112deg); }
-  .arch-wrap.open .door-right{ transform:rotateY(112deg); }
-
-  .wreath{ position:absolute; inset:0; z-index:4; pointer-events:none; }
-  .bloom{
-    position:absolute; width:13px; height:11px; border-radius:60% 40% 55% 45%;
-    background:radial-gradient(circle at 35% 30%, var(--linen), var(--sand-2) 65%, var(--driftwood) 100%);
-    box-shadow:inset 0 0 0 1px rgba(163,131,90,.35);
-  }
-  .bloom.mirror{ transform:scaleX(-1); }
-  .bloom.accent{
-    background:radial-gradient(circle at 35% 30%, var(--coral), #c96a4d 75%); width:9px; height:9px; border-radius:50%;
-  }
-  .bloom.accent.turquoise{
-    background:radial-gradient(circle at 35% 30%, var(--turquoise-light), var(--turquoise) 75%);
-  }
-  .bloom.leaf{ background:var(--driftwood-dark); border-radius:50% 10% 50% 10%; width:14px; height:6px; opacity:.8; }
-  .ribbon-bow{ position:absolute; z-index:5; width:26px; height:20px; }
-
-  .burst{
-    position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
-    width:10px; height:10px; border-radius:50%;
-    background:radial-gradient(circle, #fff7df 0%, var(--gold-soft) 40%, transparent 70%);
-    opacity:0; z-index:4; pointer-events:none;
-  }
-  .arch-wrap.open .burst{ animation:burstOut 1.3s ease-out forwards; }
-  @keyframes burstOut{
-    0%{ opacity:0; width:10px; height:10px; }
-    30%{ opacity:1; }
-    100%{ opacity:0; width:480px; height:480px; }
-  }
-
-  .cover-names{ font-family:'Cormorant Garamond', serif; font-size:15px; letter-spacing:.08em; color:var(--gold-soft); margin-top:18px; }
-  .tap-hint{
-    margin-top:14px; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:14px;
-    color:var(--khaki-soft); letter-spacing:.05em; animation:pulse 2.4s ease-in-out infinite;
-  }
-  @keyframes pulse{ 0%,100%{opacity:.5;} 50%{opacity:1;} }
-
-  /* ================= WAVE DIVIDER — signature motif ================= */
-  .tide-line{ width:100%; height:34px; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
-  .tide-line svg{ width:220px; height:20px; animation:tideSway 6s ease-in-out infinite; }
-  @keyframes tideSway{
-    0%,100%{ transform:translateX(-6px); }
-    50%{ transform:translateX(6px); }
-  }
-
-  /* Ambient bobbing marker, always present */
-  .tide-marker{
-    position:fixed; right:16px; bottom:20px; z-index:15; width:30px; opacity:.55;
-    animation:bob 4.5s ease-in-out infinite;
-  }
-  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-9px);} }
-
-  /* ================= MAIN CONTENT — flowing sections ================= */
-  #content{ position:relative; z-index:2; }
-
-  section{
-    min-height:100vh;
-    min-height:100svh;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:64px 24px;
-    position:relative;
-    will-change:opacity, filter, transform;
-    scroll-snap-align:center;
-  }
-
-  .panel{
-    width:100%;
-    background:linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
-    border:1px solid rgba(201,167,105,.5);
-    padding:36px 24px; position:relative;
-    box-shadow:0 18px 44px rgba(0,0,0,.38);
-  }
-  .panel::before, .panel::after{
-    content:""; position:absolute; width:26px; height:26px;
-    border-top:1.5px solid var(--gold); border-left:1.5px solid var(--gold);
-  }
-  .panel::before{ top:8px; left:8px; }
-  .panel::after{ bottom:8px; right:8px; transform:rotate(180deg); }
-
-  .eyebrow{
-    text-align:center; font-family:'Cormorant Garamond', serif; letter-spacing:.4em;
-    text-transform:uppercase; font-size:11px; color:var(--burgundy); margin:0 0 14px;
-  }
-
-  .names{ text-align:center; font-family:'Tangerine', cursive; font-size:64px; line-height:1; color:var(--burgundy); margin:0; }
-  .amp{ display:block; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:20px; color:var(--khaki); margin:6px 0; letter-spacing:.1em; }
-
-  .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; position:relative; }
-  .divider::before{
-    content:"◆"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    font-size:8px; color:var(--gold); background:var(--cream); padding:0 6px;
-  }
-
-  .lead-text{ text-align:center; font-size:16px; line-height:1.8; color:var(--ink); max-width:320px; margin:0 auto; }
-
-  .date-block{ text-align:center; margin-top:24px; font-family:'Cormorant Garamond', serif; }
-  .date-day{ font-size:44px; color:var(--burgundy); font-weight:600; line-height:1; }
-  .date-rest{ font-size:15px; letter-spacing:.15em; text-transform:uppercase; color:var(--khaki); margin-top:6px; }
-
-  .countdown{ display:flex; justify-content:center; gap:12px; margin-top:22px; }
-  .count-box{ text-align:center; min-width:52px; }
-  .count-num{
-    font-family:'Cormorant Garamond', serif; font-size:24px;
-    background:var(--olive-deep); color:var(--gold-soft); padding:10px 0; border:1px solid var(--gold);
-  }
-  .count-label{ font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--khaki); margin-top:6px; }
-
-  .venue-name{ text-align:center; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:20px; color:var(--ink); margin:4px 0 2px; }
-  .venue-addr{ text-align:center; font-size:14px; color:var(--khaki); line-height:1.6; }
-  .btn{
-    display:block; width:fit-content; margin:22px auto 0;
-    background:var(--burgundy); color:var(--cream); text-decoration:none;
-    font-family:'Cormorant Garamond', serif; letter-spacing:.2em; text-transform:uppercase;
-    font-size:13px; padding:12px 30px; border:1px solid var(--gold);
-    transition:background .3s ease, transform .3s var(--ease-tide); cursor:pointer;
-  }
-  .btn:hover{ background:var(--burgundy-2); transform:translateY(-2px); }
-
-  .menu-list{ text-align:center; margin-top:8px; }
-  .menu-item{ font-family:'Cormorant Garamond', serif; font-style:italic; font-size:19px; color:var(--ink); padding:12px 0; }
-  .menu-sep{ color:var(--gold); font-size:11px; letter-spacing:.2em; }
-
-  .rsvp-row{ display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap; }
-  .rsvp-btn{
-    font-family:'Cormorant Garamond', serif; letter-spacing:.12em; text-transform:uppercase; font-size:13px;
-    padding:12px 20px; border:1px solid var(--burgundy); background:transparent; color:var(--burgundy);
-    cursor:pointer; transition:all .35s var(--ease-tide);
-  }
-  .rsvp-btn.primary{ background:var(--burgundy); color:var(--cream); }
-  .rsvp-btn:hover{ background:var(--burgundy); color:var(--cream); }
-  .rsvp-msg{ text-align:center; margin-top:18px; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:15px; color:var(--khaki); min-height:20px; }
-
-  input[type=text]{
-    display:block; width:100%; margin-top:16px; padding:10px 12px; background:transparent; border:none;
-    border-bottom:1px solid var(--khaki-soft); font-family:'EB Garamond', serif; font-size:15px;
-    color:var(--ink); text-align:center;
-  }
-  input[type=text]:focus{ outline:none; border-bottom-color:var(--burgundy); }
-  input[type=text]::placeholder{ color:var(--khaki-soft); font-style:italic; }
-
-  .floral{ display:block; margin:0 auto 6px; width:120px; opacity:.9; }
-
-  .story-frame{
-    width:180px; height:180px; margin:16px auto 0; position:relative;
-    border:2px solid var(--gold); border-radius:50%;
-    background:linear-gradient(160deg,#e9dcc0,#dcc9a0);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 20px rgba(0,0,0,.25);
-  }
-  .story-frame span{ font-family:'Cormorant Garamond', serif; font-style:italic; color:var(--khaki); font-size:13px; text-align:center; padding:0 20px; }
-
-  .vinyl-wrap{ display:flex; justify-content:center; margin-top:22px; }
-  .vinyl{
-    width:96px; height:96px; border-radius:50%;
-    background:repeating-radial-gradient(circle, #1c1a10 0 3px, #2c2a1a 3px 6px);
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--gold); cursor:pointer;
-    transition:transform .5s var(--ease-tide);
-  }
-  .vinyl:hover{ transform:rotate(25deg); }
-  .vinyl-center{ width:28px; height:28px; border-radius:50%; background:var(--gold-soft); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--burgundy); }
-  .voice-caption{ text-align:center; margin-top:14px; font-size:13px; color:var(--khaki); font-style:italic; }
-
-  .family-row{ display:flex; justify-content:space-between; gap:14px; margin-top:18px; width:100%; }
-  .family-col{ flex:1; text-align:center; }
-  .family-role{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--burgundy); margin-bottom:6px; }
-  .family-names{ font-family:'Cormorant Garamond', serif; font-size:16px; color:var(--ink); line-height:1.5; }
-
-  .react-row{ display:flex; justify-content:center; gap:22px; margin-top:20px; }
-  .react-item{ text-align:center; cursor:pointer; user-select:none; }
-  .react-icon{
-    width:46px; height:46px; border-radius:50%; border:1px solid var(--gold);
-    display:flex; align-items:center; justify-content:center; font-size:18px; margin:0 auto 6px;
-    background:var(--cream-2); transition:transform .3s var(--ease-tide), background .3s ease;
-  }
-  .react-item:hover .react-icon{ background:var(--burgundy); color:var(--cream); transform:scale(1.08); }
-  .react-count{ font-size:12px; color:var(--khaki); font-family:'Cormorant Garamond', serif; }
-  .react-label{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--khaki); margin-top:2px; }
-
-  .gift-box{ margin-top:16px; padding:16px; border:1px dashed var(--gold); text-align:center; background:rgba(201,167,105,.08); }
-  .gift-label{ font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--khaki); }
-  .gift-value{ font-family:'Cormorant Garamond', serif; font-size:16px; color:var(--burgundy); margin-top:6px; letter-spacing:.05em; }
-
-  footer{ text-align:center; padding:40px 24px 70px; font-family:'Tangerine', cursive; font-size:28px; color:var(--gold-soft); }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ animation:none !important; }
-    section{ transition:opacity .4s ease !important; filter:none !important; transform:none !important; }
-    html{ scroll-snap-type:none !important; }
-  }
-</style>
+        @keyframes pulse-ready-anim { 
+            0% { background-color: #d0f3cf; box-shadow: 0 0 5px rgba(25, 135, 84, 0.5); } 
+            50% { background-color: #ffffff; box-shadow: 0 0 20px rgba(25, 135, 84, 0.8); } 
+            100% { background-color: #d0f3cf; box-shadow: 0 0 5px rgba(25, 135, 84, 0.5); } 
+        }
+        .pulse-ready { animation: pulse-ready-anim 2s infinite; border: 2px solid #198754 !important; }
+        .note-container { position: relative; display: inline-block; }
+        .note-badge { position: absolute; top: -10px; right: -12px; background: #dc3545; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.6rem; font-weight: 900; border: 1px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .install-select { font-size: 0.7rem; padding: 2px; border-radius: 4px; border: 1px solid #ced4da; margin-left: 5px; font-weight: bold; height: 28px; background: #fff; color: #000; }
+        
+        @media (max-width: 768px) { .auth-divider { border-left: none; border-top: 1px solid #dee2e6; margin: 20px 0; } }
+    </style>
 </head>
 <body>
 
-<div class="grain"></div>
-
-<!-- Ambient tide marker — a quiet constant motion, always present -->
-<svg class="tide-marker" viewBox="0 0 40 24" fill="none">
-  <path d="M2 14 C8 4, 14 20, 20 12 C26 4, 32 20, 38 12" stroke="#2fa9a3" stroke-width="1.6" stroke-linecap="round"/>
-</svg>
-
-<!-- ===================== COVER — FLORAL ARCH ===================== -->
-<div id="cover">
-  <div class="cover-inner">
-    <div class="cover-eyebrow">Bir Davetimiz Var</div>
-    <div class="arch-wrap" id="archWrap">
-      <div class="arch-frame">
-        <div class="scene" id="scene">
-          <div class="figure bride">
-            <svg viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="brideGown" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#fffdf7"/>
-                  <stop offset="100%" stop-color="#efe4cb"/>
-                </linearGradient>
-                <radialGradient id="skin1" cx="35%" cy="30%" r="75%">
-                  <stop offset="0%" stop-color="#f3d9bd"/>
-                  <stop offset="100%" stop-color="#e2b892"/>
-                </radialGradient>
-              </defs>
-              <ellipse cx="20" cy="12" rx="11.5" ry="13.5" fill="none" stroke="#f8f2e6" stroke-width="1" opacity=".5"/>
-              <path d="M11,10 C11,3 15,0 20,0 C25,0 29,3 29,10 C29,7 26,6 20,6 C14,6 11,7 11,10 Z" fill="#4a3826"/>
-              <circle cx="20" cy="10" r="6.4" fill="url(#skin1)"/>
-              <path d="M13,18 C7,22 5,28 8,36 C3,56 1,79 6,98 L34,98 C39,79 37,56 32,36 C35,28 33,22 27,18 C24,16 16,16 13,18 Z" fill="url(#brideGown)" stroke="#dcc48f" stroke-width=".6"/>
-              <line x1="9" y1="48" x2="31" y2="48" stroke="#2fa9a3" stroke-width=".6" opacity=".7"/>
-            </svg>
-          </div>
-          <div class="figure groom">
-            <svg viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="groomSuit" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#1c5a54"/>
-                  <stop offset="100%" stop-color="#0d332f"/>
-                </linearGradient>
-                <radialGradient id="skin2" cx="35%" cy="30%" r="75%">
-                  <stop offset="0%" stop-color="#e8c19c"/>
-                  <stop offset="100%" stop-color="#d1a074"/>
-                </radialGradient>
-              </defs>
-              <path d="M12,7 C12,2 15,-1 20,-1 C25,-1 28,2 28,7 L28,9 C24,6 16,6 12,9 Z" fill="#3a2b1c"/>
-              <circle cx="20" cy="10" r="6.4" fill="url(#skin2)"/>
-              <path d="M10,19 L30,19 L33,56 L7,56 Z" fill="url(#groomSuit)" stroke="#dcc48f" stroke-width=".5"/>
-              <path d="M17,19 L23,19 L21,32 L19,32 Z" fill="#f8f2e6"/>
-              <path d="M19,21 L21,21 L20,28 Z" fill="#2f2e1e"/>
-              <rect x="9" y="56" width="8" height="41" rx="1.5" fill="#2f2e1e"/>
-              <rect x="23" y="56" width="8" height="41" rx="1.5" fill="#2f2e1e"/>
-            </svg>
-          </div>
+<div id="note-modal" class="custom-modal hidden">
+    <div class="modal-box">
+        <h6 class="fw-bold mb-3 border-bottom pb-2">📋 İŞ NOTLARI</h6>
+        <textarea id="modal-textarea" class="form-control" rows="6" placeholder="Açıklama veya notunuzu buraya yazın..."></textarea>
+        <div class="d-flex gap-2 mt-3">
+            <button onclick="closeNoteModal()" class="btn btn-sm btn-secondary w-50">Kapat</button>
+            <button id="btn-save-note" class="btn btn-sm btn-primary w-50">Notu Kaydet</button>
         </div>
-        <div class="curtain curtain-left"></div>
-        <div class="curtain curtain-right"></div>
-        <div class="door-left"></div>
-        <div class="door-right"></div>
-      </div>
-      <div class="wreath" id="wreath"></div>
-      <div class="burst"></div>
     </div>
-    <div class="cover-names">E C E &nbsp;&amp;&nbsp; M E H M E T C A N</div>
-    <div class="tap-hint">✦ Açmak için kapıya dokun ✦</div>
-  </div>
 </div>
 
-<div class="stage">
-<div id="content" style="scroll-snap-type:y proximity;">
-
-  <!-- ===== Hero ===== -->
-  <section id="s1">
-    <div class="panel">
-      <svg class="floral" viewBox="0 0 200 60" fill="none">
-        <path d="M20 45 C40 20, 70 15, 100 30 C130 15, 160 20, 180 45" stroke="#a3835a" stroke-width="1.2"/>
-        <circle cx="45" cy="30" r="5" fill="#2fa9a3" opacity=".8"/>
-        <circle cx="60" cy="22" r="4" fill="#e8927a" opacity=".7"/>
-        <circle cx="140" cy="22" r="4" fill="#e8927a" opacity=".7"/>
-        <circle cx="155" cy="30" r="5" fill="#2fa9a3" opacity=".8"/>
-      </svg>
-      <div class="eyebrow">Mutlu Sona Değil, Sonsuz Mutluluğumuzun İlk Adımına</div>
-      <h1 class="names">Ece <span class="amp">&amp;</span> Mehmetcan</h1>
-      <div class="divider"></div>
-      <p class="lead-text">Birbirimize verdiğimiz sözü, en yakınlarımızın huzurunda tazelemek istiyoruz. Bu özel günde yanımızda olmanızı dileriz.</p>
-      <div class="date-block">
-        <div class="date-day">21 Ekim 2027</div>
-        <div class="date-rest">Perşembe · 19:15</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Kına ===== -->
-  <section id="s2">
-    <div class="panel">
-      <div class="eyebrow">Kına Gecesi</div>
-      <div class="venue-name" style="margin-top:0;">Düğüne Sayılı Günler</div>
-      <div class="countdown" id="countdown-kina">
-        <div class="count-box"><div class="count-num" data-u="d">--</div><div class="count-label">Gün</div></div>
-        <div class="count-box"><div class="count-num" data-u="h">--</div><div class="count-label">Saat</div></div>
-        <div class="count-box"><div class="count-num" data-u="m">--</div><div class="count-label">Dk</div></div>
-        <div class="count-box"><div class="count-num" data-u="s">--</div><div class="count-label">Sn</div></div>
-      </div>
-      <a class="btn" href="#" onclick="addToCalendar(); return false;">Takvime Ekle</a>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Hikayemiz ===== -->
-  <section id="s3">
-    <div class="panel">
-      <div class="eyebrow">Hikayemiz</div>
-      <div class="story-frame"><span>Fotoğrafınızı<br>buraya ekleyin</span></div>
-      <p class="lead-text" style="margin-top:18px;">Yıllar önce başlayan bu yolculuk, şimdi hayatımızın en güzel dönüm noktasına ulaşıyor. Bu hikayenin bir parçası olduğunuz için teşekkür ederiz.</p>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Sesli Mesaj ===== -->
-  <section id="s4">
-    <div class="panel">
-      <div class="eyebrow">Size Sesli Bir Mesajımız Var</div>
-      <div class="vinyl-wrap">
-        <div class="vinyl" onclick="toggleVoice(this)"><div class="vinyl-center" id="vinylIcon">▶</div></div>
-      </div>
-      <div class="voice-caption">Dinlemek için plağa dokunun</div>
-      <!-- Ses dosyanı eklemek için: <audio id="voiceMsg" src="mesaj.mp3"></audio> -->
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Location ===== -->
-  <section id="s5">
-    <div class="panel">
-      <div class="eyebrow">Davet Mekanı</div>
-      <div class="venue-name">Four Seasons Hotel İstanbul</div>
-      <div class="venue-addr">No:28, Çırağan Cd.<br>34349 Beşiktaş / İstanbul</div>
-      <a class="btn" href="https://maps.google.com/?q=Four+Seasons+Hotel+Istanbul+at+the+Bosphorus" target="_blank" rel="noopener">Yol Tarifi →</a>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Menu ===== -->
-  <section id="s6">
-    <div class="panel">
-      <div class="eyebrow">Menü</div>
-      <div class="menu-list">
-        <div class="menu-item">Başlangıç</div>
-        <div class="menu-sep">❦</div>
-        <div class="menu-item">Ara Sıcak</div>
-        <div class="menu-sep">❦</div>
-        <div class="menu-item">Ana Yemek</div>
-        <div class="menu-sep">❦</div>
-        <div class="menu-item">Tatlı</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Ailelerimiz ===== -->
-  <section id="s7">
-    <div class="panel">
-      <div class="eyebrow">Ailelerimiz</div>
-      <div class="family-row">
-        <div class="family-col">
-          <div class="family-role">Gelin Ailesi</div>
-          <div class="family-names">Asiye &amp; Erdem<br>Özdemir</div>
+<div id="auth-wrapper">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-md-5">
+            <div class="auth-card">
+                <h4 class="text-center fw-bold mb-4">GİRİŞ YAP</h4>
+                <div class="mb-2">
+                    <label class="small fw-bold">E-posta</label>
+                    <input type="email" id="login_email" class="form-control" placeholder="E-postanızı girin">
+                </div>
+                <div class="mb-3">
+                    <label class="small fw-bold">Şifre</label>
+                    <input type="password" id="login_pw" class="form-control" placeholder="Şifrenizi girin">
+                </div>
+                <button id="btnLogin" class="btn btn-primary w-100 fw-bold">Sisteme Giriş</button>
+            </div>
         </div>
-        <div class="family-col">
-          <div class="family-role">Damat Ailesi</div>
-          <div class="family-names">Hülya &amp; Tefik<br>Şahin</div>
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+            <div class="auth-divider d-none d-md-block"></div>
+            <span class="bg-f0f2f5 px-2 text-muted small d-md-none">VEYA</span>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== RSVP ===== -->
-  <section id="s8">
-    <div class="panel">
-      <div class="eyebrow">Katılım Bildirimi</div>
-      <p class="lead-text">Lütfen 1 Ekim 2027 tarihine kadar bize haber verin.</p>
-      <input type="text" id="guestName" placeholder="Adınız Soyadınız">
-      <div class="rsvp-row">
-        <button class="rsvp-btn primary" onclick="rsvp(true)">Katılıyorum</button>
-        <button class="rsvp-btn" onclick="rsvp(false)">Katılamıyorum</button>
-      </div>
-      <div class="rsvp-msg" id="rsvpMsg"></div>
-    </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Mutluluğumuza Ortak Olun ===== -->
-  <section id="s9">
-    <div class="panel">
-      <div class="eyebrow">Mutluluğumuza Ortak Olun</div>
-      <div class="react-row">
-        <div class="react-item" onclick="react(this)">
-          <div class="react-icon">♥</div>
-          <div class="react-count">0</div>
-          <div class="react-label">Harikasınız</div>
+        <div class="col-md-5" id="signup-section">
+            <div class="auth-card">
+                <h4 class="text-center fw-bold mb-4 text-success">YENİ PERSONEL</h4>
+                <div class="mb-2">
+                    <label class="small fw-bold">Ad Soyad</label>
+                    <input type="text" id="auth_name" class="form-control" placeholder="Adınız ve Soyadınız">
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">E-posta</label>
+                    <input type="email" id="auth_email" class="form-control" placeholder="E-posta adresi">
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">Şifre</label>
+                    <input type="password" id="auth_pw" class="form-control" placeholder="Şifre oluşturun">
+                </div>
+                <div class="mb-3">
+                    <label class="small fw-bold">Şifre Tekrar</label>
+                    <input type="password" id="auth_pw_confirm" class="form-control" placeholder="Şifreyi onaylayın">
+                </div>
+                <button id="btnSignup" class="btn btn-success w-100 fw-bold">Kayıt Ol</button>
+            </div>
         </div>
-        <div class="react-item" onclick="react(this)">
-          <div class="react-icon">✦</div>
-          <div class="react-count">0</div>
-          <div class="react-label">Tebrikler</div>
-        </div>
-        <div class="react-item" onclick="react(this)">
-          <div class="react-icon">❁</div>
-          <div class="react-count">0</div>
-          <div class="react-label">Mutluluklar</div>
-        </div>
-      </div>
     </div>
-  </section>
-
-  <div class="tide-line"><svg viewBox="0 0 220 20"><path d="M0 10 C30 -2, 60 22, 90 10 C120 -2, 150 22, 180 10 C195 4, 210 14, 220 10" stroke="#2fa9a3" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg></div>
-
-  <!-- ===== Dijital Takı ===== -->
-  <section id="s10">
-    <div class="panel">
-      <div class="eyebrow">Dijital Takı</div>
-      <p class="lead-text">Düğünümüze katılamasanız da bizimle sevginizi paylaşmak isterseniz, dijital hediyenizi aşağıdaki hesaba iletebilirsiniz.</p>
-      <div class="gift-box">
-        <div class="gift-label">IBAN</div>
-        <div class="gift-value">TR00 0000 0000 0000 0000 0000 00</div>
-      </div>
-    </div>
-  </section>
-
-  <footer>Sevgiyle,<br>Ece &amp; Mehmetcan</footer>
-
-</div>
 </div>
 
-<script>
-  /* ---- Build rope & shell wreath, precisely matched to the door's own arch curvature ---- */
-  /* Door arch: center (125,174), radius 84 (from the frame's 168px width / border-radius) */
-  const wreath = document.getElementById('wreath');
-  const ARC_CX = 125, ARC_CY = 174, ARC_R = 112; // wreath radius = door radius (84) + 28px halo
-  const total = 30;
-  for(let i=0;i<=total;i++){
-    const t = Math.PI * (1 - i/total); // PI (left) -> 0 (right), sweeping the top half only
-    const x = ARC_CX + ARC_R * Math.cos(t);
-    const y = ARC_CY - ARC_R * Math.sin(t);
-    const isRight = x > ARC_CX;
-    let kind = '';
-    if(i % 6 === 0) kind = 'accent' + (i % 12 === 0 ? ' turquoise' : '');
-    else if(i % 3 === 0) kind = 'leaf';
-    const el = document.createElement('div');
-    el.className = 'bloom ' + kind + (isRight && kind === 'leaf' ? ' mirror' : '');
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    wreath.appendChild(el);
-  }
-  // side stems continuing straight down from where the arc meets the door posts
-  const STEM_START = ARC_CY; // y where arc ends on each side
-  const STEM_GAP = 25;
-  const STEM_COUNT = 8;
-  const STEM_X = ARC_CX - ARC_R; // distance from center = same on both sides
-  for(let j=0;j<STEM_COUNT;j++){
-    ['left','right'].forEach(side=>{
-      const kind = j % 2 === 0 ? 'accent' + (j % 4 === 0 ? ' turquoise' : '') : 'leaf';
-      const el = document.createElement('div');
-      el.className = 'bloom ' + kind + (side === 'right' && kind === 'leaf' ? ' mirror' : '');
-      el.style.top = (STEM_START + j * STEM_GAP) + 'px';
-      el.style[side] = STEM_X + 'px';
-      wreath.appendChild(el);
+<div id="app-content">
+    <nav class="navbar navbar-dark bg-primary shadow-sm px-3 w-100">
+        <a class="navbar-brand p-0" href="#">
+            <img src="https://i.ibb.co/LdyvYqB/imes-logo-final.png" alt="İMES SPOR" style="height: 50px; width: auto; object-fit: contain;">
+        </a>
+        <div class="flex-grow-1 mx-4">
+            <input type="text" id="search_input" class="form-control form-control-sm w-50" placeholder="🔍 Ara (Müşteri, Bölge, Not...)">
+        </div>
+        <div class="d-flex align-items-center">
+            <span id="active-user" class="text-white me-3 small fw-bold"></span>
+            <button id="btnExcel" class="btn btn-sm btn-success fw-bold me-2">📊 EXCEL İNDİR</button>
+            <button id="btnLogout" class="btn btn-sm btn-light fw-bold">Çıkış</button>
+        </div>
+    </nav>
+
+    <div id="admin-panel" class="p-3 bg-white shadow-sm border-bottom hidden">
+        <div class="row g-2 px-2">
+            <div class="col-md-2"><input type="text" id="m_adi" class="form-control form-control-sm" placeholder="Firma / Kişi"></div>
+            <div class="col-md-2"><input type="text" id="m_bolge" class="form-control form-control-sm" placeholder="Sevk Adresi"></div>
+            <div class="col-md-2"><input type="text" id="m_iletisim" class="form-control form-control-sm" placeholder="Kişi / Telefon"></div>
+            <div class="col-md-2">
+                <input type="date" id="m_muhtemel_tarih" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-2">
+                <select id="m_hazir_durum" class="form-select form-select-sm">
+                    <option value="false">⏳ BEKLEMEDE</option>
+                    <option value="true">✅ SEVKE HAZIR</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="m_kurulum_gereksinimi" class="form-select form-select-sm">
+                    <option value="KURULUM YOK">🛠 KURULUM YOK</option>
+                    <option value="KURULUM VAR">🛠 KURULUM VAR</option>
+                </select>
+            </div>
+            <div class="col-md-1"><button id="btnKaydet" class="btn btn-dark btn-sm w-100 fw-bold">KAYDET</button></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="column">
+            <div class="column-header header-bekleyen">📋 BEKLEYENLER <span id="count-bekleyen">0</span></div>
+            <div id="liste-bekleyen" class="scroll-area"></div>
+        </div>
+        <div class="column">
+            <div class="column-header header-sevk">🚚 SEVK EDİLDİ <span id="count-sevk">0</span></div>
+            <div id="liste-sevk" class="scroll-area"></div>
+        </div>
+        <div class="column">
+            <div class="column-header header-tamam">✅ TAMAMLANDI <span id="count-tamam">0</span></div>
+            <div id="liste-tamam" class="scroll-area"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1B6mz6OBS_1LeLPzuxg7uoCdiOQfBt2g",
+      authDomain: "imes-teknik-takip.firebaseapp.com",
+      databaseURL: "https://imes-teknik-takip-default-rtdb.firebaseio.com",
+      projectId: "imes-teknik-takip",
+      storageBucket: "imes-teknik-takip.firebasestorage.app",
+      messagingSenderId: "51185146925",
+      appId: "1:51185146925:web:ad2184d20c1f83d1ff6ca4",
+      measurementId: "G-B6N42033WD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const ADMIN_EMAIL = "emrah@imesspor.com";
+    const KAYIT_EKIBI = ["eren@imesspor.com", "ermanmete@imesspor.com", "aykutonus@imesspor.com", "burak@imesspor.com", "candemir@imesspor.com", "mehmetcan@imesspor.com", "levent@imesspor.com", "selahattin@imesspor.com", "timucin@imesspor.com", "melisa@imesspor.com", "alimran@imesspor.com"];
+
+    let isAdmin = false;
+    let tumIsler = [];
+    let currentEditingId = null;
+
+    onAuthStateChanged(auth, (user) => {
+        document.getElementById('auth-wrapper').style.display = user ? 'none' : 'block';
+        document.getElementById('app-content').style.display = user ? 'block' : 'none';
+        if(user) {
+            isAdmin = (user.email === ADMIN_EMAIL);
+            const canManage = isAdmin || KAYIT_EKIBI.includes(user.email);
+            document.getElementById('active-user').innerText = (isAdmin ? "⭐ " : "👤 ") + (user.displayName || user.email);
+            if(canManage) document.getElementById('admin-panel').classList.remove('hidden');
+            verileriYukle();
+        }
     });
-  }
-  // a small turquoise ribbon bow crowning the top of the arch
-  const bow = document.createElement('div');
-  bow.className = 'ribbon-bow';
-  bow.style.left = (ARC_CX - 13) + 'px';
-  bow.style.top = (ARC_CY - ARC_R - 6) + 'px';
-  bow.innerHTML = `<svg viewBox="0 0 26 20" xmlns="http://www.w3.org/2000/svg">
-      <path d="M13,10 L2,2 C0,7 1,13 5,16 Z" fill="#2fa9a3"/>
-      <path d="M13,10 L24,2 C26,7 25,13 21,16 Z" fill="#3bbdb6"/>
-      <circle cx="13" cy="10" r="3.4" fill="#dcc48f" stroke="#a3835a" stroke-width=".6"/>
-    </svg>`;
-  wreath.appendChild(bow);
 
-  // gentle drifting sand motes across the seaside scene
-  const scene0 = document.getElementById('scene');
-  for(let k=0;k<5;k++){
-    const m = document.createElement('div');
-    m.className = 'sand-mote';
-    m.style.left = (6 + k*9) + '%';
-    m.style.animationDelay = (k*1.1) + 's';
-    scene0.appendChild(m);
-  }
+    document.getElementById('btnLogin').onclick = () => {
+        const email = document.getElementById('login_email').value;
+        const pw = document.getElementById('login_pw').value;
+        signInWithEmailAndPassword(auth, email, pw).catch(e => alert("Giriş Hatası!"));
+    };
 
-  /* ---- Cover open — slow double-door reveal, bride & groom walk to an embrace ---- */
-  const archWrap = document.getElementById('archWrap');
-  const cover = document.getElementById('cover');
-  const scene = document.getElementById('scene');
-  let opened = false;
-  archWrap.addEventListener('click', () => {
-    if(opened) return; // prevent re-trigger
-    opened = true;
-    archWrap.classList.add('open');                              // 0ms    — double doors swing open, slowly
-    setTimeout(() => scene.classList.add('walk'), 1300);          // ~1.3s  — bride & groom begin walking toward each other
-    setTimeout(() => scene.classList.add('hug'), 1300 + 2000);    // ~3.3s  — they meet & embrace
-    setTimeout(() => cover.classList.add('hidden'), 1300 + 2000 + 1400); // ~4.7s — hold the embrace, then flow into the invitation
-  });
+    document.getElementById('btnSignup').onclick = () => {
+        const name = document.getElementById('auth_name').value;
+        const email = document.getElementById('auth_email').value;
+        const pw = document.getElementById('auth_pw').value;
+        if(pw !== document.getElementById('auth_pw_confirm').value) return alert("Şifreler eşleşmiyor!");
+        createUserWithEmailAndPassword(auth, email, pw).then(u => updateProfile(u.user, {displayName: name})).catch(e => alert(e.message));
+    };
 
-  /* ---- Continuous tide fade: each section drifts in from transparent as it
-     approaches the center of the screen, holds clear, then dissolves back to
-     transparent as it drifts away — like water rising and receding. ---- */
-  const sections = document.querySelectorAll('section');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let ticking = false;
+    document.getElementById('btnLogout').onclick = () => signOut(auth);
 
-  function applyTideFade(){
-    const vh = window.innerHeight;
-    const vCenter = vh / 2;
-    sections.forEach(sec => {
-      const r = sec.getBoundingClientRect();
-      const secCenter = r.top + r.height / 2;
-      const dist = Math.abs(secCenter - vCenter);
-      const maxDist = vh / 2 + r.height / 2;
-      let progress = 1 - Math.min(dist / maxDist, 1);
-      progress = Math.max(progress, 0);
-      // ease the envelope so the middle holds clear a little longer
-      const eased = progress * progress * (3 - 2 * progress); // smoothstep
-      sec.style.opacity = eased;
-      sec.style.filter = `blur(${(1 - eased) * 15}px)`;
-      const dir = secCenter < vCenter ? -1 : 1;
-      sec.style.transform = `translateY(${(1 - eased) * 38 * dir}px) scale(${0.97 + eased * 0.03})`;
-    });
-    ticking = false;
-  }
+    document.getElementById('btnExcel').onclick = () => {
+        const bekleyenler = tumIsler.filter(m => !m.sevkDurum);
+        const sevkEdilenler = tumIsler.filter(m => m.sevkDurum && !m.kurulumDurum);
+        const tamamlananlar = tumIsler.filter(m => m.kurulumDurum);
 
-  function onScroll(){
-    if(!ticking){
-      requestAnimationFrame(applyTideFade);
-      ticking = true;
+        const getTableRows = (liste) => {
+            return liste.map(m => {
+                let durum = m.kurulumDurum ? "TAMAMLANDI" : (m.sevkDurum ? "SEVK EDİLDİ" : "BEKLİYOR");
+                let hazir = (m.hazirDurum === "true" || m.hazirDurum === true) ? "HAZIR" : "BEKLEMEDE";
+                return `
+                <Row>
+                    <Cell><Data ss:Type="String">${m.ad || '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.bolge || '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.muhtemelTarih || '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${durum}</Data></Cell>
+                    <Cell><Data ss:Type="String">${hazir}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.kurulumGereksinimi || 'YOK'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.kayitYapan || '-'} | ${m.kayitTarihi || '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.sevkDurum ? (m.sevkYapan + ' | ' + m.sevkTarihi) : '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.kurulumDurum ? (m.kurulumYapan + ' | ' + m.kurulumTarihi) : '-'}</Data></Cell>
+                    <Cell><Data ss:Type="String">${m.aciklama || '-'}</Data></Cell>
+                </Row>`;
+            }).join('');
+        };
+
+        const header = `
+            <Row ss:StyleID="headerStyle">
+                <Cell><Data ss:Type="String">MÜŞTERİ / FİRMA</Data></Cell>
+                <Cell><Data ss:Type="String">SEVK ADRESİ</Data></Cell>
+                <Cell><Data ss:Type="String">MUHTEMEL SEVK</Data></Cell>
+                <Cell><Data ss:Type="String">DURUM</Data></Cell>
+                <Cell><Data ss:Type="String">HAZIRLIK</Data></Cell>
+                <Cell><Data ss:Type="String">KURULUM</Data></Cell>
+                <Cell><Data ss:Type="String">KAYIT BİLGİSİ</Data></Cell>
+                <Cell><Data ss:Type="String">SEVK BİLGİSİ</Data></Cell>
+                <Cell><Data ss:Type="String">KURULUM BİLGİSİ</Data></Cell>
+                <Cell><Data ss:Type="String">NOTLAR</Data></Cell>
+            </Row>`;
+
+        let xml = `<?xml version="1.0"?>
+        <?mso-application progid="Excel.Sheet"?>
+        <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+         xmlns:o="urn:schemas-microsoft-com:office:office"
+         xmlns:x="urn:schemas-microsoft-com:office:excel"
+         xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+         xmlns:html="http://www.w3.org/TR/REC-html40">
+         <Styles>
+          <Style ss:ID="headerStyle">
+           <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+           <Interior ss:Color="#0d6efd" ss:Pattern="Solid"/>
+          </Style>
+         </Styles>
+         <Worksheet ss:Name="BEKLEYEN İŞLER">
+          <Table> ${header} ${getTableRows(bekleyenler)} </Table>
+         </Worksheet>
+         <Worksheet ss:Name="SEVK EDİLEN İŞLER">
+          <Table> ${header} ${getTableRows(sevkEdilenler)} </Table>
+         </Worksheet>
+         <Worksheet ss:Name="TAMAMLANAN İŞLER">
+          <Table> ${header} ${getTableRows(tamamlananlar)} </Table>
+         </Worksheet>
+        </Workbook>`;
+
+        const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `IMES_DETAYLI_RAPOR_${new Date().toLocaleDateString('tr-TR')}.xls`;
+        a.click();
+    };
+
+    const getTarih = () => new Date().toLocaleString('tr-TR');
+
+    document.getElementById('btnKaydet').onclick = () => {
+        const ad = document.getElementById('m_adi').value.trim();
+        const bolge = document.getElementById('m_bolge').value.trim();
+        const muhtemel = document.getElementById('m_muhtemel_tarih').value;
+        const kurulumSecimi = document.getElementById('m_kurulum_gereksinimi').value;
+
+        if(ad && bolge) {
+            document.getElementById('btnKaydet').disabled = true; 
+            push(ref(db, 'isler/'), { 
+                ad: ad.toUpperCase(), 
+                bolge: bolge.toUpperCase(), 
+                tel: document.getElementById('m_iletisim').value,
+                muhtemelTarih: muhtemel,
+                hazirDurum: document.getElementById('m_hazir_durum').value, 
+                aciklama: "", 
+                kayitTarihi: getTarih(), 
+                timestamp: Date.now(), 
+                sevkDurum: false, 
+                kurulumDurum: false, 
+                kayitYapan: auth.currentUser.displayName || auth.currentUser.email,
+                kurulumGereksinimi: kurulumSecimi
+            }).then(() => {
+                document.getElementById('btnKaydet').disabled = false;
+                document.getElementById('m_adi').value = ""; 
+                document.getElementById('m_bolge').value = ""; 
+                document.getElementById('m_iletisim').value = ""; 
+                document.getElementById('m_muhtemel_tarih').value = "";
+            });
+        } else {
+            alert("Lütfen Firma Adı ve Bölge bilgilerini doldurun!");
+        }
+    };
+
+    function verileriYukle() {
+        onValue(ref(db, 'isler/'), (snap) => {
+            const data = snap.val();
+            tumIsler = data ? Object.keys(data).map(id => ({id, ...data[id]})).sort((a,b) => b.timestamp - a.timestamp) : [];
+            applySearchFilter();
+        });
     }
-  }
 
-  if(reduceMotion){
-    sections.forEach(sec => { sec.style.opacity = 1; sec.style.filter = 'none'; sec.style.transform = 'none'; });
-  } else {
-    window.addEventListener('scroll', onScroll, {passive:true});
-    window.addEventListener('resize', onScroll);
-    applyTideFade();
-  }
-
-  /* ---- Countdown ---- */
-  const weddingDate = new Date('2027-10-21T19:15:00+03:00').getTime();
-  function updateCountdown(){
-    const now = new Date().getTime();
-    const diff = weddingDate - now;
-    const box = document.getElementById('countdown-kina');
-    if(!box) return;
-    const nums = box.querySelectorAll('.count-num');
-    if(diff <= 0){ nums.forEach(n=>n.textContent='0'); return; }
-    const d = Math.floor(diff/(1000*60*60*24));
-    const h = Math.floor((diff/(1000*60*60))%24);
-    const m = Math.floor((diff/(1000*60))%60);
-    const s = Math.floor((diff/1000)%60);
-    box.querySelector('[data-u="d"]').textContent = d;
-    box.querySelector('[data-u="h"]').textContent = h;
-    box.querySelector('[data-u="m"]').textContent = m;
-    box.querySelector('[data-u="s"]').textContent = s;
-  }
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-
-  function addToCalendar(){
-    const start = '20271021T191500';
-    const end = '20271021T230000';
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=Ece+%26+Mehmetcan+D%C3%BC%C4%9F%C3%BCn%C3%BC&dates=${start}/${end}&location=Four+Seasons+Hotel+Istanbul`;
-    window.open(url, '_blank');
-  }
-
-  function toggleVoice(el){
-    const icon = document.getElementById('vinylIcon');
-    const audio = document.getElementById('voiceMsg');
-    if(audio){
-      if(audio.paused){ audio.play(); icon.textContent = '❚❚'; }
-      else { audio.pause(); icon.textContent = '▶'; }
-    } else {
-      icon.textContent = icon.textContent === '▶' ? '❚❚' : '▶';
+    function applySearchFilter() {
+        const ara = document.getElementById('search_input').value.toLocaleLowerCase('tr-TR');
+        const filtrelenmis = tumIsler.filter(m => 
+            ( (m.ad||"") + (m.bolge||"") + (m.aciklama||"") + (m.tel||"") ).toLocaleLowerCase('tr-TR').includes(ara)
+        );
+        ekranaBas(filtrelenmis);
     }
-  }
 
-  function react(el){
-    const countEl = el.querySelector('.react-count');
-    countEl.textContent = parseInt(countEl.textContent) + 1;
-    el.querySelector('.react-icon').style.transform = 'scale(1.15)';
-    setTimeout(()=> el.querySelector('.react-icon').style.transform = '', 300);
-  }
+    window.toggleHazirDurum = (id, current) => {
+        if(!(isAdmin || KAYIT_EKIBI.includes(auth.currentUser.email))) return;
+        const newStatus = (current === "true" || current === true) ? "false" : "true";
+        update(ref(db), { [`isler/${id}/hazirDurum`]: newStatus });
+    };
 
-  function rsvp(coming){
-    const name = document.getElementById('guestName').value.trim();
-    const msg = document.getElementById('rsvpMsg');
-    if(!name){ msg.textContent = 'Lütfen adınızı yazın ✦'; return; }
-    msg.textContent = coming
-      ? `Teşekkürler ${name}! Sizi ağırlamak için sabırsızlanıyoruz. ✦`
-      : `Anlıyoruz ${name}, sizi çok özleyeceğiz. ✦`;
-  }
+    window.updateDirectDate = (id, val) => {
+        update(ref(db), { [`isler/${id}/muhtemelTarih`]: val });
+    };
+
+    window.updateInstallReq = (id, val) => {
+        update(ref(db), { [`isler/${id}/kurulumGereksinimi`]: val });
+    };
+
+    function ekranaBas(liste) {
+        const lists = { bekleyen: document.getElementById('liste-bekleyen'), sevk: document.getElementById('liste-sevk'), tamam: document.getElementById('liste-tamam') };
+        const counts = { b: 0, s: 0, t: 0 };
+        Object.values(lists).forEach(l => l.innerHTML = "");
+
+        liste.forEach(m => {
+            let cls = m.kurulumDurum ? "card-tamam" : (m.sevkDurum ? "card-sevk" : "card-bekleyen");
+            let isHazir = (m.hazirDurum === "true" || m.hazirDurum === true);
+            
+            let pulseClass = (isHazir && !m.sevkDurum) ? "pulse-ready" : "";
+
+            let hazirBadge = !m.sevkDurum ? `<span onclick="toggleHazirDurum('${m.id}', ${isHazir})" class="status-badge ${isHazir ? 'badge-ready' : 'badge-wait'}">${isHazir ? '✅ SEVKE HAZIR' : '⏳ BEKLEMEDE'}</span>` : "";
+            
+            let dateQuickEdit = !m.sevkDurum ? `<input type="date" class="date-input-mini ms-1" value="${m.muhtemelTarih || ''}" onchange="updateDirectDate('${m.id}', this.value)">` : '';
+
+            let installOption = `
+                <select class="install-select" onchange="updateInstallReq('${m.id}', this.value)">
+                    <option value="KURULUM VAR" ${m.kurulumGereksinimi === 'KURULUM VAR' ? 'selected' : ''}>🛠 KURULUM VAR</option>
+                    <option value="KURULUM YOK" ${m.kurulumGereksinimi === 'KURULUM YOK' ? 'selected' : ''}>🛠 KURULUM YOK</option>
+                </select>`;
+
+            let noteCount = m.aciklama ? m.aciklama.split('\n').filter(line => line.trim() !== "").length : 0;
+            let lastSeenLen = localStorage.getItem(`seen_note_${m.id}`) || "0";
+            let hasNewNote = m.aciklama && m.aciklama.length.toString() !== lastSeenLen;
+            let noteBadge = (noteCount > 0 && hasNewNote) ? `<span class="note-badge">${noteCount}</span>` : "";
+
+            let adminControls = "";
+            if(isAdmin) {
+                let undoBtn = m.kurulumDurum ? `<a href="javascript:void(0)" onclick="undoAction('${m.id}', 'kurulum')" class="btn-undo">↩ Geri</a>` : (m.sevkDurum ? `<a href="javascript:void(0)" onclick="undoAction('${m.id}', 'sevk')" class="btn-undo">↩ Geri</a>` : "");
+                adminControls = `<div class="d-flex align-items-center gap-2">${undoBtn}<span onclick="deleteRecord('${m.id}')" class="btn-delete">🗑 SİL</span></div>`;
+            }
+
+            let detaySatirlari = [`<div><b>Kayıt:</b> ${m.kayitYapan || '-'} (${m.kayitTarihi})</div>`];
+
+            if(m.sevkDurum) {
+                detaySatirlari.push(`<div><b>Sevk:</b> ${m.sevkYapan || '-'} (${m.sevkTarihi})</div>`);
+            }
+
+            if(m.kurulumDurum && m.kurulumGereksinimi !== 'KURULUM YOK') {
+                detaySatirlari.push(`<div><b>Kurulum:</b> ${m.kurulumYapan || '-'} (${m.kurulumTarihi})</div>`);
+            }
+
+            const html = `
+                <div class="card p-3 ${cls} ${pulseClass}">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="d-flex align-items-center">${hazirBadge}${dateQuickEdit}${installOption}</div>
+                        ${adminControls}
+                    </div>
+                    <div class="fw-bold fs-6">${m.ad}</div>
+                    <div class="text-muted small">📍 ${m.bolge} | 📞 ${m.tel || '-'}</div>
+                    <div class="mt-2 py-1 border-top border-bottom d-flex justify-content-between align-items-center">
+                        <div class="note-container">
+                            <button onclick="openNoteModal('${m.id}')" class="btn btn-sm p-0 fw-bold ${hasNewNote ? 'has-note-blink' : 'text-primary'}" style="font-size:1rem;">💭 NOTLAR</button>
+                            ${noteBadge}
+                        </div>
+                        ${(isAdmin || KAYIT_EKIBI.includes(auth.currentUser.email)) ? `<button onclick="editCustomerInfo('${m.id}')" class="btn btn-sm p-0 text-dark fw-bold" style="font-size:0.65rem;">✏️ GÜNCELLE</button>` : ''}
+                    </div>
+                    <div id="edit-fields-${m.id}" class="hidden mt-2 p-2 border rounded bg-white">
+                        <label class="small fw-bold">Firma Adı</label>
+                        <input type="text" id="edit-ad-${m.id}" class="form-control form-control-sm mb-1" value="${m.ad}">
+                        <label class="small fw-bold">Bölge</label>
+                        <input type="text" id="edit-bolge-${m.id}" class="form-control form-control-sm mb-1" value="${m.bolge}">
+                        <label class="small fw-bold">Telefon</label>
+                        <input type="text" id="edit-tel-${m.id}" class="form-control form-control-sm mb-1" value="${m.tel || ''}">
+                        <label class="small fw-bold">Muhtemel Sevk Tarihi</label>
+                        <input type="date" id="edit-muhtemel-${m.id}" class="form-control form-control-sm mb-2" value="${m.muhtemelTarih || ''}">
+                        <button onclick="saveCustomerInfo('${m.id}')" class="btn btn-xs btn-success w-100 fw-bold" style="font-size:0.7rem;">DEĞİŞİKLİKLERİ KAYDET</button>
+                    </div>
+                    <div class="mt-2 d-flex gap-1">
+                        <button onclick="updateStatus('${m.id}', 'sevk')" class="btn btn-sm btn-outline-primary w-50" ${m.sevkDurum ? 'disabled' : ''}>${m.sevkDurum ? '✅ SEVK EDİLDİ' : '🚚 SEVK ET'}</button>
+                        <button onclick="updateStatus('${m.id}', 'kurulum')" class="btn btn-sm btn-outline-success w-50" ${m.kurulumDurum ? 'disabled' : ''}>${m.kurulumDurum ? '✅ KURULDU' : '🛠 KURULUM'}</button>
+                    </div>
+                    <div class="user-badge">${detaySatirlari.join('')}</div>
+                </div>`;
+            
+            if(!m.sevkDurum) { lists.bekleyen.innerHTML += html; counts.b++; } 
+            else if(!m.kurulumDurum) { lists.sevk.innerHTML += html; counts.s++; } 
+            else { lists.tamam.innerHTML += html; counts.t++; }
+        });
+        document.getElementById('count-bekleyen').innerText = counts.b;
+        document.getElementById('count-sevk').innerText = counts.s;
+        document.getElementById('count-tamam').innerText = counts.t;
+    }
+
+    window.openNoteModal = (id) => {
+        currentEditingId = id;
+        const job = tumIsler.find(x => x.id === id);
+        const text = job.aciklama || "";
+        document.getElementById('modal-textarea').value = text;
+        localStorage.setItem(`seen_note_${id}`, text.length.toString());
+        document.getElementById('note-modal').classList.remove('hidden');
+        applySearchFilter();
+    };
+
+    window.closeNoteModal = () => document.getElementById('note-modal').classList.add('hidden');
+    
+    document.getElementById('btn-save-note').onclick = () => {
+        const val = document.getElementById('modal-textarea').value.trim();
+        update(ref(db), { [`isler/${currentEditingId}/aciklama`]: val }).then(() => {
+            localStorage.setItem(`seen_note_${currentEditingId}`, val.length.toString());
+            closeNoteModal();
+        });
+    };
+
+    window.editCustomerInfo = (id) => document.getElementById(`edit-fields-${id}`).classList.toggle('hidden');
+    window.saveCustomerInfo = (id) => {
+        if(confirm("Müşteri bilgileri güncellensin mi?")) {
+            update(ref(db), { 
+                [`isler/${id}/ad`]: document.getElementById(`edit-ad-${id}`).value.toUpperCase(),
+                [`isler/${id}/bolge`]: document.getElementById(`edit-bolge-${id}`).value.toUpperCase(),
+                [`isler/${id}/tel`]: document.getElementById(`edit-tel-${id}`).value,
+                [`isler/${id}/muhtemelTarih`]: document.getElementById(`edit-muhtemel-${id}`).value
+            }).then(() => document.getElementById(`edit-fields-${id}`).classList.add('hidden'));
+        }
+    };
+    window.deleteRecord = (id) => { if(confirm("Bu kayıt kalıcı olarak silinsin mi?")) remove(ref(db, `isler/${id}`)); };
+    
+    window.undoAction = (id, type) => {
+        if(confirm("Bu işlemi geri almak istediğinize emin misiniz?")) {
+            const up = {}; 
+            up[`isler/${id}/${type}Durum`] = false; 
+            up[`isler/${id}/${type}Tarihi`] = null; 
+            up[`isler/${id}/${type}Yapan`] = null;
+            up[`isler/${id}/timestamp`] = Date.now();
+            update(ref(db), up);
+        }
+    };
+    
+    window.updateStatus = (id, type) => {
+        const job = tumIsler.find(x => x.id === id);
+        if(!job) return;
+        const isNoInstall = (job.kurulumGereksinimi === 'KURULUM YOK');
+        
+        let msg = type === 'sevk' ? 'Sevk edildi olarak işaretlensin mi?' : 'Kurulum tamamlandı olarak işaretlensin mi?';
+        
+        if(type === 'sevk' && isNoInstall) {
+            msg = "Bu işte KURULUM YOK. Sevk edildiği an direkt TAMAMLANDI sütununa taşınacaktır. Onaylıyor musunuz?";
+        }
+
+        if(confirm(msg)) {
+            const up = {}; 
+            const userBilgi = auth.currentUser.displayName || auth.currentUser.email;
+            const simdi = getTarih();
+
+            if(type === 'sevk' && isNoInstall) {
+                up[`isler/${id}/sevkDurum`] = true; 
+                up[`isler/${id}/sevkTarihi`] = simdi; 
+                up[`isler/${id}/sevkYapan`] = userBilgi;
+                up[`isler/${id}/kurulumDurum`] = true; 
+                up[`isler/${id}/kurulumTarihi`] = simdi; 
+                up[`isler/${id}/kurulumYapan`] = userBilgi;
+            } else {
+                up[`isler/${id}/${type}Durum`] = true; 
+                up[`isler/${id}/${type}Tarihi`] = simdi; 
+                up[`isler/${id}/${type}Yapan`] = userBilgi;
+            }
+            
+            up[`isler/${id}/timestamp`] = Date.now();
+            update(ref(db), up);
+        }
+    };
+
+    document.getElementById('search_input').oninput = applySearchFilter;
 </script>
-
 </body>
 </html>
